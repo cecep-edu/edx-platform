@@ -44,6 +44,8 @@ from student.forms import PasswordResetFormNoActive
 from student.firebase_token_generator import create_token
 
 from verify_student.models import SoftwareSecurePhotoVerification, MidcourseReverificationWindow
+from student.validators import validate_cedula
+from cities.models import City
 from certificates.models import CertificateStatuses, certificate_status_for_student
 from dark_lang.models import DarkLangConfig
 
@@ -617,6 +619,12 @@ def change_enrollment(request):
                   u"run:{name}".format(**course_id_dict)]
         )
 
+        #Validate level_of_education
+        levels = {'p':8, 'm': 7, 'b': 6, 'a': 5, 'hs': 4, 'jhs': 3, 'el': 2, 'none': 1, 'other': 0}
+        profile = UserProfile.objects.get(user=user)
+        if course.level_of_education:
+            if not levels[profile.level_of_education] >= levels[course.level_of_education]:
+                return HttpResponseBadRequest(_("Your level of education is not accepted for this course."))
         CourseEnrollment.enroll(user, course.id, mode=current_mode.slug)
 
         return HttpResponse()
@@ -985,15 +993,18 @@ def _do_create_account(post_vars):
         raise
 
     registration.register(user)
+    city = City.objects.get(id=post_vars['city_id'])
 
     profile = UserProfile(user=user)
     profile.name = post_vars['name']
     profile.level_of_education = post_vars.get('level_of_education')
     profile.gender = post_vars.get('gender')
     profile.mailing_address = post_vars.get('mailing_address')
-    profile.city = post_vars.get('city')
-    profile.country = post_vars.get('country')
+#    profile.city = city#post_vars.get('city')
+    profile.country = city.state.country#post_vars.get('country')
     profile.goals = post_vars.get('goals')
+    profile.cedula = post_vars.get('cedula')
+    profile.city = city
 
     try:
         profile.year_of_birth = int(post_vars['year_of_birth'])
@@ -1121,6 +1132,15 @@ def create_account(request, post_override=None):
             js['value'] = error_str[field_name]
             js['field'] = field_name
             return JsonResponse(js, status=400)
+    
+    city = City.objects.get(id=post_vars['city_id'])
+    if city.state.country.code == 'EC':
+        try:
+            validate_cedula(post_vars['cedula'])
+        except ValidationError:
+            js['value'] = _("A valid ID is required.").format(field=a)
+            js['field'] = 'cedula'
+            return HttpResponse(json.dumps(js))
 
     try:
         validate_email(post_vars['email'])

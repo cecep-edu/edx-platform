@@ -1,40 +1,45 @@
 """
-This config file runs the simplest dev environment using sqlite, and db-based
-sessions. Assumes structure:
-
-/envroot/
-        /db   # This is where it'll write the database file
-        /edx-platform  # The location of this repo
-        /log  # Where we're going to write log files
+Archivo de configuracion para staging
+Esta configuracion es lo mas parecida al ambiente de produccion
+/log  # Where we're going to write log files
 """
 
 # We intentionally define lots of variables that aren't used, and
 # want to import all variables from base settings files
 # pylint: disable=W0401, W0614
 
+from os import environ
+
 from .common import *
+from .dev import SECRET_KEY
 from logsettings import get_logger_config
 
 DEBUG = True
+
+USE_I18N = True
+LANGUAGES = (('es_419', 'Spanish'), )
+TIME_ZONE = 'America/Guayaquil'
+LANGUAGE_CODE = 'es_419'
+
 TEMPLATE_DEBUG = True
 
-FEATURES['DISABLE_START_DATES'] = False
-FEATURES['ENABLE_SQL_TRACKING_LOGS'] = True
-FEATURES['SUBDOMAIN_COURSE_LISTINGS'] = False  # Enable to test subdomains--otherwise, want all courses to show up
-FEATURES['SUBDOMAIN_BRANDING'] = True
-FEATURES['FORCE_UNIVERSITY_DOMAIN'] = None		# show all university courses if in dev (ie don't use HTTP_HOST)
-FEATURES['ENABLE_MANUAL_GIT_RELOAD'] = True
-FEATURES['ENABLE_PSYCHOMETRICS'] = False    # real-time psychometrics (eg item response theory analysis in instructor dashboard)
-FEATURES['ENABLE_INSTRUCTOR_ANALYTICS'] = True
-FEATURES['ENABLE_SERVICE_STATUS'] = True
-FEATURES['ENABLE_INSTRUCTOR_EMAIL'] = True     # Enable email for all Studio courses
-FEATURES['REQUIRE_COURSE_EMAIL_AUTH'] = False  # Give all courses email (don't require django-admin perms)
-FEATURES['ENABLE_HINTER_INSTRUCTOR_VIEW'] = True
-FEATURES['ENABLE_INSTRUCTOR_BETA_DASHBOARD'] = True
-FEATURES['MULTIPLE_ENROLLMENT_ROLES'] = True
-FEATURES['ENABLE_SHOPPING_CART'] = True
-FEATURES['AUTOMATIC_VERIFY_STUDENT_IDENTITY_FOR_TESTING'] = True
-FEATURES['ENABLE_S3_GRADE_DOWNLOADS'] = True
+
+MITX_FEATURES['DISABLE_START_DATES'] = False
+MITX_FEATURES['ENABLE_SQL_TRACKING_LOGS'] = True
+MITX_FEATURES['SUBDOMAIN_COURSE_LISTINGS'] = False  # Enable to test subdomains--otherwise, want all courses to show up
+MITX_FEATURES['SUBDOMAIN_BRANDING'] = True
+MITX_FEATURES['FORCE_UNIVERSITY_DOMAIN'] = None		# show all university courses if in dev (ie don't use HTTP_HOST)
+MITX_FEATURES['ENABLE_MANUAL_GIT_RELOAD'] = True
+MITX_FEATURES['ENABLE_PSYCHOMETRICS'] = False    # real-time psychometrics (eg item response theory analysis in instructor dashboard)
+MITX_FEATURES['ENABLE_INSTRUCTOR_ANALYTICS'] = True
+MITX_FEATURES['ENABLE_SERVICE_STATUS'] = True
+MITX_FEATURES['ENABLE_INSTRUCTOR_EMAIL'] = True
+MITX_FEATURES['ENABLE_HINTER_INSTRUCTOR_VIEW'] = True
+MITX_FEATURES['ENABLE_INSTRUCTOR_BETA_DASHBOARD'] = True
+MITX_FEATURES['MULTIPLE_ENROLLMENT_ROLES'] = True
+MITX_FEATURES['ENABLE_SHOPPING_CART'] = True
+MITX_FEATURES['AUTOMATIC_VERIFY_STUDENT_IDENTITY_FOR_TESTING'] = True
+
 FEEDBACK_SUBMISSION_EMAIL = "dummy@example.com"
 
 WIKI_ENABLED = True
@@ -45,8 +50,6 @@ LOGGING = get_logger_config(ENV_ROOT / "log",
                             dev_env=True,
                             debug=True)
 
-# If there is a database called 'read_replica', you can use the use_read_replica_if_available
-# function in util/query.py, which is useful for very large database reads
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -63,7 +66,7 @@ CACHES = {
     # In staging/prod envs, the sessions also live here.
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'edx_loc_mem_cache',
+        'LOCATION': 'mitx_loc_mem_cache',
         'KEY_FUNCTION': 'util.memcache.safe_key',
     },
 
@@ -84,19 +87,15 @@ CACHES = {
         'LOCATION': '/var/tmp/mongo_metadata_inheritance',
         'TIMEOUT': 300,
         'KEY_FUNCTION': 'util.memcache.safe_key',
-    },
-    'loc_cache': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'edx_location_mem_cache',
-    },
+    }
 }
 
 
 XQUEUE_INTERFACE = {
-    "url": "http://127.0.0.1:3032",
+    "url": "https://sandbox-xqueue.edx.org",
     "django_auth": {
         "username": "lms",
-        "password": "abcd"
+        "password": "***REMOVED***"
     },
     "basic_auth": ('anant', 'agarwal'),
 }
@@ -105,7 +104,7 @@ XQUEUE_INTERFACE = {
 CACHE_TIMEOUT = 0
 
 # Dummy secret key for dev
-SECRET_KEY = '85920908f28904ed733fe576320db18cabd7b6cd'
+SECRET_KEY = environ.get('SECRET_KEY', SECRET_KEY)
 
 
 COURSE_LISTINGS = {
@@ -129,8 +128,7 @@ SUBDOMAIN_BRANDING = {
     'mit': 'MITx',
     'berkeley': 'BerkeleyX',
     'harvard': 'HarvardX',
-    'openedx': 'openedx',
-    'edge': 'edge',
+    'iaen': 'IAEN',
 }
 
 # List of `university` landing pages to display, even though they may not
@@ -163,9 +161,9 @@ if os.path.isdir(DATA_DIR):
     ]
 
 
-################################# edx-platform revision string  #####################
+################################# mitx revision string  #####################
 
-EDX_PLATFORM_VERSION_STRING = os.popen('cd %s; git describe' % REPO_ROOT).read().strip()
+MITX_VERSION_STRING = os.popen('cd %s; git describe' % REPO_ROOT).read().strip()
 
 ############################ Open ended grading config  #####################
 
@@ -179,9 +177,9 @@ OPEN_ENDED_GRADING_INTERFACE = {
 }
 
 ############################## LMS Migration ##################################
-FEATURES['ENABLE_LMS_MIGRATION'] = True
-FEATURES['ACCESS_REQUIRE_STAFF_FOR_COURSE'] = False   # require that user be in the staff_* group to be able to enroll
-FEATURES['USE_XQA_SERVER'] = 'http://xqa:server@content-qa.edX.mit.edu/xqa'
+MITX_FEATURES['ENABLE_LMS_MIGRATION'] = True
+MITX_FEATURES['ACCESS_REQUIRE_STAFF_FOR_COURSE'] = False   # require that user be in the staff_* group to be able to enroll
+MITX_FEATURES['USE_XQA_SERVER'] = 'http://xqa:server@content-qa.mitx.mit.edu/xqa'
 
 INSTALLED_APPS += ('lms_migration',)
 
@@ -189,9 +187,9 @@ LMS_MIGRATION_ALLOWED_IPS = ['127.0.0.1']
 
 ################################ OpenID Auth #################################
 
-FEATURES['AUTH_USE_OPENID'] = True
-FEATURES['AUTH_USE_OPENID_PROVIDER'] = True
-FEATURES['BYPASS_ACTIVATION_EMAIL_FOR_EXTAUTH'] = True
+MITX_FEATURES['AUTH_USE_OPENID'] = True
+MITX_FEATURES['AUTH_USE_OPENID_PROVIDER'] = True
+MITX_FEATURES['BYPASS_ACTIVATION_EMAIL_FOR_EXTAUTH'] = True
 
 INSTALLED_APPS += ('external_auth',)
 INSTALLED_APPS += ('django_openid_auth',)
@@ -205,7 +203,7 @@ OPENID_PROVIDER_TRUSTED_ROOTS = ['*']
 
 ######################## MIT Certificates SSL Auth ############################
 
-FEATURES['AUTH_USE_CERTIFICATES'] = False
+MITX_FEATURES['AUTH_USE_MIT_CERTIFICATES'] = False
 
 ################################# CELERY ######################################
 
@@ -214,20 +212,20 @@ CELERY_ALWAYS_EAGER = True
 
 ################################ DEBUG TOOLBAR ################################
 
-#INSTALLED_APPS += ('debug_toolbar',)
+INSTALLED_APPS += ('debug_toolbar',)
 MIDDLEWARE_CLASSES += ('django_comment_client.utils.QueryCountDebugMiddleware',
                        'debug_toolbar.middleware.DebugToolbarMiddleware',)
 INTERNAL_IPS = ('127.0.0.1',)
 
 DEBUG_TOOLBAR_PANELS = (
-   'debug_toolbar.panels.versions.VersionsPanel',
-   'debug_toolbar.panels.timer.TimerPanel',
-   'debug_toolbar.panels.settings.SettingsPanel',
-   'debug_toolbar.panels.headers.HeadersPanel',
-   'debug_toolbar.panels.request.RequestPanel',
-   'debug_toolbar.panels.sql.SQLPanel',
-   'debug_toolbar.panels.signals.SignalsPanel',
-   'debug_toolbar.panels.logging.LoggingPanel',
+   'debug_toolbar.panels.version.VersionDebugPanel',
+   'debug_toolbar.panels.timer.TimerDebugPanel',
+   'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
+   'debug_toolbar.panels.headers.HeaderDebugPanel',
+   'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
+   'debug_toolbar.panels.sql.SQLDebugPanel',
+   'debug_toolbar.panels.signals.SignalDebugPanel',
+   'debug_toolbar.panels.logger.LoggingPanel',
 
 #  Enabling the profiler has a weird bug as of django-debug-toolbar==0.9.4 and
 #  Django=1.3.1/1.4 where requests to views get duplicated (your method gets
@@ -252,12 +250,15 @@ FILE_UPLOAD_HANDLERS = (
     'django.core.files.uploadhandler.TemporaryFileUploadHandler',
 )
 
-FEATURES['AUTH_USE_SHIB'] = True
-FEATURES['RESTRICT_ENROLL_BY_REG_METHOD'] = True
+MITX_FEATURES['AUTH_USE_SHIB'] = True
+MITX_FEATURES['RESTRICT_ENROLL_BY_REG_METHOD'] = True
 
 ########################### PIPELINE #################################
 
 PIPELINE_SASS_ARGUMENTS = '--debug-info --require {proj_dir}/static/sass/bourbon/lib/bourbon.rb'.format(proj_dir=PROJECT_ROOT)
+
+########################## PEARSON TESTING ###########################
+MITX_FEATURES['ENABLE_PEARSON_LOGIN'] = False
 
 ########################## ANALYTICS TESTING ########################
 
@@ -269,7 +270,7 @@ ANALYTICS_API_KEY = ""
 # If there's an environment variable set, grab it and turn on Segment.io
 SEGMENT_IO_LMS_KEY = os.environ.get('SEGMENT_IO_LMS_KEY')
 if SEGMENT_IO_LMS_KEY:
-    FEATURES['SEGMENT_IO_LMS'] = True
+    MITX_FEATURES['SEGMENT_IO_LMS'] = True
 
 ###################### Payment ##############################3
 
@@ -282,11 +283,9 @@ CC_PROCESSOR['CyberSource']['PURCHASE_ENDPOINT'] = os.environ.get('CYBERSOURCE_P
 ########################## USER API ########################
 EDX_API_KEY = None
 
-####################### Shoppingcart ###########################
-FEATURES['ENABLE_SHOPPING_CART'] = True
 
-### This enables the Metrics tab for the Instructor dashboard ###########
-FEATURES['CLASS_DASHBOARD'] = True
+####################### Shoppingcart ###########################
+MITX_FEATURES['ENABLE_SHOPPING_CART'] = True
 
 #####################################################################
 # Lastly, see if the developer has any local overrides.

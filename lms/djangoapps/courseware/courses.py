@@ -193,9 +193,9 @@ def get_course_about_section(course, section_key):
                 key=section_key, url=course.location.url()))
             return None
     elif section_key == "title":
-        return course.display_name_with_default
+        return course.display_name_with_default.encode('utf-8')
     elif section_key == "university":
-        return course.display_org_with_default
+        return course.display_org_with_default.encode('utf-8')
     elif section_key == "number":
         return course.display_number_with_default
 
@@ -251,7 +251,6 @@ def get_course_syllabus_section(course, section_key):
     # Many of these are stored as html files instead of some semantic
     # markup. This can change without effecting this interface when we find a
     # good format for defining so many snippets of text/html.
-
     if section_key in ['syllabus', 'guest_syllabus']:
         try:
             filesys = course.system.resources_fs

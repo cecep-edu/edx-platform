@@ -278,10 +278,12 @@ STATICFILES_DIRS = [
 ]
 
 # Locale/Internationalization
-TIME_ZONE = 'America/New_York'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-LANGUAGE_CODE = 'en'  # http://www.i18nguy.com/unicode/language-identifiers.html
+LANGUAGES = ( ('es_419', 'Spanish'), )
+TIME_ZONE = 'America/Guayaquil'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+LANGUAGE_CODE = 'es_419'  # http://www.i18nguy.com/unicode/language-identifiers.html
 
 LANGUAGES = lms.envs.common.LANGUAGES
+LANGUAGE_CODE = 'es-419'
 USE_I18N = True
 USE_L10N = True
 
@@ -559,3 +561,26 @@ for app_name in OPTIONAL_APPS:
         except ImportError:
             continue
     INSTALLED_APPS += (app_name,)
+
+#sentry config
+RAVEN_CONFIG = {
+    'dsn': 'http://59734eda618a43afa2179d781549edeb:311de1f2e01247f284f3f72fbcd5844f@sentry.iaen.edu.ec:9000/3',
+}
+
+INSTALLED_APPS = INSTALLED_APPS + (
+    'raven.contrib.django.raven_compat',
+)
+
+# Years allowed range
+DELTA_YEAR = 12
+MAX_YEAR_ALLOWED = 70 
+
+ALLOWED_HOSTS = [
+    'beta.cms.iaen.edu.ec',
+    'beta.evex.iaen.edu.ec',
+    'upex.iaen.edu.ec',
+    'cms.iaen.edu.ec'
+    ]
+
+FEATURES['ENABLE_CREATOR_GROUP'] = True
+
