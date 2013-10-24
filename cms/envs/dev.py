@@ -59,10 +59,20 @@ CONTENTSTORE = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ENV_ROOT / "db" / "edx.db",
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'edx',
+        'USER': 'vagrant',
+        'PASSWORD': 'vagrant',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
+## DATABASES = {
+##     'default': {
+##         'ENGINE': 'django.db.backends.sqlite3',
+##         'NAME': ENV_ROOT / "db" / "mitx.db",
+##     }
+## }
 
 LMS_BASE = "localhost:8000"
 FEATURES['PREVIEW_LMS_BASE'] = "localhost:8000"
