@@ -556,3 +556,6 @@ for app_name in OPTIONAL_APPS:
         except ImportError:
             continue
     INSTALLED_APPS += (app_name,)
+
+FEATURES['ENABLE_CREATOR_GROUP'] = True
+
