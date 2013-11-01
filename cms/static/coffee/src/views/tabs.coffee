@@ -59,7 +59,7 @@ define ["jquery", "jquery.ui", "backbone", "js/views/feedback_prompt", "js/views
 
       editor.createItem(
         @model.get('id'),
-        {category: 'static_tab'}
+        {category: 'static_tab', published: true}
       )
 
       analytics.track "Added Static Page",
@@ -82,9 +82,11 @@ define ["jquery", "jquery.ui", "backbone", "js/views/feedback_prompt", "js/views
               deleting = new NotificationView.Mini
                 title: gettext('Deleting&hellip;')
               deleting.show()
-              $.postJSON('/delete_item', {
-                id: $component.data('id')
-              }, =>
+              $.ajax({
+                type:'DELETE',
+                url: $component.data('update_url'),
+                contentType: 'application/json'
+              }).success(=>
                 $component.remove()
                 deleting.hide()
               )

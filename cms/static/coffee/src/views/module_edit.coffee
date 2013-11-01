@@ -64,12 +64,15 @@ define ["backbone", "jquery", "underscore", "gettext", "xblock/runtime.v1",
 
     createItem: (parent, payload) ->
       payload.parent_location = parent
+      # if published is undefined or null, set it to false (for unit page and components)
+      payload.published = payload.published ? false
       $.postJSON(
           "/create_item"
           payload
           (data) =>
               @model.set(id: data.id)
               @$el.data('id', data.id)
+              @$el.data('update_url', data.update_url)
               @render()
       )
 

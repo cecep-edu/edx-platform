@@ -52,7 +52,8 @@ class Basetranscripts(CourseTestCase):
         data = {
             'parent_location': str(self.course_location),
             'category': 'video',
-            'type': 'video'
+            'type': 'video',
+            'published': False
         }
         resp = self.client.ajax_post(reverse('create_item'), data)
         self.item_location = json.loads(resp.content).get('id')
@@ -198,7 +199,8 @@ class TestUploadtranscripts(Basetranscripts):
         data = {
             'parent_location': str(self.course_location),
             'category': 'non_video',
-            'type': 'non_video'
+            'type': 'non_video',
+            'published': False
         }
         resp = self.client.ajax_post(reverse('create_item'), data)
         item_location = json.loads(resp.content).get('id')
@@ -409,7 +411,8 @@ class TestDownloadtranscripts(Basetranscripts):
         data = {
             'parent_location': str(self.course_location),
             'category': 'videoalpha',
-            'type': 'videoalpha'
+            'type': 'videoalpha',
+            'published': False
         }
         resp = self.client.ajax_post(reverse('create_item'), data)
         item_location = json.loads(resp.content).get('id')
@@ -659,7 +662,8 @@ class TestChecktranscripts(Basetranscripts):
         data = {
             'parent_location': str(self.course_location),
             'category': 'not_video',
-            'type': 'not_video'
+            'type': 'not_video',
+            'published': False
         }
         resp = self.client.ajax_post(reverse('create_item'), data)
         item_location = json.loads(resp.content).get('id')

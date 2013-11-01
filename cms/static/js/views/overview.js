@@ -135,7 +135,8 @@ define(["domReady", "jquery", "jquery.ui", "underscore", "gettext", "js/views/fe
             $.postJSON('/create_item', {
                     'parent_location': parent,
                     'category': category,
-                    'display_name': display_name
+                    'display_name': display_name,
+                    'published': true
                 },
 
                 function(data) {
@@ -185,7 +186,8 @@ define(["domReady", "jquery", "jquery.ui", "underscore", "gettext", "js/views/fe
             $.postJSON('/create_item', {
                     'parent_location': parent,
                     'category': category,
-                    'display_name': display_name
+                    'display_name': display_name,
+                    'published': true
                 },
 
                 function(data) {

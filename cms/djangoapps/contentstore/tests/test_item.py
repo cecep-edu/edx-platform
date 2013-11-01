@@ -12,7 +12,7 @@ from xmodule.modulestore.django import modulestore
 
 
 class DeleteItem(CourseTestCase):
-    """Tests for '/delete_item' url."""
+    """Tests for '/xblock' DELETE url."""
     def setUp(self):
         """ Creates the test course with a static page in it. """
         super(DeleteItem, self).setUp()
@@ -22,7 +22,8 @@ class DeleteItem(CourseTestCase):
         # Add static tab
         data = json.dumps({
             'parent_location': 'i4x://mitX/333/course/Dummy_Course',
-            'category': 'static_tab'
+            'category': 'static_tab',
+            'published': True
         })
 
         resp = self.client.post(
@@ -33,11 +34,8 @@ class DeleteItem(CourseTestCase):
         self.assertEqual(resp.status_code, 200)
 
         # Now delete it. There was a bug that the delete was failing (static tabs do not exist in draft modulestore).
-        resp = self.client.post(
-            reverse('delete_item'),
-            resp.content,
-            "application/json"
-        )
+        resp_content = json.loads(resp.content)
+        resp = self.client.delete(resp_content['update_url'])
         self.assertEqual(resp.status_code, 204)
 
 
@@ -64,7 +62,8 @@ class TestCreateItem(CourseTestCase):
             json.dumps({
                 'parent_location': self.course.location.url(),
                 'display_name': display_name,
-                'category': 'chapter'
+                'category': 'chapter',
+                'published': True
             }),
             content_type="application/json"
         )
@@ -87,7 +86,8 @@ class TestCreateItem(CourseTestCase):
             reverse('create_item'),
             json.dumps({
                 'parent_location': chap_location,
-                'category': 'vertical'
+                'category': 'vertical',
+                'published': True
             }),
             content_type="application/json"
         )
@@ -102,7 +102,8 @@ class TestCreateItem(CourseTestCase):
             json.dumps({
                 'parent_location': vert_location,
                 'category': 'problem',
-                'boilerplate': template_id
+                'boilerplate': template_id,
+                'published': False
             }),
             content_type="application/json"
         )
@@ -127,7 +128,8 @@ class TestCreateItem(CourseTestCase):
             json.dumps(
                 {'parent_location': self.course.location.url(),
                  'category': 'problem',
-                 'boilerplate': 'nosuchboilerplate.yaml'
+                 'boilerplate': 'nosuchboilerplate.yaml',
+                 'published': False
                  }),
             content_type="application/json"
         )
@@ -156,7 +158,8 @@ class TestEditItem(CourseTestCase):
             json.dumps(
                 {'parent_location': self.course.location.url(),
                  'display_name': display_name,
-                 'category': 'chapter'
+                 'category': 'chapter',
+                 'published': True
                  }),
             content_type="application/json"
         )
@@ -166,6 +169,7 @@ class TestEditItem(CourseTestCase):
             json.dumps({
                 'parent_location': chap_location,
                 'category': 'sequential',
+                'published': True
             }),
             content_type="application/json"
         )
@@ -178,6 +182,7 @@ class TestEditItem(CourseTestCase):
                 'parent_location': self.seq_location,
                 'category': 'problem',
                 'boilerplate': template_id,
+                'published': False
             }),
             content_type="application/json"
         )
