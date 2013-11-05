@@ -22,7 +22,6 @@ import os
 from random import choice, randint
 import string
 
-
 def seed():
     return os.getppid()
 
