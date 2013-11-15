@@ -21,6 +21,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from cities.models import City
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.db import models, IntegrityError
 from django.db.models import Count
@@ -226,6 +227,9 @@ class UserProfile(models.Model):
     country = CountryField(blank=True, null=True)
     goals = models.TextField(blank=True, null=True)
     allow_certificate = models.BooleanField(default=1)
+    #EVEX fields
+    cedula = models.CharField(max_length=32, blank=True, null=True)
+    city = models.ForeignKey(City, default=None, blank=True, null=True)
 
     def get_meta(self):
         js_str = self.meta
