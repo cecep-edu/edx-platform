@@ -37,7 +37,7 @@ from lms.lib.xblock.mixin import LmsBlockMixin
 
 ################################### FEATURES ###################################
 # The display name of the platform to be used in templates/emails/etc.
-PLATFORM_NAME = "edX"
+PLATFORM_NAME = "EVEX"
 CC_MERCHANT_NAME = PLATFORM_NAME
 
 COURSEWARE_ENABLED = True
@@ -516,8 +516,8 @@ STATICFILES_DIRS = [
 FAVICON_PATH = 'images/favicon.ico'
 
 # Locale/Internationalization
-TIME_ZONE = 'America/New_York'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-LANGUAGE_CODE = 'en'  # http://www.i18nguy.com/unicode/language-identifiers.html
+TIME_ZONE = 'America/Guayaquil'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+LANGUAGE_CODE = 'es-419'  # http://www.i18nguy.com/unicode/language-identifiers.html
 
 # Sourced from http://www.localeplanet.com/icu/ and wikipedia
 LANGUAGES = (
@@ -1078,6 +1078,8 @@ INSTALLED_APPS = (
 
     # Database-backed configuration
     'config_models',
+    #Cities EVEX
+    'cities',    
 
     # Monitor the status of services
     'service_status',
