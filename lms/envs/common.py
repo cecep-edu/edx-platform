@@ -1488,3 +1488,7 @@ for app_name in OPTIONAL_APPS:
 # Stub for third_party_auth options.
 # See common/djangoapps/third_party_auth/settings.py for configuration details.
 THIRD_PARTY_AUTH = {}
+
+# Years allowed range
+DELTA_YEAR = 12
+MAX_YEAR_ALLOWED = 70
