@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Student Views
 """
@@ -42,6 +43,7 @@ from student.models import (
 )
 from student.forms import PasswordResetFormNoActive
 from student.firebase_token_generator import create_token
+from student.validators import validate_cedula
 
 from verify_student.models import SoftwareSecurePhotoVerification, MidcourseReverificationWindow
 from certificates.models import CertificateStatuses, certificate_status_for_student
@@ -994,6 +996,7 @@ def _do_create_account(post_vars):
     profile.city = post_vars.get('city')
     profile.country = post_vars.get('country')
     profile.goals = post_vars.get('goals')
+    profile.cedula = post_vars.get('cedula')
 
     try:
         profile.year_of_birth = int(post_vars['year_of_birth'])
@@ -1121,6 +1124,13 @@ def create_account(request, post_override=None):
             js['value'] = error_str[field_name]
             js['field'] = field_name
             return JsonResponse(js, status=400)
+
+    try:
+        validate_cedula(post_vars['cedula'])
+    except ValidationError:
+        js['value'] = _("A valid ID is required.").format(field=a)
+        js['field'] = 'cedula'
+        return HttpResponse(json.dumps(js))
 
     try:
         validate_email(post_vars['email'])
@@ -1735,3 +1745,4 @@ def token(request):
     newtoken = create_token(secret, custom_data)
     response = HttpResponse(newtoken, mimetype="text/plain")
     return response
+
