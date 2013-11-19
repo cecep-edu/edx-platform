@@ -439,6 +439,8 @@ INSTALLED_APPS = (
 
     # Database-backed configuration
     'config_models',
+    # cities
+    'cities',
 
     # Monitor the status of services
     'service_status',
