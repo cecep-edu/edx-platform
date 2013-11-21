@@ -46,6 +46,7 @@ from student.firebase_token_generator import create_token
 from student.validators import validate_cedula
 
 from verify_student.models import SoftwareSecurePhotoVerification, MidcourseReverificationWindow
+from cities.models import City
 from certificates.models import CertificateStatuses, certificate_status_for_student
 from dark_lang.models import DarkLangConfig
 
@@ -987,6 +988,7 @@ def _do_create_account(post_vars):
         raise
 
     registration.register(user)
+    city = City.objects.get(id=post_vars['city_id'])
 
     profile = UserProfile(user=user)
     profile.name = post_vars['name']
@@ -997,6 +999,7 @@ def _do_create_account(post_vars):
     profile.country = post_vars.get('country')
     profile.goals = post_vars.get('goals')
     profile.cedula = post_vars.get('cedula')
+    profile.city = city
 
     try:
         profile.year_of_birth = int(post_vars['year_of_birth'])
@@ -1131,6 +1134,15 @@ def create_account(request, post_override=None):
         js['value'] = _("A valid ID is required.").format(field=a)
         js['field'] = 'cedula'
         return HttpResponse(json.dumps(js))
+    
+    city = City.objects.get(id=post_vars['city_id'])
+    if city.state.country.code == 'EC':
+        try:
+            validate_cedula(post_vars['cedula'])
+        except ValidationError:
+            js['value'] = _("A valid ID is required.").format(field=a)
+            js['field'] = 'cedula'
+            return HttpResponse(json.dumps(js))
 
     try:
         validate_email(post_vars['email'])
