@@ -42,7 +42,8 @@ def initialize_course_tabs(course, user):
         # Translators: "Wiki" is the title of the course's wiki page
         {"type": "wiki", "name": _("Wiki")},
         # Translators: "Progress" is the title of the student's grade information page
-        {"type": "progress", "name": _("Progress")},
+        {"type": "progress", "name": _("Progress")},        
+        {"type": "syllabus", "name": _("Syllabus")},
     ]
 
     modulestore('direct').update_item(course, user.id)
