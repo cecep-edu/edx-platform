@@ -25,14 +25,6 @@ urlpatterns = patterns('',  # nopep8
     url(r'^xblock/resource/(?P<block_type>[^/]*)/(?P<uri>.*)$',
         'contentstore.views.xblock.xblock_resource', name='xblock_resource_url'),
 
-    url(r'^(?P<org>[^/]+)/(?P<course>[^/]+)/syllabus/(?P<name>[^/]+)$',
-        'contentstore.views.syllabus', name='syllabus'),
-    url(r'^(?P<org>[^/]+)/(?P<course>[^/]+)/syllabus/(?P<name>[^/]+)/new$',
-        'contentstore.views.create_syllabus', name='create_syllabus'),
-
-     url(r'^(?P<org>[^/]+)/(?P<course>[^/]+)/syllabus/(?P<name>[^/]+)/(?P<tid>\d[^/]*)$',
-        'contentstore.views.syllabus_by_id', name='syllabus_by_id'),
-
     # temporary landing page for a course
     url(r'^edge/(?P<org>[^/]+)/(?P<course>[^/]+)/course/(?P<coursename>[^/]+)$',
         'contentstore.views.landing', name='landing'),
