@@ -5,13 +5,13 @@ define(["backbone", "underscore", "gettext", "js/views/feedback_notification", "
             this.template = _.template($("#show-syllabus-tpl").text());
             this.listenTo(this.model, "change", this.render);
         },
-        tagName: "section",
+        tagName: "topics",
         className: "syllabus",
         events: {
             "click .edit": "editSyllabus",
             "click .delete": "confirmDelete",
-            "click .show-chapters": "showSyllabus",
-            "click .hide-chapters": "hideSyllabus"
+            "click .show-topics": "showTopics",
+            "click .hide-topics": "hideTopics"
         },
         render: function() {
             var attrs = $.extend({}, this.model.attributes);
@@ -30,7 +30,7 @@ define(["backbone", "underscore", "gettext", "js/views/feedback_notification", "
             var msg = new PromptView.Warning({
                 title: _.template(gettext("Delete “<%= name %>”?"),
                     {name: syllabus.escape('name')}),
-                message: gettext("Deleting a section cannot be undone and once deleted any reference to it in your courseware's navigation will also be removed."),
+                message: gettext("Deleting a syllabus cannot be undone and once deleted any reference to it in your courseware's navigation will also be removed."),
                 actions: {
                     primary: {
                         text: gettext("Delete"),
@@ -55,13 +55,13 @@ define(["backbone", "underscore", "gettext", "js/views/feedback_notification", "
                 }
             }).show();
         },
-        showChapters: function(e) {
+        showTopics: function(e) {
             if(e && e.preventDefault) { e.preventDefault(); }
-            this.model.set('showTopic', true);
+            this.model.set('showTopics', true);
         },
-        hideChapters: function(e) {
+        hideTopics: function(e) {
             if(e && e.preventDefault) { e.preventDefault(); }
-            this.model.set('showTopic', false);
+            this.model.set('showTopics', false);
         }
     });
     return ShowSyllabus;
