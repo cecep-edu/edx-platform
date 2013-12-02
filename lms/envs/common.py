@@ -37,7 +37,7 @@ from lms.lib.xblock.mixin import LmsBlockMixin
 
 ################################### FEATURES ###################################
 # The display name of the platform to be used in templates/emails/etc.
-PLATFORM_NAME = "EVEX"
+PLATFORM_NAME = "UPEx"
 CC_MERCHANT_NAME = PLATFORM_NAME
 
 COURSEWARE_ENABLED = True
@@ -1249,6 +1249,16 @@ REGISTRATION_EXTRA_FIELDS = {
 CERT_NAME_SHORT = "Certificate"
 CERT_NAME_LONG = "Certificate of Achievement"
 
+########################## WS CONFIG ###########################
+
+WS_CONFIG = {
+    'ws_prod': "https://pru.bsg.gob.ec/sw/SENESCYT/BSGSW02_Consultar_TitPorCedula?wsdl",
+    'ws_auth': "https://www.bsg.gob.ec/sw/STI/BSGSW08_Acceder_BSG?wsdl",
+    'method_permission': "validarPermisoPeticion",
+    'method_query_title': "consultaTitulo",
+    'identity': '1803550274'
+    }
+
 ###################### Grade Downloads ######################
 GRADES_DOWNLOAD_ROUTING_KEY = HIGH_MEM_QUEUE
 
@@ -1499,3 +1509,15 @@ for app_name in OPTIONAL_APPS:
 # Stub for third_party_auth options.
 # See common/djangoapps/third_party_auth/settings.py for configuration details.
 THIRD_PARTY_AUTH = {}
+
+### Sentry integration
+
+RAVEN_CONFIG = {
+    'dsn': 'https://59734eda618a43afa2179d781549edeb:311de1f2e01247f284f3f72fbcd5844f@sentry.iaen.edu.ec/3',
+}
+
+INSTALLED_APPS += ('raven.contrib.django.raven_compat',)
+
+# Years allowed range
+DELTA_YEAR = 12
+MAX_YEAR_ALLOWED = 70

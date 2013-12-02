@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Student Views
 """
@@ -42,6 +43,7 @@ from student.models import (
 )
 from student.forms import PasswordResetFormNoActive
 from student.firebase_token_generator import create_token
+from student.validators import validate_cedula
 
 from verify_student.models import SoftwareSecurePhotoVerification, MidcourseReverificationWindow
 from student.validators import validate_cedula
@@ -618,13 +620,13 @@ def change_enrollment(request):
                   u"course:{course}".format(**course_id_dict),
                   u"run:{name}".format(**course_id_dict)]
         )
-
         #Validate level_of_education
         levels = {'p':8, 'm': 7, 'b': 6, 'a': 5, 'hs': 4, 'jhs': 3, 'el': 2, 'none': 1, 'other': 0}
         profile = UserProfile.objects.get(user=user)
         if course.level_of_education:
             if not levels[profile.level_of_education] >= levels[course.level_of_education]:
                 return HttpResponseBadRequest(_("Your level of education is not accepted for this course."))
+
         CourseEnrollment.enroll(user, course.id, mode=current_mode.slug)
 
         return HttpResponse()
@@ -682,6 +684,21 @@ def _get_course_enrollment_domain(course_id):
     except ItemNotFoundError:
         return None
 
+@ensure_csrf_cookie
+def student_handler(request):
+    """
+    Verificar informacion academica de estudiante
+    """
+    data = {'result': 'Ninguno'}
+    from student import utils
+    if request.is_ajax() and request.method == 'GET':
+        if request.GET.get('cedula', False):
+            cedula = request.GET.get('cedula')
+    result = utils.verify_academic_student(cedula)
+    if result:
+        data.update(result)
+    return HttpResponse(json.dumps(data))
+    
 
 @ensure_csrf_cookie
 def accounts_login(request):
@@ -986,7 +1003,7 @@ def _do_create_account(post_vars):
             return JsonResponse(js, status=400)
 
         if len(User.objects.filter(email=post_vars['email'])) > 0:
-            js['value'] = _("An account with the Email '{email}' already exists.").format(email=post_vars['email'])
+            js['value'] = _("An account with the Email '{email}' already exists.".format(email=post_vars['email']))
             js['field'] = 'email'
             return JsonResponse(js, status=400)
 
@@ -1134,13 +1151,38 @@ def create_account(request, post_override=None):
             return JsonResponse(js, status=400)
     
     city = City.objects.get(id=post_vars['city_id'])
-    if city.state.country.code == 'EC':
+    type_id = post_vars['type_id']
+    if type_id == 'cedula':
         try:
             validate_cedula(post_vars['cedula'])
         except ValidationError:
             js['value'] = _("A valid ID is required.").format(field=a)
             js['field'] = 'cedula'
             return HttpResponse(json.dumps(js))
+
+    try:
+        validate_cedula(post_vars['cedula'])
+    except ValidationError:
+        js['value'] = _("A valid ID is required.").format(field=a)
+        js['field'] = 'cedula'
+        return HttpResponse(json.dumps(js))
+    
+    city = City.objects.get(id=post_vars['city_id'])
+    type_id = post_vars['type_id']
+    if type_id == 'cedula':
+        try:
+            validate_cedula(post_vars['cedula'])
+        except ValidationError:
+            js['value'] = _("A valid ID is required.").format(field=a)
+            js['field'] = 'cedula'
+            return HttpResponse(json.dumps(js))
+
+    try:
+        validate_cedula(post_vars['cedula'])
+    except ValidationError:
+        js['value'] = _("A valid ID is required.").format(field=a)
+        js['field'] = 'cedula'
+        return HttpResponse(json.dumps(js))
 
     try:
         validate_email(post_vars['email'])
@@ -1755,3 +1797,4 @@ def token(request):
     newtoken = create_token(secret, custom_data)
     response = HttpResponse(newtoken, mimetype="text/plain")
     return response
+
