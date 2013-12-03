@@ -35,6 +35,7 @@ from django_countries import CountryField
 from track import contexts
 from track.views import server_track
 from eventtracking import tracker
+from django.utils.translation import ugettext as _
 
 from course_modes.models import CourseMode
 import lms.lib.comment_client as cc

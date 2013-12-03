@@ -179,7 +179,7 @@ class Syllabus(object):
     @lazy
     def table_of_contents(self):
         """
-        Accesses the textbook's table of contents (default name "toc.xml") at the URL self.book_url
+        Accesses the syllabus table of contents (default name "toc.xml") at the URL self.book_url
 
         Returns XML tree representation of the table of contents
         """
@@ -231,17 +231,17 @@ class Syllabus(object):
 
 class SyllabusList(List):
     def from_json(self, values):
-        syllabus = []
+        syllabuses = []
         for title, topic  in values:
             try:
-                syllabus.append(Syllabus(title, topic))
+                syllabuses.append(Syllabus(title, topic))
             except:
                 # If we can't get to S3 (e.g. on a train with no internet), don't break
                 # the rest of the courseware.
                 log.exception("Couldn't load syllabus ({0}, {1})".format(title, topic))
                 continue
 
-        return syllabus
+        return syllabuses
 
     def to_json(self, values):
         json_data = []
@@ -280,7 +280,7 @@ class CourseFields(object):
         scope=Scope.content
     )
 
-    syllabus = SyllabusList(help="List of pairs of (title, topic) for syllabus used in this course",
+    syllabuses = SyllabusList(help="List of pairs of (title, topic) for syllabus used in this course",
                              default=[], scope=Scope.content)
     wiki_slug = String(help="Slug that points to the wiki for this course", scope=Scope.content)
     enrollment_start = Date(help="Date that enrollment for this class is opened", scope=Scope.settings)
@@ -338,6 +338,7 @@ class CourseFields(object):
     no_grade = Boolean(help="True if this course isn't graded", default=False, scope=Scope.settings)
     disable_progress_graph = Boolean(help="True if this course shouldn't display the progress graph", default=False, scope=Scope.settings)
     pdf_textbooks = List(help="List of dictionaries containing pdf_textbook configuration", scope=Scope.settings)
+    topic_syllabuses = List(help="List of dictionaries containing topic_syllabus configuration", scope=Scope.settings)
     html_textbooks = List(help="List of dictionaries containing html_textbook configuration", scope=Scope.settings)
     remote_gradebook = Dict(scope=Scope.settings)
     allow_anonymous = Boolean(scope=Scope.settings, default=True)
@@ -575,7 +576,7 @@ class CourseDescriptor(CourseFields, SequenceDescriptor):
             tabs.append({'type': 'course_info', 'name': _('Course Info')})
 
             if self.syllabus_present:
-                tabs.append({'type': 'syllabus'})
+                tabs.append({'type': 'syllabuses'})
 
             tabs.append({'type': 'textbooks'})
 
@@ -676,13 +677,13 @@ class CourseDescriptor(CourseFields, SequenceDescriptor):
     @classmethod
     def definition_from_xml(cls, xml_object, system):
         textbooks = []
-        syllabus = []
+        syllabuses = []
         for textbook in xml_object.findall("textbook"):
             textbooks.append((textbook.get('title'), textbook.get('book_url')))
             xml_object.remove(textbook)
 
         for syllabus in xml_object.findall("syllabus"):
-            syllabus.append((syllabus.get('title'), syllabus.get('topic')))
+            syllabuses.append((syllabus.get('title'), syllabus.get('topic')))
             xml_object.remove(syllabus)
 
         # Load the wiki tag if it exists
@@ -695,7 +696,7 @@ class CourseDescriptor(CourseFields, SequenceDescriptor):
         definition, children = super(CourseDescriptor, cls).definition_from_xml(xml_object, system)
 
         definition['textbooks'] = textbooks
-        definition['syllabus'] = syllabus
+        definition['syllabuses'] = syllabuses
         definition['wiki_slug'] = wiki_slug
 
         return definition, children
@@ -716,7 +717,7 @@ class CourseDescriptor(CourseFields, SequenceDescriptor):
             wiki_xml_object.set('slug', self.wiki_slug)
             xml_object.append(wiki_xml_object)
 
-        if len(self.syllabus) > 0:
+        if len(self.syllabuses) > 0:
             syllabus_xml_object = etree.Element('syllabus')
             for syllabus in self.syllabus:
                 syllabus_xml_object.set('title', syllabus.title)
