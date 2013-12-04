@@ -966,7 +966,6 @@ def create_syllabus(request, org, course, name):
     """
     JSON API endpoint for creating a syllabus. Used by the Backbone application.
     """
-    pdb.set_trace()
     location = get_location_and_verify_access(request, org, course, name)
     store = get_modulestore(location)
     course_module = store.get_item(location, depth=0)
