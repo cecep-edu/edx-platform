@@ -1238,6 +1238,10 @@ REGISTRATION_EXTRA_FIELDS = {
 CERT_NAME_SHORT = "Certificate"
 CERT_NAME_LONG = "Certificate of Achievement"
 
+# Years allowed range
+DELTA_YEAR = 12
+MAX_YEAR_ALLOWED = 70
+
 ###################### Grade Downloads ######################
 GRADES_DOWNLOAD_ROUTING_KEY = HIGH_MEM_QUEUE
 
