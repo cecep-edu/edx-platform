@@ -282,7 +282,9 @@ def _cert_info(user, course, cert_status):
     """
     Implements the logic for cert_info -- split out for testing.
     """
+
     default_status = 'processing'
+    #default_status = 'ready'
 
     default_info = {'status': default_status,
                     'show_disabled_download_button': False,
@@ -301,7 +303,6 @@ def _cert_info(user, course, cert_status):
         CertificateStatuses.notpassing: 'notpassing',
         CertificateStatuses.restricted: 'restricted',
     }
-
     status = template_state.get(cert_status['status'], default_status)
 
     d = {'status': status,

@@ -62,8 +62,7 @@ __all__ = ['course_info_handler', 'course_handler', 'course_info_update_handler'
            'settings_handler',
            'grading_handler',
            'advanced_settings_handler',
-           'textbooks_list_handler', 'textbooks_detail_handler','create_syllabus','syllabus_index']
-
+           'textbooks_list_handler', 'textbooks_detail_handler','syllabus_list_handler', 'syllabus_detail_handler']
 
 def _get_locator_and_course(package_id, branch, version_guid, block_id, user, depth=0):
     """
@@ -284,7 +283,6 @@ def course_index(request, package_id, branch, version_guid, block):
     )
     lms_link = get_lms_link_for_item(course.location)
     sections = course.get_children()
-
     return render_to_response('overview.html', {
         'context_course': course,
         'lms_link': lms_link,
@@ -803,7 +801,7 @@ def validate_syllabuses_json(text):
 
 def validate_syllabus_json(syllabus):
     """
-    Validate the given text as representing a list of PDF textbooks
+    Validate the given text as representing a list of topic_syllabuses
     """
     if isinstance(syllabus, basestring):
         try:
@@ -849,17 +847,25 @@ def assign_syllabus_id(syllabus, used_ids=()):
         tid = tid + random.choice(string.ascii_lowercase)
     return tid
 
+@require_http_methods(("GET", "POST", "PUT"))
 @login_required
 @ensure_csrf_cookie
-def syllabus_index(request, org, course, name):
+def syllabus_list_handler(request, tag=None, course_id=None, branch=None, version_guid=None, block=None):
     """
-    Display an editable syllabus overview.
+    A RESTful handler for syllabus collections.
 
-    org, course, name: Attributes of the Location for the item to edit
+    GET
+        html: return syllabus list page (Backbone application)
+        json: return JSON representation of all syllabus in this course
+    POST
+        json: create a new syllabus for this course
+    PUT
+        json: overwrite all syllabus in the course with the given list
     """
-    location = get_location_and_verify_access(request, org, course, name)
-    store = get_modulestore(location)
-    course_module = store.get_item(location, depth=3)
+    locator, course = _get_locator_and_course(
+        course_id, branch, version_guid, block, request.user
+    )
+    store = get_modulestore(course.location)
 
 
     # from here on down, we know the client has requested JSON
@@ -978,6 +984,68 @@ def textbooks_list_handler(request, tag=None, package_id=None, branch=None, vers
         resp["Location"] = locator.url_reverse('textbooks', textbook["id"])
         return resp
 
+@login_required
+@ensure_csrf_cookie
+@require_http_methods(("GET", "POST", "PUT", "DELETE"))
+def syllabus_detail_handler(request, tid, tag=None, course_id=None, branch=None, version_guid=None, block=None):
+    """
+    JSON API endpoint for manipulating a syllabus via its internal ID.
+    Used by the Backbone application.
+
+    GET
+        json: return JSON representation of syllabus
+    POST or PUT
+        json: update syllabus based on provided information
+    DELETE
+        json: remove syllabus
+    """
+    __, course = _get_locator_and_course(
+        course_id, branch, version_guid, block, request.user
+    )
+    store = get_modulestore(course.location)
+    matching_id = [tb for tb in course.topic_syllabuses
+                   if str(tb.get("id")) == str(tid)]
+    if matching_id:
+        syllabus = matching_id[0]
+    else:
+        syllabus = None
+
+    if request.method == 'GET':
+        if not syllabus:
+            return JsonResponse(status=404)
+        return JsonResponse(syllabus)
+    elif request.method in ('POST', 'PUT'):  # can be either and sometimes
+                                        # django is rewriting one to the other
+        try:
+            new_syllabus = validate_syllabus_json(request.body)
+        except SyllabusValidationError as err:
+            return JsonResponse({"error": err.message}, status=400)
+        new_syllabus["id"] = tid
+        if syllabus:
+            i = course.topic_syllabuses.index(syllabus)
+            new_syllabuses = course.topic_syllabuses[0:i]
+            new_syllabuses.append(new_syllabus)
+            new_syllabuses.extend(course.topic_syllabuses[i + 1:])
+            course.topic_syllabuses = new_syllabuses
+        else:
+            course.topic_syllabuses.append(new_syllabus)
+        store.update_metadata(
+            course.location,
+            own_metadata(course)
+        )
+        return JsonResponse(new_syllabus, status=201)
+    elif request.method == 'DELETE':
+        if not syllabus:
+            return JsonResponse(status=404)
+        i = course.topic_syllabuses.index(syllabus)
+        new_syllabuses = course.topic_syllabuses[0:i]
+        new_syllabuses.extend(course.topic_syllabuses[i + 1:])
+        course.topic_syllabuses = new_syllabuses
+        store.update_metadata(
+            course.location,
+            own_metadata(course)
+        )
+        return JsonResponse()
 
 @login_required
 @ensure_csrf_cookie

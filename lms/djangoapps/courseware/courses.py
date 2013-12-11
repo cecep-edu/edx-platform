@@ -16,6 +16,7 @@ from courseware.model_data import FieldDataCache
 from static_replace import replace_static_urls
 from courseware.access import has_access
 import branding
+import pdb
 
 log = logging.getLogger(__name__)
 
