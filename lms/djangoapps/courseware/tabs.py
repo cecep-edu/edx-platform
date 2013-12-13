@@ -286,7 +286,8 @@ VALID_TAB_TYPES = {
     'open_ended': TabImpl(null_validator, _combined_open_ended_grading),
     'notes': TabImpl(null_validator, _notes_tab),
     'syllabus': TabImpl(null_validator, _syllabus)
-}
+    'topic_syllabuses':TabImpl(null_validator, _pdf_textbooks)
+    }
 
 
 ### External interface below this.
