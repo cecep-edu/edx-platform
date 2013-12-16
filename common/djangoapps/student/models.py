@@ -412,7 +412,7 @@ class CourseEnrollment(models.Model):
                attribute), this method will automatically save it before
                adding an enrollment for it.
 
-        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall)
+        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall")
 
         It is expected that this method is called from a method which has already
         verified the user authentication and access.
@@ -521,7 +521,7 @@ class CourseEnrollment(models.Model):
                attribute), this method will automatically save it before
                adding an enrollment for it.
 
-        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall)
+        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall")
 
         `mode` is a string specifying what kind of enrollment this is. The
                default is "honor", meaning honor certificate. Future options
@@ -549,7 +549,7 @@ class CourseEnrollment(models.Model):
 
         `email` Email address of the User to add to enroll in the course.
 
-        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall)
+        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall")
 
         `mode` is a string specifying what kind of enrollment this is. The
                default is "honor", meaning honor certificate. Future options
@@ -583,7 +583,7 @@ class CourseEnrollment(models.Model):
                attribute), this method will automatically save it before
                adding an enrollment for it.
 
-        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall)
+        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall")
         """
         try:
             record = CourseEnrollment.objects.get(user=user, course_id=course_id)
@@ -601,7 +601,7 @@ class CourseEnrollment(models.Model):
 
         `email` Email address of the User to unenroll from the course.
 
-        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall)
+        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall")
         """
         try:
             user = User.objects.get(email=email)
@@ -620,7 +620,7 @@ class CourseEnrollment(models.Model):
                attribute), this method will automatically save it before
                adding an enrollment for it.
 
-        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall)
+        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall")
         """
         try:
             record = CourseEnrollment.objects.get(user=user, course_id=course_id)
@@ -659,7 +659,7 @@ class CourseEnrollment(models.Model):
         Returns the enrollment mode for the given user for the given course
 
         `user` is a Django User object
-        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall)
+        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall")
         """
         try:
             record = CourseEnrollment.objects.get(user=user, course_id=course_id)
