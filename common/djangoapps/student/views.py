@@ -302,7 +302,6 @@ def _cert_info(user, course, cert_status):
         CertificateStatuses.notpassing: 'notpassing',
         CertificateStatuses.restricted: 'restricted',
     }
-    pdb.set_trace()
     status = template_state.get(cert_status['status'], default_status)
 
     d = {'status': status,

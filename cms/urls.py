@@ -75,7 +75,6 @@ urlpatterns += patterns(
         r'(?ix)^course_info_update/{}(/)?(?P<provided_id>\d+)?$'.format(parsers.URL_RE_SOURCE),
         'course_info_update_handler'
         ),
-    url(r'(?ix)^syllabuses($|/){}$'.format(parsers.URL_RE_SOURCE), 'syllabus_handler'),
     url(r'(?ix)^course($|/){}$'.format(parsers.URL_RE_SOURCE), 'course_handler'),
     url(r'(?ix)^subsection($|/){}$'.format(parsers.URL_RE_SOURCE), 'subsection_handler'),
     url(r'(?ix)^unit($|/){}$'.format(parsers.URL_RE_SOURCE), 'unit_handler'),
@@ -92,8 +91,10 @@ urlpatterns += patterns(
     url(r'(?ix)^settings/details/{}$'.format(parsers.URL_RE_SOURCE), 'settings_handler'),
     url(r'(?ix)^settings/grading/{}(/)?(?P<grader_index>\d+)?$'.format(parsers.URL_RE_SOURCE), 'grading_handler'),
     url(r'(?ix)^settings/advanced/{}$'.format(parsers.URL_RE_SOURCE), 'advanced_settings_handler'),
+    url(r'(?ix)^syllabuses/{}$'.format(parsers.URL_RE_SOURCE), 'syllabus_list_handler'),
     url(r'(?ix)^textbooks/{}$'.format(parsers.URL_RE_SOURCE), 'textbooks_list_handler'),
     url(r'(?ix)^textbooks/{}/(?P<tid>\d[^/]*)$'.format(parsers.URL_RE_SOURCE), 'textbooks_detail_handler'),
+    url(r'(?ix)^syllabuses/{}/(?P<tid>\d[^/]*)$'.format(parsers.URL_RE_SOURCE), 'syllabus_detail_handler'),
 )
 
 js_info_dict = {
