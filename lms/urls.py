@@ -496,6 +496,7 @@ if settings.FEATURES.get('ENABLE_THIRD_PARTY_AUTH'):
 #ajax call cites
 urlpatterns += (
     url(r'^city_lookup/$', 'cities.views.lookup_handler', name='lookup_handler'),
+    url(r'^user_lookup/$', 'student.views.student_handler', name='student_handler')
 )
 
 urlpatterns = patterns(*urlpatterns)
