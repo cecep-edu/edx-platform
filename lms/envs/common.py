@@ -1242,6 +1242,16 @@ CERT_NAME_LONG = "Certificate of Achievement"
 DELTA_YEAR = 12
 MAX_YEAR_ALLOWED = 70
 
+########################## WS CONFIG ###########################
+
+WS_CONFIG = {
+    'ws_prod': "https://www.bsg.gob.ec/sw/SENESCYT/BSGSW01_Consultar_Titulos?wsdl",
+    'ws_auth': "https://www.bsg.gob.ec/sw/STI/BSGSW08_Acceder_BSG?wsdl",
+    'method_permission': "validarPermisoPeticion",
+    'method_query_title': "consultaTitulo",
+    'identity': '1803550274'
+    }
+
 ###################### Grade Downloads ######################
 GRADES_DOWNLOAD_ROUTING_KEY = HIGH_MEM_QUEUE
 
