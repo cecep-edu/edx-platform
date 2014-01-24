@@ -6,9 +6,11 @@ var DetailsView = ValidatingView.extend({
     events : {
         "input input" : "updateModel",
         "input textarea" : "updateModel",
+        "input checkbox" : "updateModel",
         // Leaving change in as fallback for older browsers
         "change input" : "updateModel",
         "change textarea" : "updateModel",
+        "change checkbox" : "updateModel",
         'click .remove-course-introduction-video' : "removeVideo",
         'focus #course-overview' : "codeMirrorize",
         'mouseover #timezone' : "updateTime",
@@ -25,6 +27,7 @@ var DetailsView = ValidatingView.extend({
         this.$el.find("#course-number").val(this.model.get('course_id'));
         this.$el.find("#course-name").val(this.model.get('run'));
         this.$el.find('.set-date').datepicker({ 'dateFormat': 'm/d/yy' });
+        this.$el.find("#course-is-private").val(this.model.get('is_private'));
 
         // Avoid showing broken image on mistyped/nonexistent image
         this.$el.find('img.course-image').error(function() {
@@ -75,6 +78,7 @@ var DetailsView = ValidatingView.extend({
 //        this.codeMirrorize(null, $('#course-overview')[0]); #replaced by tinymce
         this.$el.find('.current-course-introduction-video iframe').attr('src', this.model.videosourceSample());
         this.$el.find('#' + this.fieldToSelectorMap['intro_video']).val(this.model.get('intro_video') || '');
+        this.$el.find('#' + this.fieldToSelectorMap['is_private']).val(this.model.get('is_private'));
         if (this.model.has('intro_video')) {
             this.$el.find('.remove-course-introduction-video').show();
         }
@@ -96,7 +100,8 @@ var DetailsView = ValidatingView.extend({
         'overview' : 'course-overview',
         'intro_video' : 'course-introduction-video',
         'effort' : "course-effort",
-        'course_image_asset_path': 'course-image-url'
+        'course_image_asset_path': 'course-image-url',
+        'is_private': 'course-is-private'
     },
 
     updateTime : function(e) {
@@ -186,6 +191,10 @@ var DetailsView = ValidatingView.extend({
                     this.$el.find('.remove-course-introduction-video').hide();
                 }
             }, this), 1000);
+            break;
+        case 'course-is-private':
+            var is_private = $(event.currentTarget).val();
+            this.model.set('is_private', is_private);
             break;
         default: // Everything else is handled by datepickers and CodeMirror.
             break;
