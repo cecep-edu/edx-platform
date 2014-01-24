@@ -184,6 +184,14 @@ require(["domReady!", "jquery", "js/models/settings/course_details", "js/views/s
                 <span class="tip tip-stacked" id="timezone"></span>
               </div>
             </li>
+
+            <li class="field-group" id="private-course">
+              <div class="field" id="field-is-private">
+                <label for="is-private">${_("Is Private ?")}</field>
+                <input type="checkbox" id="course-is-private"/>
+                <span class="tip tip-stacked" id="private"></span>
+              </div>
+            </li>
           </ol>
 
           % if not about_page_editable:
