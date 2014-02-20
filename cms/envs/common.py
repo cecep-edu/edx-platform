@@ -463,8 +463,6 @@ INSTALLED_APPS = (
     'user_api',
     'django_openid_auth',
 
-    # Cities UPEx
-    'cities',
 )
 
 
