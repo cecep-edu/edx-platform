@@ -1251,7 +1251,7 @@ MAX_YEAR_ALLOWED = 70
 ########################## WS CONFIG ###########################
 
 WS_CONFIG = {
-    'ws_prod': "https://www.bsg.gob.ec/sw/SENESCYT/BSGSW01_Consultar_Titulos?wsdl",
+    'ws_prod': "https://pru.bsg.gob.ec/sw/SENESCYT/BSGSW02_Consultar_TitPorCedula?wsdl",
     'ws_auth': "https://www.bsg.gob.ec/sw/STI/BSGSW08_Acceder_BSG?wsdl",
     'method_permission': "validarPermisoPeticion",
     'method_query_title': "consultaTitulo",
