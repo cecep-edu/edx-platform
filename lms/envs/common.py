@@ -502,8 +502,8 @@ STATICFILES_DIRS = [
 FAVICON_PATH = 'images/favicon.ico'
 
 # Locale/Internationalization
-TIME_ZONE = 'America/New_York'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-LANGUAGE_CODE = 'en'  # http://www.i18nguy.com/unicode/language-identifiers.html
+TIME_ZONE = 'America/Guayaquil'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+LANGUAGE_CODE = 'es-ec'  # http://www.i18nguy.com/unicode/language-identifiers.html
 
 # Sourced from http://www.localeplanet.com/icu/ and wikipedia
 LANGUAGES = (
@@ -1268,7 +1268,7 @@ MAX_YEAR_ALLOWED = 70
 ########################## WS CONFIG ###########################
 
 WS_CONFIG = {
-    'ws_prod': "https://www.bsg.gob.ec/sw/SENESCYT/BSGSW01_Consultar_Titulos?wsdl",
+    'ws_prod': "https://pru.bsg.gob.ec/sw/SENESCYT/BSGSW02_Consultar_TitPorCedula?wsdl",
     'ws_auth': "https://www.bsg.gob.ec/sw/STI/BSGSW08_Acceder_BSG?wsdl",
     'method_permission': "validarPermisoPeticion",
     'method_query_title': "consultaTitulo",
