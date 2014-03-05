@@ -280,6 +280,7 @@ TIME_ZONE = 'America/Guayaquil'  # http://en.wikipedia.org/wiki/List_of_tz_zones
 LANGUAGE_CODE = 'es_419'  # http://www.i18nguy.com/unicode/language-identifiers.html
 
 LANGUAGES = lms.envs.common.LANGUAGES
+LANGUAGE_CODE = 'es-ec'
 USE_I18N = True
 USE_L10N = True
 
