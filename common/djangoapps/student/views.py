@@ -1015,8 +1015,8 @@ def _do_create_account(post_vars):
     profile.level_of_education = post_vars.get('level_of_education')
     profile.gender = post_vars.get('gender')
     profile.mailing_address = post_vars.get('mailing_address')
-    profile.city = post_vars.get('city')
-    profile.country = post_vars.get('country')
+#    profile.city = city#post_vars.get('city')
+    profile.country = city.state.country#post_vars.get('country')
     profile.goals = post_vars.get('goals')
     profile.cedula = post_vars.get('cedula')
     profile.city = city
