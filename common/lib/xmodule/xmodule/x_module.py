@@ -142,6 +142,13 @@ class XModuleMixin(XBlockMixin):
     )
 
     @property
+    def system(self):
+        """
+        Return the XBlock runtime (backwards compatibility alias provided for XModules).
+        """
+        return self.runtime
+
+    @property
     def course_id(self):
         return self.runtime.course_id
 
@@ -400,7 +407,6 @@ class XModule(XModuleMixin, HTMLSnippet, XBlock):  # pylint: disable=abstract-me
         self.descriptor = descriptor
         super(XModule, self).__init__(*args, **kwargs)
         self._loaded_children = None
-        self.system = self.runtime
         self.runtime.xmodule_instance = self
 
     def __unicode__(self):
@@ -634,7 +640,6 @@ class XModuleDescriptor(XModuleMixin, HTMLSnippet, ResourceTemplates, XBlock):
         XModuleDescriptor.__init__ takes the same arguments as xblock.core:XBlock.__init__
         """
         super(XModuleDescriptor, self).__init__(*args, **kwargs)
-        self.system = self.runtime
         # update_version is the version which last updated this xblock v prev being the penultimate updater
         # leaving off original_version since it complicates creation w/o any obv value yet and is computable
         # by following previous until None
@@ -891,8 +896,21 @@ class ConfigurableFragmentWrapper(object):  # pylint: disable=abstract-method
 # This function exists to give applications (LMS/CMS) a place to monkey-patch until
 # we can refactor modulestore to split out the FieldData half of its interface from
 # the Runtime part of its interface. This function matches the Runtime.handler_url interface
-def descriptor_global_handler_url(block, handler_name, suffix='', query='', thirdparty=False):
-    raise NotImplementedError("Applications must monkey-patch this function before using handler-urls for studio_view")
+def descriptor_global_handler_url(block, handler_name, suffix='', query='', thirdparty=False):  # pylint: disable=invalid-name, unused-argument
+    """
+    See :meth:`xblock.runtime.Runtime.handler_url`.
+    """
+    raise NotImplementedError("Applications must monkey-patch this function before using handler_url for studio_view")
+
+
+# This function exists to give applications (LMS/CMS) a place to monkey-patch until
+# we can refactor modulestore to split out the FieldData half of its interface from
+# the Runtime part of its interface. This function matches the Runtime.local_resource_url interface
+def descriptor_global_local_resource_url(block, uri):  # pylint: disable=invalid-name, unused-argument
+    """
+    See :meth:`xblock.runtime.Runtime.local_resource_url`.
+    """
+    raise NotImplementedError("Applications must monkey-patch this function before using local_resource_url for studio_view")
 
 
 class DescriptorSystem(ConfigurableFragmentWrapper, Runtime):  # pylint: disable=abstract-method
@@ -940,6 +958,8 @@ class DescriptorSystem(ConfigurableFragmentWrapper, Runtime):  # pylint: disable
 
         get_policy: a function that takes a usage id and returns a dict of
             policy to apply.
+
+        local_resource_url: an implementation of :meth:`xblock.runtime.Runtime.local_resource_url`
 
         """
         super(DescriptorSystem, self).__init__(**kwargs)
@@ -1008,13 +1028,30 @@ class DescriptorSystem(ConfigurableFragmentWrapper, Runtime):  # pylint: disable
             # global function that the application can override.
             return descriptor_global_handler_url(block, handler_name, suffix, query, thirdparty)
 
-    def resource_url(self, resource):
-        raise NotImplementedError("edX Platform doesn't currently implement XBlock resource urls")
-
     def local_resource_url(self, block, uri):
+        """
+        See :meth:`xblock.runtime.Runtime:local_resource_url` for documentation.
+        """
+        xmodule_runtime = getattr(block, 'xmodule_runtime', None)
+        if xmodule_runtime is not None:
+            return xmodule_runtime.local_resource_url(block, uri)
+        else:
+            # Currently, Modulestore is responsible for instantiating DescriptorSystems
+            # This means that LMS/CMS don't have a way to define a subclass of DescriptorSystem
+            # that implements the correct local_resource_url. So, for now, instead, we will reference a
+            # global function that the application can override.
+            return descriptor_global_local_resource_url(block, uri)
+
+    def resource_url(self, resource):
+        """
+        See :meth:`xblock.runtime.Runtime:resource_url` for documentation.
+        """
         raise NotImplementedError("edX Platform doesn't currently implement XBlock resource urls")
 
     def publish(self, block, event):
+        """
+        See :meth:`xblock.runtime.Runtime:publish` for documentation.
+        """
         raise NotImplementedError("edX Platform doesn't currently implement XBlock publish")
 
     def add_block_as_child_node(self, block, node):
@@ -1048,7 +1085,7 @@ class ModuleSystem(ConfigurableFragmentWrapper, Runtime):  # pylint: disable=abs
     """
     def __init__(
             self, static_url, track_function, get_module, render_template,
-            replace_urls, user=None, filestore=None,
+            replace_urls, descriptor_runtime, user=None, filestore=None,
             debug=False, hostname="", xqueue=None, publish=None, node_path="",
             anonymous_student_id='', course_id=None,
             open_ended_grading_interface=None, s3_interface=None,
@@ -1088,6 +1125,8 @@ class ModuleSystem(ConfigurableFragmentWrapper, Runtime):  # pylint: disable=abs
         replace_urls - TEMPORARY - A function like static_replace.replace_urls
                          that capa_module can use to fix up the static urls in
                          ajax results.
+
+        descriptor_runtime - A `DescriptorSystem` to use for loading xblocks by id
 
         anonymous_student_id - Used for tracking modules with student id
 
@@ -1148,6 +1187,7 @@ class ModuleSystem(ConfigurableFragmentWrapper, Runtime):  # pylint: disable=abs
         self.get_real_user = get_real_user
 
         self.get_user_role = get_user_role
+        self.descriptor_runtime = descriptor_runtime
 
     def get(self, attr):
         """	provide uniform access to attributes (like etree)."""
@@ -1172,12 +1212,9 @@ class ModuleSystem(ConfigurableFragmentWrapper, Runtime):  # pylint: disable=abs
         return self.handler_url(self.xmodule_instance, 'xmodule_handler', '', '').rstrip('/?')
 
     def get_block(self, block_id):
-        raise NotImplementedError("XModules must use get_module to load other modules")
+        return self.get_module(self.descriptor_runtime.get_block(block_id))
 
     def resource_url(self, resource):
-        raise NotImplementedError("edX Platform doesn't currently implement XBlock resource urls")
-
-    def local_resource_url(self, block, uri):
         raise NotImplementedError("edX Platform doesn't currently implement XBlock resource urls")
 
     def publish(self, block, event):

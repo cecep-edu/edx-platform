@@ -26,7 +26,9 @@ Longer TODO:
 
 import sys
 import lms.envs.common
-from lms.envs.common import USE_TZ, TECH_SUPPORT_EMAIL, PLATFORM_NAME, BUGS_EMAIL, DOC_STORE_CONFIG, enable_microsites
+from lms.envs.common import (
+    USE_TZ, TECH_SUPPORT_EMAIL, PLATFORM_NAME, BUGS_EMAIL, DOC_STORE_CONFIG, ALL_LANGUAGES
+)
 from path import path
 
 from lms.lib.xblock.mixin import LmsBlockMixin
@@ -76,6 +78,15 @@ FEATURES = {
 
     # Allow editing of short description in course settings in cms
     'EDITABLE_SHORT_DESCRIPTION': True,
+
+    # Hide any Personally Identifiable Information from application logs
+    'SQUELCH_PII_IN_LOGS': False,
+
+    # Toggles embargo functionality
+    'EMBARGO': False,
+
+    # Turn on/off Microsites feature
+    'USE_MICROSITES': False,
 }
 ENABLE_JASMINE = False
 
@@ -91,9 +102,11 @@ GITHUB_REPO_ROOT = ENV_ROOT / "data"
 
 sys.path.append(REPO_ROOT)
 sys.path.append(PROJECT_ROOT / 'djangoapps')
-sys.path.append(PROJECT_ROOT / 'lib')
 sys.path.append(COMMON_ROOT / 'djangoapps')
 sys.path.append(COMMON_ROOT / 'lib')
+
+# For geolocation ip database
+GEOIP_PATH = REPO_ROOT / "common/static/data/geoip/GeoIP.dat"
 
 
 ############################# WEB CONFIGURATION #############################
@@ -181,6 +194,8 @@ MIDDLEWARE_CLASSES = (
     # Allows us to dark-launch particular languages
     'dark_lang.middleware.DarkLangMiddleware',
 
+    'embargo.middleware.EmbargoMiddleware',
+
     # Detects user-requested locale from 'accept-language' header in http request
     'django.middleware.locale.LocaleMiddleware',
 
@@ -193,7 +208,13 @@ MIDDLEWARE_CLASSES = (
 
     # for expiring inactive sessions
     'session_inactivity_timeout.middleware.SessionInactivityTimeout',
+
+    # use Django built in clickjacking protection
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+# Clickjacking protection can be enabled by setting this to 'DENY'
+X_FRAME_OPTIONS = 'ALLOW'
 
 ############# XBlock Configuration ##########
 
@@ -279,7 +300,7 @@ PIPELINE_CSS = {
             'css/vendor/normalize.css',
             'css/vendor/font-awesome.css',
             'css/vendor/html5-input-polyfills/number-polyfill.css',
-            'js/vendor/CodeMirror/codemirror.css',
+            'js/vendor/CodeMirror/codemirror-3.21.0.css',
             'css/vendor/ui-lightness/jquery-ui-1.8.22.custom.css',
             'css/vendor/jquery.qtip.min.css',
             'js/vendor/markitup/skins/simple/style.css',
@@ -465,6 +486,7 @@ INSTALLED_APPS = (
 
     # Cities UPEx
     'cities',
+    'embargo',
 )
 
 
@@ -515,3 +537,13 @@ YOUTUBE_API = {
 ##### ACCOUNT LOCKOUT DEFAULT PARAMETERS #####
 MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED = 5
 MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS = 15 * 60
+
+
+### JSdraw (only installed in some instances)
+
+try:
+    import edx_jsdraw
+except ImportError:
+    pass
+else:
+    INSTALLED_APPS += ('edx_jsdraw',)

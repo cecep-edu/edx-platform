@@ -173,7 +173,7 @@ def cancel_does_not_save_changes(step):
 def enable_latex_compiler(step):
     url = world.browser.url
     step.given("I select the Advanced Settings")
-    change_value(step, 'use_latex_compiler', True)
+    change_value(step, 'use_latex_compiler', 'true')
     world.visit(url)
     world.wait_for_xmodule()
 
@@ -258,12 +258,6 @@ def verify_high_level_source_links(step, visible):
                     msg="Expected not to find the latex button but it is present.")
 
     world.cancel_component(step)
-    if visible:
-        assert_true(world.is_css_present('.upload-button'),
-                    msg="Expected to find the upload button but it is not present.")
-    else:
-        assert_true(world.is_css_not_present('.upload-button'),
-                    msg="Expected not to find the upload button but it is present.")
 
 
 def verify_modified_weight():

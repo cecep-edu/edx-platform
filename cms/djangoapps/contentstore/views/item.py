@@ -1,4 +1,5 @@
 """Views for items (modules)."""
+from __future__ import absolute_import
 
 import hashlib
 import logging
@@ -11,7 +12,7 @@ from xmodule_modifiers import wrap_xblock
 
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseBadRequest, HttpResponse
+from django.http import HttpResponseBadRequest, HttpResponse, Http404
 from django.utils.translation import ugettext as _
 from django.views.decorators.http import require_http_methods
 
@@ -24,11 +25,10 @@ from xmodule.modulestore.exceptions import ItemNotFoundError, InvalidLocationErr
 from xmodule.modulestore.inheritance import own_metadata
 from xmodule.modulestore.locator import BlockUsageLocator
 from xmodule.modulestore import Location
+from xmodule.video_module import manage_video_subtitles_save
 
 from util.json_request import expect_json, JsonResponse
 from util.string_utils import str_to_bool
-
-from ..transcripts_utils import manage_video_subtitles_save
 
 from ..utils import get_modulestore
 
@@ -37,9 +37,9 @@ from .helpers import _xmodule_recurse
 from contentstore.views.preview import get_preview_fragment
 from edxmako.shortcuts import render_to_string
 from models.settings.course_grading import CourseGradingModel
-from cms.lib.xblock.runtime import handler_url
+from cms.lib.xblock.runtime import handler_url, local_resource_url
 
-__all__ = ['orphan_handler', 'xblock_handler']
+__all__ = ['orphan_handler', 'xblock_handler', 'xblock_view_handler']
 
 log = logging.getLogger(__name__)
 
@@ -50,6 +50,7 @@ CREATE_IF_NOT_FOUND = ['course_info']
 # monkey-patch the x_module library.
 # TODO: Remove this code when Runtimes are no longer created by modulestores
 xmodule.x_module.descriptor_global_handler_url = handler_url
+xmodule.x_module.descriptor_global_local_resource_url = local_resource_url
 
 
 def hash_resource(resource):
@@ -109,41 +110,7 @@ def xblock_handler(request, tag=None, package_id=None, branch=None, version_guid
         if request.method == 'GET':
             accept_header = request.META.get('HTTP_ACCEPT', 'application/json')
 
-            if 'application/x-fragment+json' in accept_header:
-                store = get_modulestore(old_location)
-                component = store.get_item(old_location)
-
-                # Wrap the generated fragment in the xmodule_editor div so that the javascript
-                # can bind to it correctly
-                component.runtime.wrappers.append(partial(wrap_xblock, 'StudioRuntime'))
-
-                try:
-                    editor_fragment = component.render('studio_view')
-                # catch exceptions indiscriminately, since after this point they escape the
-                # dungeon and surface as uneditable, unsaveable, and undeletable
-                # component-goblins.
-                except Exception as exc:                          # pylint: disable=W0703
-                    log.debug("Unable to render studio_view for %r", component, exc_info=True)
-                    editor_fragment = Fragment(render_to_string('html_error.html', {'message': str(exc)}))
-
-                store.save_xmodule(component)
-
-                preview_fragment = get_preview_fragment(request, component)
-
-                hashed_resources = OrderedDict()
-                for resource in editor_fragment.resources + preview_fragment.resources:
-                    hashed_resources[hash_resource(resource)] = resource
-
-                return JsonResponse({
-                    'html': render_to_string('component.html', {
-                        'preview': preview_fragment.content,
-                        'editor': editor_fragment.content,
-                        'label': component.display_name or component.scope_ids.block_type,
-                    }),
-                    'resources': hashed_resources.items()
-                })
-
-            elif 'application/json' in accept_header:
+            if 'application/json' in accept_header:
                 fields = request.REQUEST.get('fields', '').split(',')
                 if 'graderType' in fields:
                     # right now can't combine output of this w/ output of _get_module_info, but worthy goal
@@ -197,6 +164,100 @@ def xblock_handler(request, tag=None, package_id=None, branch=None, version_guid
             content_type="text/plain"
         )
 
+# pylint: disable=unused-argument
+@require_http_methods(("GET"))
+@login_required
+@expect_json
+def xblock_view_handler(request, package_id, view_name, tag=None, branch=None, version_guid=None, block=None):
+    """
+    The restful handler for requests for rendered xblock views.
+
+    Returns a json object containing two keys:
+        html: The rendered html of the view
+        resources: A list of tuples where the first element is the resource hash, and
+            the second is the resource description
+    """
+    locator = BlockUsageLocator(package_id=package_id, branch=branch, version_guid=version_guid, block_id=block)
+    if not has_course_access(request.user, locator):
+        raise PermissionDenied()
+    old_location = loc_mapper().translate_locator_to_location(locator)
+
+    accept_header = request.META.get('HTTP_ACCEPT', 'application/json')
+
+    if 'application/json' in accept_header:
+        store = get_modulestore(old_location)
+        component = store.get_item(old_location)
+
+        # wrap the generated fragment in the xmodule_editor div so that the javascript
+        # can bind to it correctly
+        component.runtime.wrappers.append(partial(wrap_xblock, 'StudioRuntime'))
+
+        if view_name == 'studio_view':
+            try:
+                fragment = component.render('studio_view')
+            # catch exceptions indiscriminately, since after this point they escape the
+            # dungeon and surface as uneditable, unsaveable, and undeletable
+            # component-goblins.
+            except Exception as exc:                          # pylint: disable=w0703
+                log.debug("unable to render studio_view for %r", component, exc_info=True)
+                fragment = Fragment(render_to_string('html_error.html', {'message': str(exc)}))
+
+            store.save_xmodule(component)
+        elif view_name == 'student_view' and component.has_children:
+            # For non-leaf xblocks on the unit page, show the special rendering
+            # which links to the new container page.
+            course_location = loc_mapper().translate_locator_to_location(locator, True)
+            course = store.get_item(course_location)
+            html = render_to_string('unit_container_xblock_component.html', {
+                'course': course,
+                'xblock': component,
+                'locator': locator
+            })
+            return JsonResponse({
+                'html': html,
+                'resources': [],
+            })
+        elif view_name in ('student_view', 'container_preview'):
+            is_container_view = (view_name == 'container_preview')
+
+            # Only show the new style HTML for the container view, i.e. for non-verticals
+            # Note: this special case logic can be removed once the unit page is replaced
+            # with the new container view.
+            is_read_only_view = is_container_view
+            context = {
+                'container_view': is_container_view,
+                'read_only': is_read_only_view,
+                'root_xblock': component
+            }
+
+            fragment = get_preview_fragment(request, component, context)
+            # For old-style pages (such as unit and static pages), wrap the preview with
+            # the component div. Note that the container view recursively adds headers
+            # into the preview fragment, so we don't want to add another header here.
+            if not is_container_view:
+                fragment.content = render_to_string('component.html', {
+                    'preview': fragment.content,
+                    'label': component.display_name or component.scope_ids.block_type,
+
+                    # Native XBlocks are responsible for persisting their own data,
+                    # so they are also responsible for providing save/cancel buttons.
+                    'show_save_cancel': isinstance(component, xmodule.x_module.XModuleDescriptor),
+                })
+        else:
+            raise Http404
+
+        hashed_resources = OrderedDict()
+        for resource in fragment.resources:
+            hashed_resources[hash_resource(resource)] = resource
+
+        return JsonResponse({
+            'html': fragment.content,
+            'resources': hashed_resources.items()
+        })
+
+    else:
+        return HttpResponse(status=406)
+
 
 def _save_item(request, usage_loc, item_location, data=None, children=None, metadata=None, nullout=None,
                grader_type=None, publish=None):
@@ -222,6 +283,8 @@ def _save_item(request, usage_loc, item_location, data=None, children=None, meta
     except InvalidLocationError:
         log.error("Can't find item by location.")
         return JsonResponse({"error": "Can't find item by location: " + str(item_location)}, 404)
+
+    old_metadata = own_metadata(existing_item)
 
     if publish:
         if publish == 'make_private':
@@ -271,7 +334,7 @@ def _save_item(request, usage_loc, item_location, data=None, children=None, meta
                     field.write_to(existing_item, value)
 
         if existing_item.category == 'video':
-            manage_video_subtitles_save(existing_item, existing_item, request.user)
+            manage_video_subtitles_save(existing_item, request.user, old_metadata, generate_translation=True)
 
     # commit to datastore
     store.update_item(existing_item, request.user.id)
@@ -288,9 +351,18 @@ def _save_item(request, usage_loc, item_location, data=None, children=None, meta
     # Make public after updating the xblock, in case the caller asked
     # for both an update and a publish.
     if publish and publish == 'make_public':
+        def _publish(block):
+            # This is super gross, but prevents us from publishing something that
+            # we shouldn't. Ideally, all modulestores would have a consistant
+            # interface for publishing. However, as of now, only the DraftMongoModulestore
+            # does, so we have to check for the attribute explicitly.
+            store = get_modulestore(block.location)
+            if hasattr(store, 'publish'):
+                store.publish(block.location, request.user.id)
+
         _xmodule_recurse(
             existing_item,
-            lambda i: modulestore().publish(i.location, request.user.id)
+            _publish
         )
 
     # Note that children aren't being returned until we have a use case.

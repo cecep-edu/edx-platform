@@ -1,5 +1,6 @@
 import json
 import logging
+import mimetypes
 
 import static_replace
 
@@ -13,7 +14,6 @@ from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
-import django.utils
 from django.views.decorators.csrf import csrf_exempt
 
 from capa.xqueue_interface import XQueueInterface
@@ -23,6 +23,7 @@ from courseware.model_data import FieldDataCache, DjangoKeyValueStore
 from lms.lib.xblock.field_data import LmsFieldData
 from lms.lib.xblock.runtime import LmsModuleSystem, unquote_slashes
 from edxmako.shortcuts import render_to_string
+from eventtracking import tracker
 from psychometrics.psychoanalyze import make_psychometrics_data_update_handler
 from student.models import anonymous_id_for_user, user_by_anonymous_id
 from xblock.core import XBlock
@@ -33,14 +34,13 @@ from xblock.django.request import django_to_webob_request, webob_to_django_respo
 from xmodule.error_module import ErrorDescriptor, NonStaffErrorDescriptor
 from xmodule.exceptions import NotFoundError, ProcessingError
 from xmodule.modulestore import Location
-from xmodule.modulestore.django import modulestore
+from xmodule.modulestore.django import modulestore, ModuleI18nService
 from xmodule.modulestore.exceptions import ItemNotFoundError
 from xmodule.util.duedate import get_extended_due_date
 from xmodule_modifiers import replace_course_urls, replace_jump_to_id_urls, replace_static_urls, add_staff_debug_info, wrap_xblock
 from xmodule.lti_module import LTIModule
 from xmodule.x_module import XModuleDescriptor
 
-from util.date_utils import strftime_localized
 from util.json_request import JsonResponse
 from util.sandboxing import can_execute_unsafe_code
 
@@ -227,7 +227,6 @@ def get_module_for_descriptor_internal(user, descriptor, field_data_cache, cours
             return None
 
     student_data = KvsFieldData(DjangoKeyValueStore(field_data_cache))
-    descriptor._field_data = LmsFieldData(descriptor._field_data, student_data)
 
 
     def make_xqueue_callback(dispatch='score_update'):
@@ -320,12 +319,12 @@ def get_module_for_descriptor_internal(user, descriptor, field_data_cache, cours
 
         # Bin score into range and increment stats
         score_bucket = get_score_bucket(student_module.grade, student_module.max_grade)
-        org, course_num, run = course_id.split("/")
+        course_id_dict = Location.parse_course_id(course_id)
 
         tags = [
-            u"org:{0}".format(org),
-            u"course:{0}".format(course_num),
-            u"run:{0}".format(run),
+            u"org:{org}".format(**course_id_dict),
+            u"course:{course}".format(**course_id_dict),
+            u"run:{name}".format(**course_id_dict),
             u"score_bucket:{0}".format(score_bucket)
         ]
 
@@ -433,6 +432,7 @@ def get_module_for_descriptor_internal(user, descriptor, field_data_cache, cours
             'i18n': ModuleI18nService(),
         },
         get_user_role=lambda: get_user_role(user, course_id),
+        descriptor_runtime=descriptor.runtime,
     )
 
     # pass position specified in URL to module through ModuleSystem
@@ -451,8 +451,8 @@ def get_module_for_descriptor_internal(user, descriptor, field_data_cache, cours
     else:
         system.error_descriptor_class = NonStaffErrorDescriptor
 
-    descriptor.xmodule_runtime = system
-    descriptor.scope_ids = descriptor.scope_ids._replace(user_id=user.id)
+    descriptor.bind_for_student(system, LmsFieldData(descriptor._field_data, student_data))  # pylint: disable=protected-access
+    descriptor.scope_ids = descriptor.scope_ids._replace(user_id=user.id)  # pylint: disable=protected-access
     return descriptor
 
 
@@ -545,6 +545,23 @@ def handle_xblock_callback(request, course_id, usage_id, handler, suffix=None):
     return _invoke_xblock_handler(request, course_id, usage_id, handler, suffix, request.user)
 
 
+def xblock_resource(request, block_type, uri):  # pylint: disable=unused-argument
+    """
+    Return a package resource for the specified XBlock.
+    """
+    try:
+        xblock_class = XBlock.load_class(block_type, select=settings.XBLOCK_SELECT_FUNCTION)
+        content = xblock_class.open_local_resource(uri)
+    except IOError:
+        log.info('Failed to load xblock resource', exc_info=True)
+        raise Http404
+    except Exception:  # pylint: disable-msg=broad-except
+        log.error('Failed to load xblock resource', exc_info=True)
+        raise Http404
+    mimetype, _ = mimetypes.guess_type(uri)
+    return HttpResponse(content, mimetype=mimetype)
+
+
 def _invoke_xblock_handler(request, course_id, usage_id, handler, suffix, user):
     """
     Invoke an XBlock handler, either authenticated or not.
@@ -573,6 +590,13 @@ def _invoke_xblock_handler(request, course_id, usage_id, handler, suffix, user):
         )
         raise Http404
 
+    tracking_context_name = 'module_callback_handler'
+    tracking_context = {
+        'module': {
+            'display_name': descriptor.display_name_with_default,
+        }
+    }
+
     field_data_cache = FieldDataCache.cache_for_descriptor_descendents(
         course_id,
         user,
@@ -587,7 +611,8 @@ def _invoke_xblock_handler(request, course_id, usage_id, handler, suffix, user):
 
     req = django_to_webob_request(request)
     try:
-        resp = instance.handle(handler, req, suffix)
+        with tracker.get_tracker().context(tracking_context_name, tracking_context):
+            resp = instance.handle(handler, req, suffix)
 
     except NoSuchHandlerError:
         log.exception("XBlock %s attempted to access missing handler %r", instance, handler)
@@ -651,20 +676,3 @@ def _check_files_limits(files):
                 return msg
 
     return None
-
-
-class ModuleI18nService(object):
-    """
-    Implement the XBlock runtime "i18n" service.
-
-    Mostly a pass-through to Django's translation module.
-    django.utils.translation implements the gettext.Translations interface (it
-    has ugettext, ungettext, etc), so we can use it directly as the runtime
-    i18n service.
-
-    """
-    def __getattr__(self, name):
-        return getattr(django.utils.translation, name)
-
-    def strftime(self, *args, **kwargs):
-        return strftime_localized(*args, **kwargs)

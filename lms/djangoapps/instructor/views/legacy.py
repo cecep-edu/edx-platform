@@ -24,7 +24,7 @@ from django.utils import timezone
 
 from xmodule_modifiers import wrap_xblock
 import xmodule.graders as xmgraders
-from xmodule.modulestore import XML_MODULESTORE_TYPE
+from xmodule.modulestore import XML_MODULESTORE_TYPE, Location
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import ItemNotFoundError
 from xmodule.html_module import HtmlDescriptor
@@ -53,6 +53,7 @@ from instructor_task.api import (
 )
 from instructor_task.views import get_task_completion_info
 from edxmako.shortcuts import render_to_response, render_to_string
+from class_dashboard import dashboard_data
 from psychometrics import psychoanalyze
 from student.models import CourseEnrollment, CourseEnrollmentAllowed, unique_id_for_user
 from student.views import course_from_id
@@ -61,7 +62,7 @@ from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
 from django.utils.translation import ugettext as _u
 
-from microsite_configuration.middleware import MicrositeConfiguration
+from microsite_configuration import microsite
 
 log = logging.getLogger(__name__)
 
@@ -170,8 +171,9 @@ def instructor_dashboard(request, course_id):
             urlname = "problem/" + urlname
 
         # complete the url using information about the current course:
-        (org, course_name, _) = course_id.split("/")
-        return u"i4x://{org}/{name}/{url}".format(org=org, name=course_name, url=urlname)
+        parts = Location.parse_course_id(course_id)
+        parts['url'] = urlname
+        return u"i4x://{org}/{name}/{url}".format(**parts)
 
     def get_student_from_identifier(unique_student_identifier):
         """Gets a student object using either an email address or username"""
@@ -571,10 +573,12 @@ def instructor_dashboard(request, course_id):
         if problem_to_dump[-4:] == ".xml":
             problem_to_dump = problem_to_dump[:-4]
         try:
-            (org, course_name, _) = course_id.split("/")
-            module_state_key = "i4x://" + org + "/" + course_name + "/problem/" + problem_to_dump
-            smdat = StudentModule.objects.filter(course_id=course_id,
-                                                 module_state_key=module_state_key)
+            course_id_dict = Location.parse_course_id(course_id)
+            module_state_key = u"i4x://{org}/{course}/problem/{0}".format(problem_to_dump, **course_id_dict)
+            smdat = StudentModule.objects.filter(
+                course_id=course_id,
+                module_state_key=module_state_key
+            )
             smdat = smdat.order_by('student')
             msg += _u("Found {num} records to dump.").format(num=smdat)
         except Exception as err:
@@ -815,6 +819,14 @@ def instructor_dashboard(request, course_id):
             analytics_results[analytic_name] = get_analytics_result(analytic_name)
 
     #----------------------------------------
+    # Metrics
+
+    metrics_results = {}
+    if settings.FEATURES.get('CLASS_DASHBOARD') and idash_mode == 'Metrics':
+        metrics_results['section_display_name'] = dashboard_data.get_section_display_name(course_id)
+        metrics_results['section_has_problem'] = dashboard_data.get_array_section_has_problem(course_id)
+
+    #----------------------------------------
     # offline grades?
 
     if use_offline:
@@ -897,7 +909,8 @@ def instructor_dashboard(request, course_id):
         'cohorts_ajax_url': reverse('cohorts', kwargs={'course_id': course_id}),
 
         'analytics_results': analytics_results,
-        'disable_buttons': disable_buttons
+        'disable_buttons': disable_buttons,
+        'metrics_results': metrics_results,
     }
 
     if settings.FEATURES.get('ENABLE_INSTRUCTOR_BETA_DASHBOARD'):
@@ -1282,7 +1295,7 @@ def _do_enroll_students(course, course_id, students, overload=False, auto_enroll
         ceaset.delete()
 
     if email_students:
-        stripped_site_name = MicrositeConfiguration.get_microsite_configuration_value(
+        stripped_site_name = microsite.get_value(
             'SITE_NAME',
             settings.SITE_NAME
         )
@@ -1376,7 +1389,7 @@ def _do_unenroll_students(course_id, students, email_students=False):
     old_students, _ = get_and_clean_student_list(students)
     status = dict([x, 'unprocessed'] for x in old_students)
 
-    stripped_site_name = MicrositeConfiguration.get_microsite_configuration_value(
+    stripped_site_name = microsite.get_value(
         'SITE_NAME',
         settings.SITE_NAME
     )
@@ -1456,7 +1469,7 @@ def send_mail_to_student(student, param_dict):
     # add some helpers and microconfig subsitutions
     if 'course' in param_dict:
         param_dict['course_name'] = param_dict['course'].display_name_with_default
-    param_dict['site_name'] = MicrositeConfiguration.get_microsite_configuration_value(
+    param_dict['site_name'] = microsite.get_value(
         'SITE_NAME',
         param_dict.get('site_name', '')
     )
@@ -1484,7 +1497,7 @@ def send_mail_to_student(student, param_dict):
 
         # Email subject *must not* contain newlines
         subject = ''.join(subject.splitlines())
-        from_address = MicrositeConfiguration.get_microsite_configuration_value(
+        from_address = microsite.get_value(
             'email_from_address',
             settings.DEFAULT_FROM_EMAIL
         )

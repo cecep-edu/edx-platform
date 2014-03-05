@@ -7,6 +7,7 @@ from bok_choy.query import SubQuery
 from bok_choy.promise import EmptyPromise, fulfill
 
 from . import BASE_URL
+from .container import ContainerPage
 
 
 class UnitPage(PageObject):
@@ -24,15 +25,34 @@ class UnitPage(PageObject):
         return "{}/unit/{}".format(BASE_URL, self.unit_locator)
 
     def is_browser_on_page(self):
-        return self.is_css_present('body.view-unit')
-
-    def component(self, title):
-        return Component(
-            self.browser,
-            self.q(css=Component.BODY_SELECTOR).filter(
-                SubQuery(css=Component.NAME_SELECTOR).filter(text=title)
-            )[0]['data-locator']
+        # Wait until all components have been loaded
+        number_of_leaf_xblocks = len(self.q(css='{} .xblock-student_view'.format(Component.BODY_SELECTOR)))
+        number_of_container_xblocks = len(self.q(css='{} .wrapper-xblock'.format(Component.BODY_SELECTOR)))
+        return (
+            self.is_css_present('body.view-unit') and
+            len(self.q(css=Component.BODY_SELECTOR)) == number_of_leaf_xblocks + number_of_container_xblocks
         )
+
+    @property
+    def components(self):
+        """
+        Return a list of components loaded on the unit page.
+        """
+        return self.q(css=Component.BODY_SELECTOR).map(lambda el: Component(self.browser, el['data-locator'])).results
+
+    def edit_draft(self):
+        """
+        Started editing a draft of this unit.
+        """
+        fulfill(EmptyPromise(
+            lambda: self.q(css='.create-draft').present,
+            'Wait for edit draft link to be present'
+        ))
+        self.q(css='.create-draft').click()
+        fulfill(EmptyPromise(
+            lambda: self.q(css='.editing-draft-alert').present,
+            'Wait for draft mode to be activated'
+        ))
 
 
 class Component(PageObject):
@@ -88,3 +108,10 @@ class Component(PageObject):
     @property
     def editor_selector(self):
         return self._bounded_selector('.xblock-studio_view')
+
+    def go_to_container(self):
+        """
+        Open the container page linked to by this component, and return
+        an initialized :class:`.ContainerPage` for that xblock.
+        """
+        return ContainerPage(self.browser, self.locator).visit()
