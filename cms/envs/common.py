@@ -279,6 +279,7 @@ STATICFILES_DIRS = [
 TIME_ZONE = 'America/Guayaquil'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 
 LANGUAGES = lms.envs.common.LANGUAGES
+LANGUAGE_CODE = 'es-ec'
 USE_I18N = True
 USE_L10N = True
 
@@ -547,3 +548,7 @@ except ImportError:
     pass
 else:
     INSTALLED_APPS += ('edx_jsdraw',)
+
+# Years allowed range
+DELTA_YEAR = 12
+MAX_YEAR_ALLOWED = 70
