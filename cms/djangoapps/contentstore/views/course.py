@@ -886,10 +886,7 @@ def syllabus_list_handler(request, tag=None, package_id=None, branch=None, versi
         if not any(tab['type'] == 'topic_syllabuses' for tab in course.tabs):
             course.tabs.append({"type": "topic_syllabuses"})
         course.topic_syllabuses = syllabuses
-        store.update_metadata(
-            course.location,
-            own_metadata(course)
-        )
+        store.update_item(course, request.user.id)
         return JsonResponse(course.topic_syllabuses)
     elif request.method == 'POST':
         # create a new syllabus for the course
@@ -907,7 +904,7 @@ def syllabus_list_handler(request, tag=None, package_id=None, branch=None, versi
             tabs = course.tabs
             tabs.append({"type": "topic_syllabuses"})
             course.tabs = tabs
-        store.update_metadata(course.location, own_metadata(course))
+        store.update_item(course, request.user.id)
         resp = JsonResponse(syllabus, status=201)
         resp["Location"] = locator.url_reverse('syllabuses', syllabus["id"])
         return resp
@@ -1031,10 +1028,7 @@ def syllabus_detail_handler(request, tid, tag=None, package_id=None, branch=None
             course.topic_syllabuses = new_syllabuses
         else:
             course.topic_syllabuses.append(new_syllabus)
-        store.update_metadata(
-            course.location,
-            own_metadata(course)
-        )
+        store.update_item(course, request.user.id)
         return JsonResponse(new_syllabus, status=201)
     elif request.method == 'DELETE':
         if not syllabus:
@@ -1043,10 +1037,7 @@ def syllabus_detail_handler(request, tid, tag=None, package_id=None, branch=None
         new_syllabuses = course.topic_syllabuses[0:i]
         new_syllabuses.extend(course.topic_syllabuses[i + 1:])
         course.topic_syllabuses = new_syllabuses
-        store.update_metadata(
-            course.location,
-            own_metadata(course)
-        )
+        store.update_item(course, request.user.id)
         return JsonResponse()
 
 @login_required
