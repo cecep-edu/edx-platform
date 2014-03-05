@@ -465,6 +465,18 @@ class CourseFields(object):
         # Ensure that courses imported from XML keep their image
         default="images_course_image.jpg"
     )
+    
+    ## Course level Certificate Name overrides.
+    cert_name_short = String(
+        help="Sitewide name of completion statements given to students (short).",
+        scope=Scope.settings,
+        default=""
+    )
+    cert_name_long = String(
+        help="Sitewide name of completion statements given to students (long).",
+        scope=Scope.settings,
+        default=""
+    )
 
     # An extra property is used rather than the wiki_slug/number because
     # there are courses that change the number for different runs. This allows
@@ -498,6 +510,10 @@ class CourseFields(object):
     max_student_enrollments_allowed = Integer(help="Limit the number of students allowed to enroll in this course.",
                                               scope=Scope.settings)
 
+    allow_public_wiki_access = Boolean(help="Whether to allow an unenrolled user to view the Wiki",
+                                       default=False,
+                                       scope=Scope.settings)
+
 class CourseDescriptor(CourseFields, SequenceDescriptor):
     module_class = SequenceModule
 
@@ -519,7 +535,7 @@ class CourseDescriptor(CourseFields, SequenceDescriptor):
             # set the due_date_display_format to what would have been shown previously (with no timezone).
             # Then remove show_timezone so that if the user clears out the due_date_display_format,
             # they get the default date display.
-            self.due_date_display_format = u"%b %d, %Y at %H:%M"
+            self.due_date_display_format = "DATE_TIME"
             delattr(self, 'show_timezone')
 
         # NOTE: relies on the modulestore to call set_grading_policy() right after
@@ -927,8 +943,10 @@ class CourseDescriptor(CourseFields, SequenceDescriptor):
         '''Convert the given course_id (org/course/name) to a location object.
         Throws ValueError if course_id is of the wrong format.
         '''
-        org, course, name = course_id.split('/')
-        return Location('i4x', org, course, 'course', name)
+        course_id_dict = Location.parse_course_id(course_id)
+        course_id_dict['tag'] = 'i4x'
+        course_id_dict['category'] = 'course'
+        return Location(course_id_dict)
 
     @staticmethod
     def location_to_id(location):

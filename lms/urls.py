@@ -11,7 +11,6 @@ if settings.DEBUG or settings.FEATURES.get('ENABLE_DJANGO_ADMIN_SITE'):
 
 urlpatterns = ('',  # nopep8
     # certificate view
-
     url(r'^update_certificate$', 'certificates.views.update_certificate'),
     url(r'^$', 'branding.views.index', name="root"),   # Main marketing page, or redirect to courseware
     url(r'^dashboard$', 'student.views.dashboard', name="dashboard"),
@@ -66,6 +65,8 @@ urlpatterns = ('',  # nopep8
     url(r'^', include('waffle.urls')),
 
     url(r'^i18n/', include('django.conf.urls.i18n')),
+
+    url(r'^embargo$', 'student.views.embargo', name="embargo"),
 )
 
 # if settings.FEATURES.get("MULTIPLE_ENROLLMENT_ROLES"):
@@ -190,6 +191,9 @@ if settings.COURSEWARE_ENABLED:
         url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/xblock/(?P<usage_id>[^/]*)/handler_noauth/(?P<handler>[^/]*)(?:/(?P<suffix>.*))?$',
             'courseware.module_render.handle_xblock_callback_noauth',
             name='xblock_handler_noauth'),
+        url(r'xblock/resource/(?P<block_type>[^/]+)/(?P<uri>.*)$',
+            'courseware.module_render.xblock_resource',
+            name='xblock_resource_url'),
 
         # Software Licenses
 
@@ -369,6 +373,19 @@ if settings.COURSEWARE_ENABLED and settings.FEATURES.get('ENABLE_INSTRUCTOR_BETA
 
         url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/instructor_dashboard/api/',
             include('instructor.views.api_urls'))
+    )
+
+if settings.FEATURES.get('CLASS_DASHBOARD'):
+    urlpatterns += (
+        # Json request data for metrics for entire course
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/all_sequential_open_distrib$',
+            'class_dashboard.views.all_sequential_open_distrib', name="all_sequential_open_distrib"),
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/all_problem_grade_distribution$',
+            'class_dashboard.views.all_problem_grade_distribution', name="all_problem_grade_distribution"),
+
+        # Json request data for metrics for particular section
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/problem_grade_distribution/(?P<section>\d+)$',
+            'class_dashboard.views.section_problem_grade_distrib', name="section_problem_grade_distrib"),
     )
 
 if settings.DEBUG or settings.FEATURES.get('ENABLE_DJANGO_ADMIN_SITE'):

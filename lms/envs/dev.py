@@ -298,6 +298,9 @@ WS_CONFIG = {
 ####################### Shoppingcart ###########################
 FEATURES['ENABLE_SHOPPING_CART'] = True
 
+### This enables the Metrics tab for the Instructor dashboard ###########
+FEATURES['CLASS_DASHBOARD'] = True
+
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 try:

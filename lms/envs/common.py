@@ -218,6 +218,20 @@ FEATURES = {
 
     # Turn off account locking if failed login attempts exceeds a limit
     'ENABLE_MAX_FAILED_LOGIN_ATTEMPTS': False,
+
+    # Hide any Personally Identifiable Information from application logs
+    'SQUELCH_PII_IN_LOGS': False,
+
+    # Toggle embargo functionality
+    'EMBARGO': False,
+
+    # Whether the Wiki subsystem should be accessible via the direct /wiki/ paths. Setting this to True means
+    # that people can submit content and modify the Wiki in any arbitrary manner. We're leaving this as True in the
+    # defaults, so that we maintain current behavior
+    'ALLOW_WIKI_ROOT_ACCESS': True,
+
+    # Turn on/off Microsites feature
+    'USE_MICROSITES': False,
 }
 
 # Used for A/B testing
@@ -255,6 +269,9 @@ node_paths = [
     system_node_path,
 ]
 NODE_PATH = ':'.join(node_paths)
+
+# For geolocation ip database
+GEOIP_PATH = REPO_ROOT / "common/static/data/geoip/GeoIP.dat"
 
 
 # Where to look for a status message
@@ -685,7 +702,7 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     'request_cache.middleware.RequestCache',
-    'microsite_configuration.middleware.MicrositeConfiguration',
+    'microsite_configuration.middleware.MicrositeMiddleware',
     'django_comment_client.middleware.AjaxExceptionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -706,6 +723,7 @@ MIDDLEWARE_CLASSES = (
 
     # Allows us to dark-launch particular languages
     'dark_lang.middleware.DarkLangMiddleware',
+    'embargo.middleware.EmbargoMiddleware',
 
     # Allows us to set user preferences
     # should be after DarkLangMiddleware
@@ -730,7 +748,13 @@ MIDDLEWARE_CLASSES = (
 
     # for expiring inactive sessions
     'session_inactivity_timeout.middleware.SessionInactivityTimeout',
+
+    # use Django built in clickjacking protection
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+# Clickjacking protection can be enabled by setting this to 'DENY'
+X_FRAME_OPTIONS = 'ALLOW'
 
 ############################### Pipeline #######################################
 
@@ -820,7 +844,7 @@ PIPELINE_CSS = {
     },
     'style-course-vendor': {
         'source_filenames': [
-            'js/vendor/CodeMirror/codemirror.css',
+            'js/vendor/CodeMirror/codemirror-3.21.0.css',
             'css/vendor/jquery.treeview.css',
             'css/vendor/ui-lightness/jquery-ui-1.8.22.custom.css',
         ],
@@ -1147,6 +1171,7 @@ INSTALLED_APPS = (
 
     # Cities UPEx
     'cities',
+    'embargo',
 )
 
 ######################### MARKETING SITE ###############################
@@ -1169,68 +1194,15 @@ MKTG_URL_LINK_MAP = {
 }
 
 
-############################### MICROSITES ################################
-def enable_microsites(microsite_config_dict, subdomain_branding, virtual_universities, microsites_root=ENV_ROOT / "microsites"):
-    """
-    Enable the use of microsites, which are websites that allow
-    for subdomains for the edX platform, e.g. foo.edx.org
-    """
-
-    if not microsite_config_dict:
-        return
-
-    FEATURES['USE_MICROSITES'] = True
-
-    for microsite_name in microsite_config_dict.keys():
-        # Calculate the location of the microsite's files
-        microsite_root = microsites_root / microsite_name
-        microsite_config = microsite_config_dict[microsite_name]
-
-        # pull in configuration information from each
-        # microsite root
-
-        if os.path.isdir(microsite_root):
-            # store the path on disk for later use
-            microsite_config['microsite_root'] = microsite_root
-
-            # get the domain that this should reside
-            domain = microsite_config['domain_prefix']
-
-            # get the virtual university that this should use
-            university = microsite_config['university']
-
-            # add to the existing maps in our settings
-            subdomain_branding[domain] = university
-            virtual_universities.append(university)
-
-            template_dir = microsite_root / 'templates'
-            microsite_config['template_dir'] = template_dir
-
-            microsite_config['microsite_name'] = microsite_name
-
-        else:
-            # not sure if we have application logging at this stage of
-            # startup
-            print '**** Error loading microsite {0}. Directory does not exist'.format(microsite_root)
-            # remove from our configuration as it is not valid
-            del microsite_config_dict[microsite_name]
-
-    # if we have microsites, then let's turn on SUBDOMAIN_BRANDING
-    # Note check size of the dict because some microsites might not be found on disk and
-    # we could be left with none
-    if microsite_config_dict:
-        FEATURES['SUBDOMAIN_BRANDING'] = True
-
-        TEMPLATE_DIRS.append(microsites_root)
-        MAKO_TEMPLATES['main'].append(microsites_root)
-
-        STATICFILES_DIRS.append(microsites_root)
-
-
 ################# Student Verification #################
 VERIFY_STUDENT = {
     "DAYS_GOOD_FOR": 365,  # How many days is a verficiation good for?
 }
+
+### This enables the Metrics tab for the Instructor dashboard ###########
+FEATURES['CLASS_DASHBOARD'] = False
+if FEATURES.get('CLASS_DASHBOARD'):
+    INSTALLED_APPS += ('class_dashboard',)
 
 ######################## CAS authentication ###########################
 
@@ -1274,6 +1246,9 @@ WS_CONFIG = {
     'method_query_title': "consultaTitulo",
     'identity': '1803550274'
     }
+########################## CERTIFICATE NAME ########################
+CERT_NAME_SHORT = "Certificate"
+CERT_NAME_LONG = "Certificate of Achievement"
 
 ###################### Grade Downloads ######################
 GRADES_DOWNLOAD_ROUTING_KEY = HIGH_MEM_QUEUE
@@ -1306,3 +1281,207 @@ LINKEDIN_API = {
 ##### ACCOUNT LOCKOUT DEFAULT PARAMETERS #####
 MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED = 5
 MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS = 15 * 60
+
+
+##### LMS DEADLINE DISPLAY TIME_ZONE #######
+TIME_ZONE_DISPLAYED_FOR_DEADLINES = 'UTC'
+
+
+# Source:
+# http://loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt according to http://en.wikipedia.org/wiki/ISO_639-1
+ALL_LANGUAGES = (
+    [u"aa", u"Afar"],
+    [u"ab", u"Abkhazian"],
+    [u"af", u"Afrikaans"],
+    [u"ak", u"Akan"],
+    [u"sq", u"Albanian"],
+    [u"am", u"Amharic"],
+    [u"ar", u"Arabic"],
+    [u"an", u"Aragonese"],
+    [u"hy", u"Armenian"],
+    [u"as", u"Assamese"],
+    [u"av", u"Avaric"],
+    [u"ae", u"Avestan"],
+    [u"ay", u"Aymara"],
+    [u"az", u"Azerbaijani"],
+    [u"ba", u"Bashkir"],
+    [u"bm", u"Bambara"],
+    [u"eu", u"Basque"],
+    [u"be", u"Belarusian"],
+    [u"bn", u"Bengali"],
+    [u"bh", u"Bihari languages"],
+    [u"bi", u"Bislama"],
+    [u"bs", u"Bosnian"],
+    [u"br", u"Breton"],
+    [u"bg", u"Bulgarian"],
+    [u"my", u"Burmese"],
+    [u"ca", u"Catalan; Valencian"],
+    [u"ch", u"Chamorro"],
+    [u"ce", u"Chechen"],
+    [u"zh", u"Chinese"],
+    [u"cu", u"Church Slavic; Old Slavonic; Church Slavonic; Old Bulgarian; Old Church Slavonic"],
+    [u"cv", u"Chuvash"],
+    [u"kw", u"Cornish"],
+    [u"co", u"Corsican"],
+    [u"cr", u"Cree"],
+    [u"cs", u"Czech"],
+    [u"da", u"Danish"],
+    [u"dv", u"Divehi; Dhivehi; Maldivian"],
+    [u"nl", u"Dutch; Flemish"],
+    [u"dz", u"Dzongkha"],
+    [u"en", u"English"],
+    [u"eo", u"Esperanto"],
+    [u"et", u"Estonian"],
+    [u"ee", u"Ewe"],
+    [u"fo", u"Faroese"],
+    [u"fj", u"Fijian"],
+    [u"fi", u"Finnish"],
+    [u"fr", u"French"],
+    [u"fy", u"Western Frisian"],
+    [u"ff", u"Fulah"],
+    [u"ka", u"Georgian"],
+    [u"de", u"German"],
+    [u"gd", u"Gaelic; Scottish Gaelic"],
+    [u"ga", u"Irish"],
+    [u"gl", u"Galician"],
+    [u"gv", u"Manx"],
+    [u"el", u"Greek, Modern (1453-)"],
+    [u"gn", u"Guarani"],
+    [u"gu", u"Gujarati"],
+    [u"ht", u"Haitian; Haitian Creole"],
+    [u"ha", u"Hausa"],
+    [u"he", u"Hebrew"],
+    [u"hz", u"Herero"],
+    [u"hi", u"Hindi"],
+    [u"ho", u"Hiri Motu"],
+    [u"hr", u"Croatian"],
+    [u"hu", u"Hungarian"],
+    [u"ig", u"Igbo"],
+    [u"is", u"Icelandic"],
+    [u"io", u"Ido"],
+    [u"ii", u"Sichuan Yi; Nuosu"],
+    [u"iu", u"Inuktitut"],
+    [u"ie", u"Interlingue; Occidental"],
+    [u"ia", u"Interlingua (International Auxiliary Language Association)"],
+    [u"id", u"Indonesian"],
+    [u"ik", u"Inupiaq"],
+    [u"it", u"Italian"],
+    [u"jv", u"Javanese"],
+    [u"ja", u"Japanese"],
+    [u"kl", u"Kalaallisut; Greenlandic"],
+    [u"kn", u"Kannada"],
+    [u"ks", u"Kashmiri"],
+    [u"kr", u"Kanuri"],
+    [u"kk", u"Kazakh"],
+    [u"km", u"Central Khmer"],
+    [u"ki", u"Kikuyu; Gikuyu"],
+    [u"rw", u"Kinyarwanda"],
+    [u"ky", u"Kirghiz; Kyrgyz"],
+    [u"kv", u"Komi"],
+    [u"kg", u"Kongo"],
+    [u"ko", u"Korean"],
+    [u"kj", u"Kuanyama; Kwanyama"],
+    [u"ku", u"Kurdish"],
+    [u"lo", u"Lao"],
+    [u"la", u"Latin"],
+    [u"lv", u"Latvian"],
+    [u"li", u"Limburgan; Limburger; Limburgish"],
+    [u"ln", u"Lingala"],
+    [u"lt", u"Lithuanian"],
+    [u"lb", u"Luxembourgish; Letzeburgesch"],
+    [u"lu", u"Luba-Katanga"],
+    [u"lg", u"Ganda"],
+    [u"mk", u"Macedonian"],
+    [u"mh", u"Marshallese"],
+    [u"ml", u"Malayalam"],
+    [u"mi", u"Maori"],
+    [u"mr", u"Marathi"],
+    [u"ms", u"Malay"],
+    [u"mg", u"Malagasy"],
+    [u"mt", u"Maltese"],
+    [u"mn", u"Mongolian"],
+    [u"na", u"Nauru"],
+    [u"nv", u"Navajo; Navaho"],
+    [u"nr", u"Ndebele, South; South Ndebele"],
+    [u"nd", u"Ndebele, North; North Ndebele"],
+    [u"ng", u"Ndonga"],
+    [u"ne", u"Nepali"],
+    [u"nn", u"Norwegian Nynorsk; Nynorsk, Norwegian"],
+    [u"nb", u"Bokmål, Norwegian; Norwegian Bokmål"],
+    [u"no", u"Norwegian"],
+    [u"ny", u"Chichewa; Chewa; Nyanja"],
+    [u"oc", u"Occitan (post 1500); Provençal"],
+    [u"oj", u"Ojibwa"],
+    [u"or", u"Oriya"],
+    [u"om", u"Oromo"],
+    [u"os", u"Ossetian; Ossetic"],
+    [u"pa", u"Panjabi; Punjabi"],
+    [u"fa", u"Persian"],
+    [u"pi", u"Pali"],
+    [u"pl", u"Polish"],
+    [u"pt", u"Portuguese"],
+    [u"ps", u"Pushto; Pashto"],
+    [u"qu", u"Quechua"],
+    [u"rm", u"Romansh"],
+    [u"ro", u"Romanian; Moldavian; Moldovan"],
+    [u"rn", u"Rundi"],
+    [u"ru", u"Russian"],
+    [u"sg", u"Sango"],
+    [u"sa", u"Sanskrit"],
+    [u"si", u"Sinhala; Sinhalese"],
+    [u"sk", u"Slovak"],
+    [u"sl", u"Slovenian"],
+    [u"se", u"Northern Sami"],
+    [u"sm", u"Samoan"],
+    [u"sn", u"Shona"],
+    [u"sd", u"Sindhi"],
+    [u"so", u"Somali"],
+    [u"st", u"Sotho, Southern"],
+    [u"es", u"Spanish; Castilian"],
+    [u"sc", u"Sardinian"],
+    [u"sr", u"Serbian"],
+    [u"ss", u"Swati"],
+    [u"su", u"Sundanese"],
+    [u"sw", u"Swahili"],
+    [u"sv", u"Swedish"],
+    [u"ty", u"Tahitian"],
+    [u"ta", u"Tamil"],
+    [u"tt", u"Tatar"],
+    [u"te", u"Telugu"],
+    [u"tg", u"Tajik"],
+    [u"tl", u"Tagalog"],
+    [u"th", u"Thai"],
+    [u"bo", u"Tibetan"],
+    [u"ti", u"Tigrinya"],
+    [u"to", u"Tonga (Tonga Islands)"],
+    [u"tn", u"Tswana"],
+    [u"ts", u"Tsonga"],
+    [u"tk", u"Turkmen"],
+    [u"tr", u"Turkish"],
+    [u"tw", u"Twi"],
+    [u"ug", u"Uighur; Uyghur"],
+    [u"uk", u"Ukrainian"],
+    [u"ur", u"Urdu"],
+    [u"uz", u"Uzbek"],
+    [u"ve", u"Venda"],
+    [u"vi", u"Vietnamese"],
+    [u"vo", u"Volapük"],
+    [u"cy", u"Welsh"],
+    [u"wa", u"Walloon"],
+    [u"wo", u"Wolof"],
+    [u"xh", u"Xhosa"],
+    [u"yi", u"Yiddish"],
+    [u"yo", u"Yoruba"],
+    [u"za", u"Zhuang; Chuang"],
+    [u"zu", u"Zulu"]
+)
+
+
+### JSdraw (only installed in some instances)
+
+try:
+    import edx_jsdraw
+except ImportError:
+    pass
+else:
+    INSTALLED_APPS += ('edx_jsdraw',)

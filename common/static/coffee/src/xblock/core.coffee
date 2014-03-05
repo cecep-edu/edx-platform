@@ -7,8 +7,9 @@
     runtime = $element.data("runtime-class")
     version = $element.data("runtime-version")
     initFnName = $element.data("init")
+    $element.prop('xblock_children', children)
     if runtime? and version? and initFnName?
-      runtime = new window[runtime]["v#{version}"](element, children)
+      runtime = new window[runtime]["v#{version}"]
       initFn = window[initFnName]
       block = initFn(runtime, element) ? {}
     else
@@ -21,6 +22,7 @@
 
     $element.trigger("xblock-initialized")
     $element.data("initialized", true)
+    $element.addClass("xblock-initialized")
     block
 
   initializeBlocks: (element) ->

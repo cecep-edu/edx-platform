@@ -13,6 +13,7 @@ Contents
 
    read_me
    change_log
+   accounts
    get_started
    create_new_course
    establish_grading_policy
@@ -40,8 +41,10 @@ Contents
    course_data
    course_enrollment
    course_staffing
+   beta_testing
    course_student
    course_grades
+   staff_debug_info
    glossary
 
 

@@ -25,10 +25,7 @@ class AcidView(PageObject):
         self.context_selector = context_selector
 
     def is_browser_on_page(self):
-        return (
-            self.is_css_present('{} .acid-block'.format(self.context_selector)) and
-            self.browser.evaluate_script("$({!r}).data('initialized')".format(self.context_selector))
-        )
+        return self.is_css_present('{}.xblock-initialized .acid-block'.format(self.context_selector))
 
     def test_passed(self, test_selector):
         """
@@ -45,11 +42,21 @@ class AcidView(PageObject):
         return self.test_passed('.js-init-run')
 
     @property
-    def doc_ready_passed(self):
+    def child_tests_passed(self):
         """
-        Whether the document-ready test passed in this view of the :class:`.AcidBlock`.
+        Whether the tests of children passed
         """
-        return self.test_passed('.document-ready-run')
+        return all([
+            self.test_passed('.child-counts-match'),
+            self.test_passed('.child-values-match')
+        ])
+
+    @property
+    def resource_url_passed(self):
+        """
+        Whether the resource-url test passed in this view of the :class:`.AcidBlock`.
+        """
+        return self.test_passed('.local-resource-test')
 
     def scope_passed(self, scope):
         return all(
