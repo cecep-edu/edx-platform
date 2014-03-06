@@ -279,7 +279,7 @@ STATICFILES_DIRS = [
 TIME_ZONE = 'America/Guayaquil'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 
 LANGUAGES = lms.envs.common.LANGUAGES
-LANGUAGE_CODE = 'es-ec'
+LANGUAGE_CODE = 'es-419'
 USE_I18N = True
 USE_L10N = True
 
