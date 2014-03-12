@@ -197,7 +197,7 @@ def get_course_about_section(course, section_key):
     elif section_key == "university":
         return course.display_org_with_default.encode('utf-8')
     elif section_key == "number":
-        return course.display_number_with_default
+        return course.display_number_with_default.encode('utf-8')
 
     raise KeyError("Invalid about key " + str(section_key))
 
