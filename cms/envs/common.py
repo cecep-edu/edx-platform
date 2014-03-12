@@ -24,6 +24,7 @@ Longer TODO:
 # want to import all variables from base settings files
 # pylint: disable=W0401, W0611, W0614
 
+import imp
 import sys
 import lms.envs.common
 from lms.envs.common import (
@@ -33,8 +34,6 @@ from path import path
 
 from lms.lib.xblock.mixin import LmsBlockMixin
 from cms.lib.xblock.mixin import CmsBlockMixin
-from xmodule.modulestore.inheritance import InheritanceMixin
-from xmodule.x_module import XModuleMixin, only_xmodules
 from dealer.git import git
 
 ############################ FEATURE CONFIGURATION #############################
@@ -218,19 +217,19 @@ X_FRAME_OPTIONS = 'ALLOW'
 
 ############# XBlock Configuration ##########
 
+# Import after sys.path fixup
+from xmodule.modulestore.inheritance import InheritanceMixin
+from xmodule.modulestore import prefer_xmodules
+from xmodule.x_module import XModuleMixin
+
 # This should be moved into an XBlock Runtime/Application object
 # once the responsibility of XBlock creation is moved out of modulestore - cpennington
 XBLOCK_MIXINS = (LmsBlockMixin, CmsBlockMixin, InheritanceMixin, XModuleMixin)
 
-# Only allow XModules in Studio
-XBLOCK_SELECT_FUNCTION = only_xmodules
-
-# Use the following lines to allow any xblock in Studio,
-# either by uncommenting them here, or adding them to your private.py
+# Allow any XBlock in Studio
 # You should also enable the ALLOW_ALL_ADVANCED_COMPONENTS feature flag, so that
 # xblocks can be added via advanced settings
-# from xmodule.x_module import prefer_xmodules
-# XBLOCK_SELECT_FUNCTION = prefer_xmodules
+XBLOCK_SELECT_FUNCTION = prefer_xmodules
 
 ############################ SIGNAL HANDLERS ################################
 # This is imported to register the exception signal handling that logs exceptions
@@ -301,7 +300,7 @@ PIPELINE_CSS = {
             'css/vendor/normalize.css',
             'css/vendor/font-awesome.css',
             'css/vendor/html5-input-polyfills/number-polyfill.css',
-            'js/vendor/CodeMirror/codemirror-3.21.0.css',
+            'js/vendor/CodeMirror/codemirror.css',
             'css/vendor/ui-lightness/jquery-ui-1.8.22.custom.css',
             'css/vendor/jquery.qtip.min.css',
             'js/vendor/markitup/skins/simple/style.css',
@@ -440,6 +439,8 @@ INSTALLED_APPS = (
 
     # Database-backed configuration
     'config_models',
+    # cities
+    'cities',
 
     # Monitor the status of services
     'service_status',
@@ -540,23 +541,44 @@ MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED = 5
 MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS = 15 * 60
 
 
-### JSdraw (only installed in some instances)
+### Apps only installed in some instances
 
-try:
-    import edx_jsdraw
-except ImportError:
-    pass
-else:
-    INSTALLED_APPS += ('edx_jsdraw',)
+OPTIONAL_APPS = (
+    'edx_jsdraw',
+    'mentoring',
+)
+
+for app_name in OPTIONAL_APPS:
+    # First attempt to only find the module rather than actually importing it,
+    # to avoid circular references - only try to import if it can't be found
+    # by find_module, which doesn't work with import hooks
+    try:
+        imp.find_module(app_name)
+    except ImportError:
+        try:
+            __import__(app_name)
+        except ImportError:
+            continue
+    INSTALLED_APPS += (app_name,)
+
+FEATURES['ENABLE_CREATOR_GROUP'] = True
+
+#sentry config
+RAVEN_CONFIG = {
+    'dsn': 'http://59734eda618a43afa2179d781549edeb:311de1f2e01247f284f3f72fbcd5844f@sentry.iaen.edu.ec:9000/3',
+}
+
+INSTALLED_APPS = INSTALLED_APPS + (
+    'raven.contrib.django.raven_compat',
+)
 
 # Years allowed range
 DELTA_YEAR = 12
-MAX_YEAR_ALLOWED = 70
+MAX_YEAR_ALLOWED = 70 
 
-### Sentry integration
-
-RAVEN_CONFIG = {
-    'dsn': 'https://59734eda618a43afa2179d781549edeb:311de1f2e01247f284f3f72fbcd5844f@sentry.iaen.edu.ec/3',
-}
-
-INSTALLED_APPS += ('raven.contrib.django.raven_compat',)
+ALLOWED_HOSTS = [
+    'beta.cms.iaen.edu.ec',
+    'beta.evex.iaen.edu.ec',
+    'upex.iaen.edu.ec',
+    'cms.iaen.edu.ec'
+    ]

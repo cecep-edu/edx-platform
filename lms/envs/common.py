@@ -26,6 +26,7 @@ Longer TODO:
 
 import sys
 import os
+import imp
 import json
 
 from path import path
@@ -33,8 +34,6 @@ from path import path
 from .discussionsettings import *
 
 from lms.lib.xblock.mixin import LmsBlockMixin
-from xmodule.modulestore.inheritance import InheritanceMixin
-from xmodule.x_module import XModuleMixin, only_xmodules
 
 ################################### FEATURES ###################################
 # The display name of the platform to be used in templates/emails/etc.
@@ -232,6 +231,10 @@ FEATURES = {
 
     # Turn on/off Microsites feature
     'USE_MICROSITES': False,
+
+    # Turn on third-party auth. Disabled for now because full implementations are not yet available. Remember to syncdb
+    # if you enable this; we don't create tables by default.
+    'ENABLE_THIRD_PARTY_AUTH': False,
 }
 
 # Used for A/B testing
@@ -431,17 +434,17 @@ DOC_STORE_CONFIG = {
 
 ############# XBlock Configuration ##########
 
+# Import after sys.path fixup
+from xmodule.modulestore.inheritance import InheritanceMixin
+from xmodule.modulestore import prefer_xmodules
+from xmodule.x_module import XModuleMixin
+
 # This should be moved into an XBlock Runtime/Application object
 # once the responsibility of XBlock creation is moved out of modulestore - cpennington
 XBLOCK_MIXINS = (LmsBlockMixin, InheritanceMixin, XModuleMixin)
 
-# Only allow XModules in the LMS
-XBLOCK_SELECT_FUNCTION = only_xmodules
-
-# Use the following lines to allow any xblock in the LMS,
-# either by uncommenting them here, or adding them to your private.py
-# from xmodule.x_module import prefer_xmodules
-# XBLOCK_SELECT_FUNCTION = prefer_xmodules
+# Allow any XBlock in the LMS
+XBLOCK_SELECT_FUNCTION = prefer_xmodules
 
 #################### Python sandbox ############################################
 
@@ -714,6 +717,10 @@ MIDDLEWARE_CLASSES = (
     'contentserver.middleware.StaticContentServer',
     'crum.CurrentRequestUserMiddleware',
 
+    # Adds user tags to tracking events
+    # Must go before TrackMiddleware, to get the context set up
+    'user_api.middleware.UserTagsEventContextMiddleware',
+
     'django.contrib.messages.middleware.MessageMiddleware',
     'track.middleware.TrackMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -844,7 +851,7 @@ PIPELINE_CSS = {
     },
     'style-course-vendor': {
         'source_filenames': [
-            'js/vendor/CodeMirror/codemirror-3.21.0.css',
+            'js/vendor/CodeMirror/codemirror.css',
             'css/vendor/jquery.treeview.css',
             'css/vendor/ui-lightness/jquery-ui-1.8.22.custom.css',
         ],
@@ -1077,6 +1084,8 @@ INSTALLED_APPS = (
 
     # Database-backed configuration
     'config_models',
+    #Cities EVEX
+    'cities',    
 
     # Monitor the status of services
     'service_status',
@@ -1250,6 +1259,20 @@ WS_CONFIG = {
 CERT_NAME_SHORT = "Certificate"
 CERT_NAME_LONG = "Certificate of Achievement"
 
+# Years allowed range
+DELTA_YEAR = 12
+MAX_YEAR_ALLOWED = 70
+
+########################## WS CONFIG ###########################
+
+WS_CONFIG = {
+    'ws_prod': "https://pru.bsg.gob.ec/sw/SENESCYT/BSGSW02_Consultar_TitPorCedula?wsdl",
+    'ws_auth': "https://www.bsg.gob.ec/sw/STI/BSGSW08_Acceder_BSG?wsdl",
+    'method_permission': "validarPermisoPeticion",
+    'method_query_title': "consultaTitulo",
+    'identity': '1803550274'
+    }
+
 ###################### Grade Downloads ######################
 GRADES_DOWNLOAD_ROUTING_KEY = HIGH_MEM_QUEUE
 
@@ -1277,6 +1300,7 @@ LINKEDIN_API = {
     'EMAIL_WHITELIST': [],
     'COMPANY_ID': '2746406',
 }
+
 
 ##### ACCOUNT LOCKOUT DEFAULT PARAMETERS #####
 MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED = 5
@@ -1477,19 +1501,38 @@ ALL_LANGUAGES = (
 )
 
 
-### JSdraw (only installed in some instances)
+### Apps only installed in some instances
+OPTIONAL_APPS = (
+    'edx_jsdraw',
+    'mentoring',
+)
 
-try:
-    import edx_jsdraw
-except ImportError:
-    pass
-else:
-    INSTALLED_APPS += ('edx_jsdraw',)
+for app_name in OPTIONAL_APPS:
+    # First attempt to only find the module rather than actually importing it,
+    # to avoid circular references - only try to import if it can't be found
+    # by find_module, which doesn't work with import hooks
+    try:
+        imp.find_module(app_name)
+    except ImportError:
+        try:
+            __import__(app_name)
+        except ImportError:
+            continue
+    INSTALLED_APPS += (app_name,)
+
+# Stub for third_party_auth options.
+# See common/djangoapps/third_party_auth/settings.py for configuration details.
+THIRD_PARTY_AUTH = {}
 
 ### Sentry integration
 
 RAVEN_CONFIG = {
-    'dsn': 'https://59734eda618a43afa2179d781549edeb:311de1f2e01247f284f3f72fbcd5844f@sentry.iaen.edu.ec/3',
+    'dsn': 'https://59734eda618a43afa2179d781549edeb:311de1f2e01247f284f3f72fbcd5844f@sentry.iaen.edu.ec:9000/3',
 }
 
 INSTALLED_APPS += ('raven.contrib.django.raven_compat',)
+
+# Years allowed range
+DELTA_YEAR = 12
+MAX_YEAR_ALLOWED = 70
+

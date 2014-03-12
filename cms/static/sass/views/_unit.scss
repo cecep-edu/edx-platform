@@ -1399,7 +1399,13 @@ body.unit .xblock-type-container {
 // UI: special case discussion, HTML xmodule styling
 
 body.unit .component {
-  .xmodule_DiscussionModule, .xmodule_HtmlModule {
+  .xmodule_DiscussionModule, .xmodule_HtmlModule, .xblock {
     margin-top: ($baseline*1.5);
+  }
+}
+
+body.unit .component.editing {
+  .xmodule_DiscussionModule, .xmodule_HtmlModule, .xblock {
+    margin-top: 0;
   }
 }

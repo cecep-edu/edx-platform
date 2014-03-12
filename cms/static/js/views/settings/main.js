@@ -75,6 +75,7 @@ var DetailsView = ValidatingView.extend({
 //        this.codeMirrorize(null, $('#course-overview')[0]);
 
 //        this.$el.find('#' + this.fieldToSelectorMap['short_description']).val(this.model.get('short_description'));
+
         this.$el.find('.current-course-introduction-video iframe').attr('src', this.model.videosourceSample());
         this.$el.find('#' + this.fieldToSelectorMap['intro_video']).val(this.model.get('intro_video') || '');
         if (this.model.has('intro_video')) {

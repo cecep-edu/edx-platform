@@ -28,7 +28,7 @@ from django.http import (HttpResponse, HttpResponseBadRequest, HttpResponseForbi
 from django.shortcuts import redirect
 from django_future.csrf import ensure_csrf_cookie
 from django.utils.http import cookie_date, base36_to_int
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, get_language
 from django.views.decorators.http import require_POST, require_GET
 
 from ratelimitbackend.exceptions import RateLimitException
@@ -43,7 +43,10 @@ from student.models import (
 )
 from student.forms import PasswordResetFormNoActive
 from student.firebase_token_generator import create_token
+from student.validators import validate_cedula
+
 from verify_student.models import SoftwareSecurePhotoVerification, MidcourseReverificationWindow
+from cities.models import City
 from certificates.models import CertificateStatuses, certificate_status_for_student
 from dark_lang.models import DarkLangConfig
 
@@ -349,6 +352,9 @@ def signin_user(request):
         # branding and allow that to process the login if it
         # is enabled and the header is in the request.
         return redirect(reverse('root'))
+    if settings.FEATURES.get('AUTH_USE_CAS'):
+        # If CAS is enabled, redirect auth handling to there
+        return redirect(reverse('cas-login'))
     if request.user.is_authenticated():
         return redirect(reverse('dashboard'))
 
@@ -492,6 +498,8 @@ def dashboard(request):
     # add in the default language if it's not in the list of released languages
     if settings.LANGUAGE_CODE not in language_options:
         language_options.append(settings.LANGUAGE_CODE)
+        # Re-alphabetize language options
+        language_options.sort()
 
     # try to get the prefered language for the user
     cur_lang_code = UserPreference.get_preference(request.user, LANGUAGE_KEY)
@@ -1028,6 +1036,9 @@ def _do_create_account(post_vars):
         profile.save()
     except Exception:
         log.exception("UserProfile creation failed for user {id}.".format(id=user.id))
+
+    UserPreference.set_preference(user, LANGUAGE_KEY, get_language())
+
     return (user, profile, registration)
 
 
@@ -1151,6 +1162,23 @@ def create_account(request, post_override=None):
             js['value'] = error_str[field_name]
             js['field'] = field_name
             return JsonResponse(js, status=400)
+
+    try:
+        validate_cedula(post_vars['cedula'])
+    except ValidationError:
+        js['value'] = _("A valid ID is required.").format(field=a)
+        js['field'] = 'cedula'
+        return HttpResponse(json.dumps(js))
+    
+    city = City.objects.get(id=post_vars['city_id'])
+    type_id = post_vars['type_id']
+    if type_id == 'cedula':
+        try:
+            validate_cedula(post_vars['cedula'])
+        except ValidationError:
+            js['value'] = _("A valid ID is required.").format(field=a)
+            js['field'] = 'cedula'
+            return HttpResponse(json.dumps(js))
 
     try:
         validate_email(post_vars['email'])
@@ -1765,3 +1793,4 @@ def token(request):
     newtoken = create_token(secret, custom_data)
     response = HttpResponse(newtoken, mimetype="text/plain")
     return response
+

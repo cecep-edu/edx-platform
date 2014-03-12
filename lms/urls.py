@@ -488,7 +488,12 @@ if settings.FEATURES.get('AUTOMATIC_AUTH_FOR_TESTING'):
         url(r'^auto_auth$', 'student.views.auto_auth'),
     )
 
-# Extra ajax calls
+# Third-party auth.
+if settings.FEATURES.get('ENABLE_THIRD_PARTY_AUTH'):
+    urlpatterns += (
+        url(r'', include('third_party_auth.urls')),
+    )
+#ajax call cites
 urlpatterns += (
     url(r'^city_lookup/$', 'cities.views.lookup_handler', name='lookup_handler'),
     url(r'^user_lookup/$', 'student.views.student_handler', name='student_handler')
