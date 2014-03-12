@@ -20,7 +20,6 @@ from xmodule.modulestore.locator import CourseLocator
 from django.utils.timezone import UTC
 
 
-
 log = logging.getLogger(__name__)
 
 

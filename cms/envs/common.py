@@ -63,7 +63,7 @@ FEATURES = {
 
     # If set to True, new Studio users won't be able to author courses unless
     # edX has explicitly added them to the course creator group.
-    'ENABLE_CREATOR_GROUP': True,
+    'ENABLE_CREATOR_GROUP': False,
 
     # whether to use password policy enforcement or not
     'ENFORCE_PASSWORD_POLICY': False,
@@ -275,7 +275,9 @@ STATICFILES_DIRS = [
 ]
 
 # Locale/Internationalization
+LANGUAGES = ( ('es_419', 'Spanish'), )
 TIME_ZONE = 'America/Guayaquil'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+LANGUAGE_CODE = 'es_419'  # http://www.i18nguy.com/unicode/language-identifiers.html
 
 LANGUAGES = lms.envs.common.LANGUAGES
 LANGUAGE_CODE = 'es-419'
@@ -486,8 +488,6 @@ INSTALLED_APPS = (
     'user_api',
     'django_openid_auth',
 
-    # Cities UPEx
-    'cities',
     'embargo',
 )
 
@@ -582,3 +582,4 @@ ALLOWED_HOSTS = [
     'upex.iaen.edu.ec',
     'cms.iaen.edu.ec'
     ]
+

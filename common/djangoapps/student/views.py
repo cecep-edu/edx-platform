@@ -84,10 +84,6 @@ from util.password_policy_validators import (
     validate_password_dictionary
 )
 
-from student.validators import validate_cedula
-from cities.models import City
-
-
 log = logging.getLogger("edx.student")
 AUDIT_LOG = logging.getLogger("audit")
 
@@ -1139,16 +1135,6 @@ def create_account(request, post_override=None):
             js['value'] = error_str[field_name]
             js['field'] = field_name
             return JsonResponse(js, status=400)
-    
-    city = City.objects.get(id=post_vars['city_id'])
-    type_id = post_vars['type_id']
-    if type_id == 'cedula':
-        try:
-            validate_cedula(post_vars['cedula'])
-        except ValidationError:
-            js['value'] = _("A valid ID is required.").format(field=a)
-            js['field'] = 'cedula'
-            return HttpResponse(json.dumps(js))        
 
         max_length = 75
         if field_name == 'username':
