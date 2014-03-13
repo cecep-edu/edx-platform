@@ -1,0 +1,3 @@
+[submodule "themes/standford"]
+	path = themes/standford
+	url = https://github.com/iaen-edu/upex-theme.git
