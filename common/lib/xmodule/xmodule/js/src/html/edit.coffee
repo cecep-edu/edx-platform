@@ -44,15 +44,17 @@ class @HTMLEditingDescriptor
       },
       # Disable visual aid on borderless table.
       visual:false,
+      plugins: "textcolor, link, image, codemirror",
+      codemirror: {
+        path: "#{baseUrl}/js/vendor/CodeMirror"
+      },
       # We may want to add "styleselect" when we collect all styles used throughout the LMS
-#      theme_modern_buttons1 : "formatselect,bold,italic,underline,|,bullist,numlist,outdent,indent,|,blockquote,wrapAsCode,|,link,unlink",
-#      theme_modern_toolbar_location : "top",
-#      theme_modern_toolbar_align : "left",
-#      theme_modern_statusbar_location : "none",
-#      theme_modern_resizing : true,
-#      theme_modern_blockformats : "p,pre,h1,h2,h3",
+      toolbar1: "formatselect | fontselect | bold italic underline forecolor | bullist numlist outdent indent",
+      toolbar2: "link unlink image | blockquote wrapAsCode code",
       width: '100%',
       height: '400px',
+      menubar: false,
+      statusbar: false,
       setup : @setupTinyMCE,
       # Cannot get access to tinyMCE Editor instance (for focusing) until after it is rendered.
       # The tinyMCE callback passes in the editor as a paramter.
@@ -81,14 +83,14 @@ class @HTMLEditingDescriptor
 
     @visualEditor = ed
     
-    ed.onExecCommand.add(@onExecCommandHandler)
+    ed.on('change', @changeHandler)
 
   # Intended to run after the "image" plugin is used so that static urls are set
   # correctly in the Visual editor immediately after command use.
-  onExecCommandHandler: (ed, cmd, ui, val) =>
-      if cmd == 'mceInsertContent' and val.match(/^<img/)
-        content = rewriteStaticLinks(ed.getContent(), '/static/', @base_asset_url)
-        ed.setContent(content)
+  changeHandler: (e) =>
+    if e.level and e.level.content and e.level.content.match(/<img src="\/static\//)
+      content = rewriteStaticLinks(e.target.getContent(), '/static/', @base_assset_url)
+      e.target.setContent(content)
 
   onSwitchEditor: (e) =>
     e.preventDefault();
