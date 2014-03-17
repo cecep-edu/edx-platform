@@ -18,9 +18,12 @@ class @HTMLEditingDescriptor
 
 #   This is a workaround for the fact that tinyMCE's baseURL property is not getting correctly set on AWS
 #   instances (like sandbox). It is not necessary to explicitly set baseURL when running locally.
-    tinyMCE.baseURL = "#{baseUrl}/js/vendor/tinymce"
+    tinyMCE.baseURL = "#{baseUrl}/js/vendor/tiny_mce"
+#   This is necessary for the LMS bulk e-mail acceptance test. In that particular scenario,
+#   tinyMCE incorrectly decides that the suffix should be "", which means it fails to load files.
+    tinyMCE.suffix = '.min'
     @tiny_mce_textarea = $(".tiny-mce", @element).tinymce({
-      script_url : "#{baseUrl}/js/vendor/tinymce/tinymce.min.js",
+      script_url : "#{baseUrl}/js/vendor/tiny_mce/tinymce.min.js",
       theme : "modern",
       skin: 'lightgray',
       schema: "html5",
@@ -42,12 +45,12 @@ class @HTMLEditingDescriptor
       # Disable visual aid on borderless table.
       visual:false,
       # We may want to add "styleselect" when we collect all styles used throughout the LMS
-      theme_advanced_buttons1 : "formatselect,fontselect,bold,italic,underline,forecolor,|,bullist,numlist,outdent,indent,|,link,unlink,image,|,blockquote,wrapAsCode",
-      theme_advanced_toolbar_location : "top",
-      theme_advanced_toolbar_align : "left",
-      theme_advanced_statusbar_location : "none",
-      theme_advanced_resizing : true,
-      theme_advanced_blockformats : "p,pre,h1,h2,h3",
+#      theme_modern_buttons1 : "formatselect,bold,italic,underline,|,bullist,numlist,outdent,indent,|,blockquote,wrapAsCode,|,link,unlink",
+#      theme_modern_toolbar_location : "top",
+#      theme_modern_toolbar_align : "left",
+#      theme_modern_statusbar_location : "none",
+#      theme_modern_resizing : true,
+#      theme_modern_blockformats : "p,pre,h1,h2,h3",
       width: '100%',
       height: '400px',
       setup : @setupTinyMCE,
@@ -65,7 +68,6 @@ class @HTMLEditingDescriptor
     @element.on('click', '.editor-tabs .tab', @onSwitchEditor)
 
   setupTinyMCE: (ed) =>
-    debugger
     ed.addButton('wrapAsCode', {
       title : 'Code',
       image : "#{baseUrl}/images/ico-tinymce-code.png",
