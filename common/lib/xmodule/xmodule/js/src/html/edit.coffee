@@ -18,9 +18,12 @@ class @HTMLEditingDescriptor
 
 #   This is a workaround for the fact that tinyMCE's baseURL property is not getting correctly set on AWS
 #   instances (like sandbox). It is not necessary to explicitly set baseURL when running locally.
-    tinyMCE.baseURL = "#{baseUrl}/js/vendor/tinymce"
+    tinyMCE.baseURL = "#{baseUrl}/js/vendor/tiny_mce"
+#   This is necessary for the LMS bulk e-mail acceptance test. In that particular scenario,
+#   tinyMCE incorrectly decides that the suffix should be "", which means it fails to load files.
+    tinyMCE.suffix = '.min'
     @tiny_mce_textarea = $(".tiny-mce", @element).tinymce({
-      script_url : "#{baseUrl}/js/vendor/tinymce/tinymce.min.js",
+      script_url : "#{baseUrl}/js/vendor/tiny_mce/tinymce.min.js",
       theme : "modern",
       skin: 'lightgray',
       schema: "html5",
@@ -41,15 +44,17 @@ class @HTMLEditingDescriptor
       },
       # Disable visual aid on borderless table.
       visual:false,
+      plugins: "textcolor, link, image, codemirror",
+      codemirror: {
+        path: "#{baseUrl}/js/vendor/CodeMirror"
+      },
       # We may want to add "styleselect" when we collect all styles used throughout the LMS
-      theme_advanced_buttons1 : "formatselect,fontselect,bold,italic,underline,forecolor,|,bullist,numlist,outdent,indent,|,link,unlink,image,|,blockquote,wrapAsCode",
-      theme_advanced_toolbar_location : "top",
-      theme_advanced_toolbar_align : "left",
-      theme_advanced_statusbar_location : "none",
-      theme_advanced_resizing : true,
-      theme_advanced_blockformats : "p,pre,h1,h2,h3",
+      toolbar1: "formatselect | fontselect | bold italic underline forecolor | bullist numlist outdent indent",
+      toolbar2: "link unlink image | blockquote wrapAsCode code",
       width: '100%',
       height: '400px',
+      menubar: false,
+      statusbar: false,
       setup : @setupTinyMCE,
       # Cannot get access to tinyMCE Editor instance (for focusing) until after it is rendered.
       # The tinyMCE callback passes in the editor as a paramter.
@@ -65,7 +70,6 @@ class @HTMLEditingDescriptor
     @element.on('click', '.editor-tabs .tab', @onSwitchEditor)
 
   setupTinyMCE: (ed) =>
-    debugger
     ed.addButton('wrapAsCode', {
       title : 'Code',
       image : "#{baseUrl}/images/ico-tinymce-code.png",
@@ -79,14 +83,14 @@ class @HTMLEditingDescriptor
 
     @visualEditor = ed
     
-    ed.onExecCommand.add(@onExecCommandHandler)
+    ed.on('change', @changeHandler)
 
   # Intended to run after the "image" plugin is used so that static urls are set
   # correctly in the Visual editor immediately after command use.
-  onExecCommandHandler: (ed, cmd, ui, val) =>
-      if cmd == 'mceInsertContent' and val.match(/^<img/)
-        content = rewriteStaticLinks(ed.getContent(), '/static/', @base_asset_url)
-        ed.setContent(content)
+  changeHandler: (e) =>
+    if e.level and e.level.content and e.level.content.match(/<img src="\/static\//)
+      content = rewriteStaticLinks(e.target.getContent(), '/static/', @base_assset_url)
+      e.target.setContent(content)
 
   onSwitchEditor: (e) =>
     e.preventDefault();
