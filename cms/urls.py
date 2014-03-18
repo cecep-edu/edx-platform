@@ -25,10 +25,6 @@ urlpatterns = patterns('',  # nopep8
     url(r'^xblock/resource/(?P<block_type>[^/]*)/(?P<uri>.*)$',
         'contentstore.views.xblock.xblock_resource', name='xblock_resource_url'),
 
-    url(r'^(?P<org>[^/]+)/(?P<course>[^/]+)/syllabus/(?P<name>[^/]+)$',
-        'contentstore.views.syllabus', name='syllabus'),
-
-
     # temporary landing page for a course
     url(r'^edge/(?P<org>[^/]+)/(?P<course>[^/]+)/course/(?P<coursename>[^/]+)$',
         'contentstore.views.landing', name='landing'),
