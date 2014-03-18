@@ -5,7 +5,7 @@ define(["js/views/baseview", "underscore", "gettext", "js/views/feedback_notific
             this.template = _.template($("#show-syllabus-tpl").text());
             this.listenTo(this.model, "change", this.render);
         },
-        tagName: "section",
+        tagName: "topics",
         className: "syllabus",
         events: {
             "click .edit": "editSyllabus",

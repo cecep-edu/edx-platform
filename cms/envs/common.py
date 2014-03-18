@@ -86,6 +86,9 @@ FEATURES = {
 
     # Turn on/off Microsites feature
     'USE_MICROSITES': False,
+
+    # Allow creating courses with non-ascii characters in the course id
+    'ALLOW_UNICODE_COURSE_ID': False,
 }
 ENABLE_JASMINE = False
 
@@ -561,8 +564,6 @@ for app_name in OPTIONAL_APPS:
             continue
     INSTALLED_APPS += (app_name,)
 
-FEATURES['ENABLE_CREATOR_GROUP'] = True
-
 #sentry config
 RAVEN_CONFIG = {
     'dsn': 'http://59734eda618a43afa2179d781549edeb:311de1f2e01247f284f3f72fbcd5844f@sentry.iaen.edu.ec:9000/3',
@@ -583,3 +584,4 @@ ALLOWED_HOSTS = [
     'cms.iaen.edu.ec'
     ]
 
+FEATURES['ENABLE_CREATOR_GROUP'] = True

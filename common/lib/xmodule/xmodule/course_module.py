@@ -179,7 +179,7 @@ class Syllabus(object):
     @lazy
     def table_of_contents(self):
         """
-        Accesses the syllabus table of contents (default name "toc.xml") at the URL self.book_url
+        Accesses the textbook's table of contents (default name "toc.xml") at the URL self.book_url
 
         Returns XML tree representation of the table of contents
         """
@@ -231,17 +231,17 @@ class Syllabus(object):
 
 class SyllabusList(List):
     def from_json(self, values):
-        syllabuses = []
+        syllabus = []
         for title, topic  in values:
             try:
-                syllabuses.append(Syllabus(title, topic))
+                syllabus.append(Syllabus(title, topic))
             except:
                 # If we can't get to S3 (e.g. on a train with no internet), don't break
                 # the rest of the courseware.
                 log.exception("Couldn't load syllabus ({0}, {1})".format(title, topic))
                 continue
 
-        return syllabuses
+        return syllabus
 
     def to_json(self, values):
         json_data = []
@@ -261,6 +261,20 @@ class UserPartitionList(List):
     """Special List class for listing UserPartitions"""
     def from_json(self, values):
         return [UserPartition.from_json(v) for v in values]
+
+class SyllabusList(List):
+    def from_json(self, values):
+        syllabuses = []
+        for title, topic  in values:
+            try:
+                syllabuses.append(Syllabus(title, topic))
+            except:
+                # If we can't get to S3 (e.g. on a train with no internet), don't break
+                # the rest of the courseware.
+                log.exception("Couldn't load syllabus ({0}, {1})".format(title, topic))
+                continue
+
+        return syllabuses
 
     def to_json(self, values):
         return [user_partition.to_json()

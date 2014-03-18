@@ -544,9 +544,11 @@ LANGUAGES = (
     ('en@lolcat', u'LOLCAT English'),  # LOLCAT English
     ('en@pirate', u'Pirate English'),  # Pirate English
     ('es-419', u'Español (Latinoamérica)'),  # Spanish (Latin America)
+    ('es-ar', u'Español (Argentina)'),  # Spanish (Argentina)
     ('es-ec', u'Español (Ecuador)'),  # Spanish (Ecuador)
     ('es-es', u'Español (España)'),  # Spanish (Spain)
     ('es-mx', u'Español (México)'),  # Spanish (Mexico)
+    ('es-pe', u'Español (Perú)'),  # Spanish (Peru)
     ('es-us', u'Español (Estados Unidos)'),  # Spanish (United States)
     ('et-ee', u'Eesti (Eesti)'),  # Estonian (Estonia)
     ('fa', u'فارسی'),  # Persian
@@ -556,6 +558,7 @@ LANGUAGES = (
     ('gl', u'Galego'),  # Galician
     ('he', u'עברית'),  # Hebrew
     ('hi', u'हिन्दी'),  # Hindi
+    ('hu', u'magyar'),  # Hungarian
     ('hy-am', u'Հայերէն (Հայաստանի Հանրապետութիւն)'),  # Armenian (Armenia)
     ('id', u'Bahasa Indonesia'),  # Indonesian
     ('it-it', u'Italiano (Italia)'),  # Italian (Italy)
@@ -564,7 +567,9 @@ LANGUAGES = (
     ('ko-kr', u'한국어(대한민국)'),  # Korean (Korea)
     ('lt-lt', u'Lietuvių (Lietuva)'),  # Lithuanian (Lithuania)
     ('ml', u'മലയാളം'),  # Malayalam
+    ('mn', u'Монгол хэл'),  # Mongolian
     ('nb', u'Norsk bokmål'),  # Norwegian Bokmål
+    ('ne', u'नेपाली'),  # Nepali
     ('nl-nl', u'Nederlands (Nederland)'),  # Dutch (Netherlands)
     ('pl', u'Polski'),  # Polish
     ('pt-br', u'Português (Brasil)'),  # Portuguese (Brazil)
@@ -1259,10 +1264,6 @@ WS_CONFIG = {
 CERT_NAME_SHORT = "Certificate"
 CERT_NAME_LONG = "Certificate of Achievement"
 
-# Years allowed range
-DELTA_YEAR = 12
-MAX_YEAR_ALLOWED = 70
-
 ########################## WS CONFIG ###########################
 
 WS_CONFIG = {
@@ -1535,4 +1536,3 @@ INSTALLED_APPS += ('raven.contrib.django.raven_compat',)
 # Years allowed range
 DELTA_YEAR = 12
 MAX_YEAR_ALLOWED = 70
-

@@ -55,6 +55,30 @@ var DetailsView = ValidatingView.extend({
         this.listenTo(this.model, 'invalid', this.handleValidationError);
         this.listenTo(this.model, 'change', this.showNotificationBar);
         this.selectorToField = _.invert(this.fieldToSelectorMap);
+        tinymce.init({
+            selector: "textarea#course-overview",
+            setup: function(editor){
+                editor.on("change", function(e){
+                    console.log("eventchange fired", e);
+                });
+            },
+            language: "es",
+            plugins: ["table"],
+            menu: {
+                file: {title: 'File', items: 'save'},
+                edit: {title: 'Edit', items: 'undo redo | cut copy paste | selectall'}, 
+                insert: {title: 'Insert', items: '|'}, 
+                view: {title: 'View', items: 'visualaid'}, 
+                format: {title: 'Format', items: 'bold italic underline strikethrough superscript subscript | formats | removeformat'}, 
+                table: {title: 'Table'}, 
+                tools: {title: 'Tools', items: 'inserttable'} 
+            },
+            toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | table",
+        });
+    },
+
+    changeOverview: function(editor){
+        console.log("editor changed: ");
     },
 
     render: function() {
@@ -76,6 +100,7 @@ var DetailsView = ValidatingView.extend({
 
         this.$el.find('#' + this.fieldToSelectorMap['short_description']).val(this.model.get('short_description'));
 
+//        this.codeMirrorize(null, $('#course-overview')[0]); #replaced by tinymce
         this.$el.find('.current-course-introduction-video iframe').attr('src', this.model.videosourceSample());
         this.$el.find('#' + this.fieldToSelectorMap['intro_video']).val(this.model.get('intro_video') || '');
         if (this.model.has('intro_video')) {

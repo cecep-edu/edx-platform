@@ -23,10 +23,12 @@ from courseware.access import has_access
 from courseware.courses import get_course_with_access, get_course_by_id
 from django.contrib.auth.models import User
 from django_comment_client.utils import has_forum_access
-from django_comment_common.models import (Role,
-                                          FORUM_ROLE_ADMINISTRATOR,
-                                          FORUM_ROLE_MODERATOR,
-                                          FORUM_ROLE_COMMUNITY_TA)
+from django_comment_common.models import (
+    Role,
+    FORUM_ROLE_ADMINISTRATOR,
+    FORUM_ROLE_MODERATOR,
+    FORUM_ROLE_COMMUNITY_TA,
+)
 
 from courseware.models import StudentModule
 from student.models import unique_id_for_user
@@ -281,7 +283,7 @@ def students_update_enrollment(request, course_id):
 @require_level('instructor')
 @common_exceptions_400
 @require_query_params(
-    email="user email",
+    unique_student_identifier="email or username of user to change access",
     rolename="'instructor', 'staff', or 'beta'",
     action="'allow' or 'revoke'"
 )
@@ -293,7 +295,7 @@ def modify_access(request, course_id):
     NOTE: instructors cannot remove their own instructor access.
 
     Query parameters:
-    email is the target users email
+    unique_student_identifer is the target user's username or email
     rolename is one of ['instructor', 'staff', 'beta']
     action is one of ['allow', 'revoke']
     """
@@ -301,7 +303,7 @@ def modify_access(request, course_id):
         request.user, course_id, 'instructor', depth=None
     )
 
-    email = strip_if_string(request.GET.get('email'))
+    user = get_student_from_identifier(request.GET.get('unique_student_identifier'))
     rolename = request.GET.get('rolename')
     action = request.GET.get('action')
 
@@ -309,8 +311,6 @@ def modify_access(request, course_id):
         return HttpResponseBadRequest(strip_tags(
             "unknown rolename '{}'".format(rolename)
         ))
-
-    user = User.objects.get(email=email)
 
     # disallow instructors from removing their own instructor access.
     if rolename == 'instructor' and user == request.user and action != 'allow':
@@ -328,7 +328,7 @@ def modify_access(request, course_id):
         ))
 
     response_payload = {
-        'email': email,
+        'unique_student_identifier': user.username,
         'rolename': rolename,
         'action': action,
         'success': 'yes',
