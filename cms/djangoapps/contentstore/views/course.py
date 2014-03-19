@@ -933,69 +933,6 @@ def assign_syllabus_id(syllabus, used_ids=()):
         tid = tid + random.choice(string.ascii_lowercase)
     return tid
 
-@require_http_methods(("GET", "POST", "PUT"))
-@login_required
-@ensure_csrf_cookie
-def syllabus_list_handler(request, tag=None, course_id=None, branch=None, version_guid=None, block=None):
-    """
-    A RESTful handler for syllabus collections.
-
-    GET
-        html: return syllabus list page (Backbone application)
-        json: return JSON representation of all syllabus in this course
-    POST
-        json: create a new syllabus for this course
-    PUT
-        json: overwrite all syllabus in the course with the given list
-    """
-    locator, course = _get_locator_and_course(
-        course_id, branch, version_guid, block, request.user
-    )
-    store = get_modulestore(course.location)
-
-
-    # from here on down, we know the client has requested JSON
-    if request.method == 'GET':
-        return JsonResponse(course.topic_syllabuses)
-    elif request.method == 'PUT':
-        try:
-            syllabuses = validate_syllabuses_json(request.body)
-        except SyllabusValidationError as err:
-            return JsonResponse({"error": err.message}, status=400)
-
-        tids = set(t["id"] for t in syllabuses if "id" in t)
-        for syllabus in syllabuses:
-            if not "id" in syllabus:
-                tid = assign_syllabus_id(syllabus, tids)
-                syllabus["id"] = tid
-                tids.add(tid)
-
-        if not any(tab['type'] == 'topic_syllabuses' for tab in course.tabs):
-            course.tabs.append({"type": "topic_syllabuses"})
-        course.topic_syllabuses = syllabuses
-        store.update_item(course, request.user.id)
-        return JsonResponse(course.topic_syllabuses)
-    elif request.method == 'POST':
-        # create a new syllabus for the course
-        try:
-            syllabus = validate_syllabus_json(request.body)
-        except SyllabusValidationError as err:
-            return JsonResponse({"error": err.message}, status=400)
-        if not syllabus.get("id"):
-            tids = set(t["id"] for t in course.topic_syllabuses if "id" in t)
-            syllabus["id"] = assign_syllabus_id(syllabus, tids)
-        existing = course.topic_syllabuses
-        existing.append(syllabus)
-        course.topic_syllabuses = existing
-        if not any(tab['type'] == 'topic_syllabuses' for tab in course.tabs):
-            tabs = course.tabs
-            tabs.append({"type": "topic_syllabuses"})
-            course.tabs = tabs
-        store.update_item(course, request.user.id)
-        resp = JsonResponse(syllabus, status=201)
-        resp["Location"] = locator.url_reverse('syllabuses', syllabus["id"])
-        return resp
-
 
 @require_http_methods(("GET", "POST", "PUT"))
 @login_required
@@ -1073,7 +1010,7 @@ def textbooks_list_handler(request, tag=None, package_id=None, branch=None, vers
 @login_required
 @ensure_csrf_cookie
 @require_http_methods(("GET", "POST", "PUT", "DELETE"))
-def syllabus_detail_handler(request, tid, tag=None, course_id=None, branch=None, version_guid=None, block=None):
+def syllabus_detail_handler(request, tid, tag=None, package_id=None, branch=None, version_guid=None, block=None):
     """
     JSON API endpoint for manipulating a syllabus via its internal ID.
     Used by the Backbone application.
@@ -1086,70 +1023,7 @@ def syllabus_detail_handler(request, tid, tag=None, course_id=None, branch=None,
         json: remove syllabus
     """
     __, course = _get_locator_and_course(
-        course_id, branch, version_guid, block, request.user
-    )
-    store = get_modulestore(course.location)
-    matching_id = [tb for tb in course.topic_syllabuses
-                   if str(tb.get("id")) == str(tid)]
-    if matching_id:
-        syllabus = matching_id[0]
-    else:
-        syllabus = None
-
-    if request.method == 'GET':
-        if not syllabus:
-            return JsonResponse(status=404)
-        return JsonResponse(syllabus)
-    elif request.method in ('POST', 'PUT'):  # can be either and sometimes
-                                        # django is rewriting one to the other
-        try:
-            new_syllabus = validate_syllabus_json(request.body)
-        except SyllabusValidationError as err:
-            return JsonResponse({"error": err.message}, status=400)
-        new_syllabus["id"] = tid
-        if syllabus:
-            i = course.topic_syllabuses.index(syllabus)
-            new_syllabuses = course.topic_syllabuses[0:i]
-            new_syllabuses.append(new_syllabus)
-            new_syllabuses.extend(course.topic_syllabuses[i + 1:])
-            course.topic_syllabuses = new_syllabuses
-        else:
-            course.topic_syllabuses.append(new_syllabus)
-        store.update_metadata(
-            course.location,
-            own_metadata(course)
-        )
-        return JsonResponse(new_syllabus, status=201)
-    elif request.method == 'DELETE':
-        if not syllabus:
-            return JsonResponse(status=404)
-        i = course.topic_syllabuses.index(syllabus)
-        new_syllabuses = course.topic_syllabuses[0:i]
-        new_syllabuses.extend(course.topic_syllabuses[i + 1:])
-        course.topic_syllabuses = new_syllabuses
-        store.update_metadata(
-            course.location,
-            own_metadata(course)
-        )
-        return JsonResponse()
-
-@login_required
-@ensure_csrf_cookie
-@require_http_methods(("GET", "POST", "PUT", "DELETE"))
-def syllabus_detail_handler(request, tid, tag=None, course_id=None, branch=None, version_guid=None, block=None):
-    """
-    JSON API endpoint for manipulating a syllabus via its internal ID.
-    Used by the Backbone application.
-
-    GET
-        json: return JSON representation of syllabus
-    POST or PUT
-        json: update syllabus based on provided information
-    DELETE
-        json: remove syllabus
-    """
-    __, course = _get_locator_and_course(
-        course_id, branch, version_guid, block, request.user
+        package_id, branch, version_guid, block, request.user
     )
     store = get_modulestore(course.location)
     matching_id = [tb for tb in course.topic_syllabuses
@@ -1189,6 +1063,7 @@ def syllabus_detail_handler(request, tid, tag=None, course_id=None, branch=None,
         course.topic_syllabuses = new_syllabuses
         store.update_item(course, request.user.id)
         return JsonResponse()
+
 
 @login_required
 @ensure_csrf_cookie
