@@ -43,7 +43,6 @@ from student.models import (
 )
 from student.forms import PasswordResetFormNoActive
 from student.firebase_token_generator import create_token
-from student.validators import validate_cedula
 
 from verify_student.models import SoftwareSecurePhotoVerification, MidcourseReverificationWindow
 from student.validators import validate_cedula
@@ -1149,47 +1148,6 @@ def create_account(request, post_override=None):
             js['value'] = error_str[field_name]
             js['field'] = field_name
             return JsonResponse(js, status=400)
-    
-    city = City.objects.get(id=post_vars['city_id'])
-    type_id = post_vars['type_id']
-    if type_id == 'cedula':
-        try:
-            validate_cedula(post_vars['cedula'])
-        except ValidationError:
-            js['value'] = _("A valid ID is required.").format(field=a)
-            js['field'] = 'cedula'
-            return HttpResponse(json.dumps(js))
-
-    try:
-        validate_cedula(post_vars['cedula'])
-    except ValidationError:
-        js['value'] = _("A valid ID is required.").format(field=a)
-        js['field'] = 'cedula'
-        return HttpResponse(json.dumps(js))
-    
-    city = City.objects.get(id=post_vars['city_id'])
-    type_id = post_vars['type_id']
-    if type_id == 'cedula':
-        try:
-            validate_cedula(post_vars['cedula'])
-        except ValidationError:
-            js['value'] = _("A valid ID is required.").format(field=a)
-            js['field'] = 'cedula'
-            return HttpResponse(json.dumps(js))
-
-    try:
-        validate_cedula(post_vars['cedula'])
-    except ValidationError:
-        js['value'] = _("A valid ID is required.").format(field=a)
-        js['field'] = 'cedula'
-        return HttpResponse(json.dumps(js))
-
-    try:
-        validate_cedula(post_vars['cedula'])
-    except ValidationError:
-        js['value'] = _("A valid ID is required.").format(field=a)
-        js['field'] = 'cedula'
-        return HttpResponse(json.dumps(js))
     
     city = City.objects.get(id=post_vars['city_id'])
     type_id = post_vars['type_id']
