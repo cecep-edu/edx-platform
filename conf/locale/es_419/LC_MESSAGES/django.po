@@ -11565,7 +11565,7 @@ msgstr "Ubicación"
 
 #: cms/templates/register.html
 msgid "I agree to the {a_start} Terms of Service {a_end}"
-msgstr ""
+msgstr "Acepto los {a_start} Términos de Referencia {a_end}"
 
 #: cms/templates/register.html
 msgid "Create My Account &amp; Start Authoring Courses"
