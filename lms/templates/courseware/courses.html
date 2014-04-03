@@ -23,13 +23,13 @@
       <hgroup>
         <div class="logo">
           % if self.stanford_theme_enabled():
-            <img src="${static.url('themes/stanford/images/seal.png')}" alt="Stanford Seal Logo" />
+            <img src="${static.url('themes/stanford/images/stanford-S-logo.png')}" alt="Stanford Seal Logo" />
           % else:
             <img src='${logo_file}' alt="${microsite.get_value('platform_name', settings.PLATFORM_NAME)} Logo" />
           % endif
         </div>
         % if self.stanford_theme_enabled():
-          <h2>${_("Explore free courses from {university_name}.").format(university_name="Stanford University")}</h2>
+          <h2>${_("Explore free courses from {university_name}.").format(university_name="Universidad de Posgrados del Estado")}</h2>
         % else:
           <h2>${course_index_overlay_text}</h2>
         % endif
