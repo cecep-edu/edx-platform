@@ -43,7 +43,7 @@
             </div>
 
             <div class="field required select" id="type-id">
-              <label for="type_id">${_("Tipo de Identificación")}</label>
+              <label for="type_id">${_(u"Tipo de Identificación")}</label>
               <select id="type-id" name="type_id">
                 <option value="cedula">CEDULA</option>
                 <option value="pasaporte">PASAPORTE</option>
@@ -51,7 +51,7 @@
             </div>
 
             <li class="field required text" id="field-cedula">
-              <label for="name">${_('Cédula / Pasaporte')}</label>
+              <label for="name">${_(u'Cédula / Pasaporte')}</label>
               <input id="cedula" type="text" name="cedula" value="" placeholder="${_('example: 0102030405')}" required aria-required="true" aria-describedby="cedula-tip"/>
               <span class="tip tip-input" id="cedula-tip">${_("No ingresar caracteres especiales")}</span>
             </li>
@@ -78,7 +78,7 @@
             <li class="field checkbox required" id="field-tos">
               <input id="tos" name="terms_of_service" type="checkbox" value="true" />
               <label for="tos">
-                ${_("Acepto los {a_start} Términos del Servicio {a_end}").format(a_start='<a data-rel="edx.org" href="{}">'.format(marketing_link('TOS')), a_end="</a>")}
+                ${_(u"Acepto los {a_start} Términos del Servicio {a_end}").format(a_start='<a data-rel="edx.org" href="{}">'.format(marketing_link('TOS')), a_end="</a>")}
               </label>
             </li>
           </ol>

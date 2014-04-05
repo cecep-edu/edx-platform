@@ -210,7 +210,7 @@ class UserProfile(models.Model):
     # ('p_oth', 'Doctorate in another field'),
     LEVEL_OF_EDUCATION_CHOICES = (
         ('p', ugettext_noop('Doctorado')),
-        ('m', ugettext_noop("Master o Título Profesional")),
+        ('m', ugettext_noop("Master o Titulo Profesional")),
         ('b', ugettext_noop("Bachiller")),
         ('a', ugettext_noop("Associate's degree")),
         ('hs', ugettext_noop("Secuandaria")),

@@ -133,11 +133,11 @@
           <li class="field required text" id="field-username">
             <label for="username">${_('Public Username')}</label>
             <input id="username" type="text" name="username" value="" placeholder="${_('example: JaneDoe')}" required aria-required="true" aria-describedby="username-tip"/>
-            <span class="tip tip-input" id="username-tip">${_('Will be shown in any discussions or forums you participate in')} <strong>(${_('cannot be changed later')}) (${_('Estan permitidos solo números y letras')})</strong></span>
+            <span class="tip tip-input" id="username-tip">${_('Will be shown in any discussions or forums you participate in')} <strong>(${_('cannot be changed later')}) (${_(u'Estan permitidos solo números y letras')})</strong></span>
           </li>
           <li class="field-group" id="field-cedula">
             <div class="field required select" id="type-id">
-              <label for="type_id">${_("Tipo de Identificación")}</label>
+              <label for="type_id">${_(u"Tipo de Identificación")}</label>
               <select id="type-id" name="type_id">
                 <option value="cedula">CEDULA</option>
                 <option value="pasaporte">PASAPORTE</option>
@@ -146,7 +146,7 @@
           </li>
           <li class="field-group">
             <div class="field required text" id="field-cedula">
-              <label for="cedula-label">${_('Cédula / Pasaporte')}</label>
+              <label for="cedula-label">${_(u'Cédula / Pasaporte')}</label>
               <input id="cedula" type="text" name="cedula" value="" placeholder="${_('example: 0102030405')}" required aria-required="true" aria-describedby="cedula-tip"/>
               <span class="tip tip-input" id="cedula-tip">${_("No ingresar caracteres especiales")}</span>
             </div>
