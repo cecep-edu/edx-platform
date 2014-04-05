@@ -213,7 +213,7 @@ class UserProfile(models.Model):
         ('m', ugettext_noop("Master o Titulo Profesional")),
         ('b', ugettext_noop("Bachiller")),
         ('a', ugettext_noop("Associate's degree")),
-        ('hs', ugettext_noop("Secuandaria")),
+        ('hs', ugettext_noop("Secundaria")),
         ('jhs', ugettext_noop("Junior secondary/junior high/middle school")),
         ('el', ugettext_noop("Primaria")),
         # Translators: 'None' refers to the student's level of education
