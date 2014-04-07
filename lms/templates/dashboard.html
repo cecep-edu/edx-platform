@@ -420,9 +420,9 @@
           <div class="input-group">
             ## Translators: note that {platform} {cert_name_short} will look something like: "edX certificate". Please do not change the order of these placeholders.
             <label>${_("Enter your desired full name, as it will appear on your {platform} {cert_name_short}:").format(platform=settings.PLATFORM_NAME, cert_name_short=cert_name_short)}</label>
-            <input id="new_name_field" value="" type="text" />
+            <input id="new_name_field" value="" type="text" maxlength="128"/>
             <label>${_("Reason for name change:")}</label>
-            <textarea id="name_rationale_field" value=""></textarea>
+            <textarea id="name_rationale_field" value="" maxlength="300"></textarea>
           </div>
           <div class="submit">
             <input type="submit" id="submit" value="${_('Change My Name')}">
