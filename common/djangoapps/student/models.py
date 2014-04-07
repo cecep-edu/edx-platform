@@ -195,10 +195,10 @@ class UserProfile(models.Model):
 
     year_of_birth = models.IntegerField(blank=True, null=True, db_index=True)
     GENDER_CHOICES = (
-        ('m', ugettext_noop('Male')),
-        ('f', ugettext_noop('Female')),
+        ('m', ugettext_noop('Masculino')),
+        ('f', ugettext_noop('Femenino')),
         # Translators: 'Other' refers to the student's gender
-        ('o', ugettext_noop('Other'))
+        ('o', ugettext_noop('Otro'))
     )
     gender = models.CharField(
         blank=True, null=True, max_length=6, db_index=True, choices=GENDER_CHOICES
