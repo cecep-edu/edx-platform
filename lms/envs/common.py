@@ -495,7 +495,10 @@ ALLOWED_HOSTS = [
     'beta.cms.iaen.edu.ec',
     'beta.evex.iaen.edu.ec',
     'upex.iaen.edu.ec',
-    'cms.iaen.edu.ec'
+    'cms.iaen.edu.ec',
+    'iaen.edu.ec',
+    'gmail.com',
+    'yahoo.com',
     ]
 
 # Platform Email
@@ -1237,8 +1240,8 @@ if FEATURES.get('AUTH_USE_CAS'):
 # - 'hidden': to not display the field
 
 REGISTRATION_EXTRA_FIELDS = {
-    'level_of_education': 'optional',
-    'gender': 'optional',
+    'level_of_education': 'required',
+    'gender': 'required',
     'year_of_birth': 'optional',
     'mailing_address': 'optional',
     'goals': 'optional',
@@ -1528,7 +1531,7 @@ THIRD_PARTY_AUTH = {}
 ### Sentry integration
 
 RAVEN_CONFIG = {
-    'dsn': 'https://59734eda618a43afa2179d781549edeb:311de1f2e01247f284f3f72fbcd5844f@sentry.iaen.edu.ec:9000/3',
+    'dsn': 'https://59734eda618a43afa2179d781549edeb:311de1f2e01247f284f3f72fbcd5844f@sentry.iaen.edu.ec/3',
 }
 
 INSTALLED_APPS += ('raven.contrib.django.raven_compat',)

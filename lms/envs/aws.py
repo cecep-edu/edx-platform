@@ -194,6 +194,12 @@ BULK_EMAIL_ROUTING_KEY = HIGH_PRIORITY_QUEUE
 
 # Theme overrides
 THEME_NAME = ENV_TOKENS.get('THEME_NAME', None)
+if (THEME_NAME is not None) and (THEME_NAME is not u''):
+    # Calculate the location of the theme's files
+    theme_root = CONFIG_ROOT / "themes" / THEME_NAME
+    TEMPLATE_DIRS.insert(0, theme_root / 'templates')
+    MAKO_TEMPLATES['main'].insert(0, theme_root / 'templates')
+    STATICFILES_DIRS.insert(0,( theme_root / 'static'))
 
 # Marketing link overrides
 MKTG_URL_LINK_MAP.update(ENV_TOKENS.get('MKTG_URL_LINK_MAP', {}))
