@@ -372,9 +372,9 @@
         <fieldset>
           <div class="input-group">
             <label>${_('Please enter your new email address:')}</label>
-            <input id="new_email_field" type="email" value="" />
+            <input id="new_email_field" type="email" value="" maxlength="50"/>
             <label>${_('Please confirm your password:')}</label>
-            <input id="new_email_password" value="" type="password" />
+            <input id="new_email_password" value="" type="password" maxlength="30"/>
           </div>
           <section>
             <p>${_('We will send a confirmation to both {email} and your new email as part of the process.').format(email=user.email)}</p>
