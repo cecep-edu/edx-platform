@@ -17,6 +17,32 @@
 %>
 
 <section class="home">
+   
+  <section id="slideshow">
+      <div class="html_carousel">
+       <div id="slider">
+              <div class="slide">
+                  <img src="${static.url('themes/stanford/images/sliderimage1.jpg')}"/>
+              </div>
+              
+              <div class="slide">
+                  <img src="${static.url('themes/stanford/images/sliderimage2.jpg')}"/>
+              </div>
+              
+              <div class="slide">
+                   <img src="${static.url('themes/stanford/images/sliderimage3.jpg')}"/>
+              </div>
+              
+              <div class="slide">
+                   <img src="${static.url('themes/stanford/images/sliderimage4.jpg')}"/>
+              </div>
+  
+       </div>         
+      </div>
+    </section>
+      
+
+
   <header>
     <div class="outer-wrapper">
       <div class="title">
@@ -67,8 +93,8 @@
       % endif
     </div>
   </header>
-  <section class="container">
-    <p class="titulo">Cursos</p>
+  <section class="container">  
+    
     <section class="highlighted-courses">
 
       % if settings.FEATURES.get('COURSES_ARE_BROWSABLE'):
@@ -88,8 +114,6 @@
 </section>
 ## contenido del nuevo cuerpo
 <div id="contenido">
-  <p>Nuestros Servicios</p>
-
   <div id="contenido-interno">
     <img src="${static.url('themes/stanford/images/diseno.png')}"  alt="UPEx" width="400" height="300" />
     <img src="${static.url('themes/stanford/images/multimedia.png')}" alt="upex_ec"width="400" height="300"/>
@@ -104,7 +128,7 @@
     <%
       youtube_video_id = homepage_promo_video_youtube_id
       if self.stanford_theme_enabled():
-        youtube_video_id = "YY0tklUDXG0"
+        youtube_video_id = "2m5zbShDcDA"
     %>
     <iframe width="640" height="360" src="//www.youtube.com/embed/${youtube_video_id}?showinfo=0" frameborder="0" allowfullscreen></iframe>
   </div>
@@ -127,3 +151,20 @@
   $(window).load(function() {$('#signup_action').trigger("click");});
 </script>
 % endif
+
+## script del slider------------->
+<script type="text/javascript">
+    $("#slider").carouFredSel({
+    responsive  : true,
+    scroll    : {
+      fx      : "crossfade",
+      easing    : "swing",
+      duration  : 800
+      },
+    items   : {
+      visible   : 1,
+      height    : "30%"
+      }
+    });
+</script>
+##<----------------------------->
