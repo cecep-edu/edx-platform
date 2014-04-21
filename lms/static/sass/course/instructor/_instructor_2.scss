@@ -292,7 +292,7 @@ section.instructor-dashboard-content-2 {
     margin-right: 0;
   }
 
-  .batch-enrollment {
+  .batch-enrollment, .batch-beta-testers {
     textarea {
       margin-top: 0.2em;
       height: auto;
@@ -323,7 +323,7 @@ section.instructor-dashboard-content-2 {
   }
 
   .enroll-option {
-    margin-bottom: ($baseline/2);
+    margin: ($baseline/2) 0;
     position: relative;
 
       label {
@@ -339,6 +339,7 @@ section.instructor-dashboard-content-2 {
       padding: ($baseline/2);
       width: 50%;
       background-color: $light-gray;
+      box-shadow: 2px 2px 3px $shadow;
 
       .hint-caret {
         display: block;
@@ -357,8 +358,18 @@ section.instructor-dashboard-content-2 {
     display: block;
   }
 
+  label[for="auto-enroll-beta"]:hover + .auto-enroll-beta-hint {
+    width: 30%;
+    display: block;
+  }
+
 
   label[for="email-students"]:hover + .email-students-hint {
+    display: block;
+  }
+
+  label[for="email-students-beta"]:hover + .email-students-beta-hint {
+    width: 30%;
     display: block;
   }
 
@@ -467,7 +478,7 @@ section.instructor-dashboard-content-2 {
         color: $lighter-base-font-color;
         cursor: pointer;
 
-        &:hover {
+        &:hover, &:focus {
           color: $alert-color;
         }
       }
@@ -549,57 +560,131 @@ section.instructor-dashboard-content-2 {
     float: left;
     clear: both;
     margin-top: 25px;
-  }
-  .metrics-left {
-    position: relative;
-    width: 30%;
-    height: 640px;
-    float: left;
-    margin-right: 2.5%;
-  }
-  .metrics-left svg {
-	width: 100%;
-  }
-  .metrics-right {
-    position: relative;
-    width: 65%;
-    height: 295px;
-    float: left;
-    margin-left: 2.5%;
-    margin-bottom: 25px;
-  }
-  .metrics-right svg {
-	width: 100%;
-  }
-
-  .metrics-tooltip {
-    width: 250px;
-    background-color: lightgray;
-    padding: 3px;
-  }
-
-  .stacked-bar-graph-legend {
-    fill: white;
-  }
-
-  p.loading {
-    padding-top: 100px;
-    text-align: center;
-  }
-
-  p.nothing {
-    padding-top: 25px;
-  }
-
-  h3.attention {
-    padding: 10px;
-    border: 1px solid #999;
-    border-radius: 5px;
-    margin-top: 25px;
-  }
-
-  input#graph_reload {
-    display: none;
+  
+    .metrics-left {
+      position: relative;
+      width: 30%;
+      height: 640px;
+      float: left;
+      margin-right: 2.5%;
+    
+      svg {
+        width: 100%;
+      }
+    }
+    .metrics-right {
+      position: relative;
+      width: 65%;
+      height: 295px;
+      float: left;
+      margin-left: 2.5%;
+      margin-bottom: 25px;
+	    
+      svg {
+        width: 100%;
+      }
+    }
+          
+    svg {
+      .stacked-bar {
+        cursor: pointer;
+      }
+    }
+	
+    .metrics-tooltip {
+      width: 250px;
+      background-color: lightgray;
+      padding: 3px;
+    }
+	
+    .metrics-overlay {
+      position: absolute; 
+      top: 0; 
+      right: 0; 
+      bottom: 0; 
+      left: 0; 
+      background-color: rgba(255,255,255, .75); 
+      display: none;
+	    
+      .metrics-overlay-content-wrapper {
+        position: relative;
+        display: block;
+        height: 475px;
+        width: 85%;
+        margin: 5%;
+        background-color: #fff;
+        border: 1px solid #000;
+        border-radius: 25px;
+        padding: 2.5%;
+              
+        .metrics-overlay-title {
+          display: block;
+          height: 50px;
+          margin-bottom: 10px;
+          font-weight: bold;
+        }
+              
+        .metrics-overlay-content {
+          width: 100%;
+          height: 370px;
+          overflow: auto;
+          border: 1px solid #000;
+              
+          table {
+            width: 100%;
+                  
+            .header {
+              background-color: #ddd;
+            }
+            th, td {
+              padding: 10px;
+            }
+          }
+        }
+        
+        .overflow-message {
+          padding-top: 20px;
+        }
+              
+        .download-csv {
+          position: absolute;
+          display: none;
+          right: 2%;
+          bottom: 2%;
+        }
+              
+        .close-button {
+          position: absolute;
+          right: 1.5%;
+          top: 2%;
+          font-size: 2em;
+        }
+      }
+    }
+	
+    .stacked-bar-graph-legend {
+      fill: white;
+    }
+	
+    p.loading {
+      padding-top: 100px;
+      text-align: center;
+    }
+	
+    p.nothing {
+      padding-top: 25px;
+    }
+	
+    h3.attention {
+      padding: 10px;
+      border: 1px solid #999;
+      border-radius: 5px;
+      margin-top: 25px;
+    }
+	
+    input#graph_reload {
+      display: none;
+    }
   }
 }
 

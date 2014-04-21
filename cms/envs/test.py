@@ -17,6 +17,9 @@ import os
 from path import path
 from warnings import filterwarnings
 
+# import settings from LMS for consistent behavior with CMS
+from lms.envs.test import (WIKI_ENABLED)
+
 # Nose Test Runner
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
@@ -172,6 +175,7 @@ LETTUCE_SERVER_PORT = 8003
 XQUEUE_PORT = 8040
 YOUTUBE_PORT = 8031
 LTI_PORT = 8765
+VIDEO_SOURCE_PORT = 8777
 
 
 ################### Make tests faster
@@ -222,3 +226,7 @@ MICROSITE_CONFIGURATION = {
 }
 MICROSITE_ROOT_DIR = COMMON_ROOT / 'test' / 'test_microsites'
 FEATURES['USE_MICROSITES'] = True
+
+# For consistency in user-experience, keep the value of this setting in sync with
+# the one in lms/envs/test.py
+FEATURES['ENABLE_DISCUSSION_SERVICE'] = False

@@ -25,7 +25,8 @@ FEATURES['DISABLE_START_DATES'] = True
 
 # Most tests don't use the discussion service, so we turn it off to speed them up.
 # Tests that do can enable this flag, but must use the UrlResetMixin class to force urls.py
-# to reload
+# to reload. For consistency in user-experience, keep the value of this setting in sync with
+# the one in cms/envs/test.py
 FEATURES['ENABLE_DISCUSSION_SERVICE'] = False
 
 FEATURES['ENABLE_SERVICE_STATUS'] = True
@@ -256,6 +257,7 @@ LETTUCE_SERVER_PORT = 8003
 XQUEUE_PORT = 8040
 YOUTUBE_PORT = 8031
 LTI_PORT = 8765
+VIDEO_SOURCE_PORT = 8777
 
 ################### Make tests faster
 

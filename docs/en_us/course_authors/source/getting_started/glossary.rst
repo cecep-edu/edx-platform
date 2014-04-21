@@ -16,7 +16,7 @@ A
 
   The course page that provides potential students with a course summary, prerequisites, a course video and image, and important dates.
 
-  See :ref:`Setting up a New Course` for more information.
+  See :ref:`The Course Summary Page` for more information.
 
 .. _Advanced Editor-g:
  
@@ -231,7 +231,7 @@ G
  
   List of the items that a student's response should cover in an open response assessment.
 
-  See :ref:`Rubrics` for more information.
+  See :ref:`ORA Rubrics` for more information.
 
 
 .. _H:
@@ -248,14 +248,6 @@ H
 
   See :ref:`Working with HTML Components` for more information.
 
-
-.. _HTML View:
- 
-**HTML View**
-
-  The view in the HTML component editor allows you to enter HTML code directly.
-
-  See :ref:`The User Interface` for more information.
 
 
 .. _I:
@@ -377,6 +369,14 @@ N
 P
 ****
 
+.. _Pages_g:
+ 
+**Pages**
+
+  Pages that supplement the courseware for a course. Each page appears in your course's navigation bar. 
+
+  See :ref:`Adding Pages to a Course` for more information.
+
 .. _Preview Mode:
  
 **Preview Mode**
@@ -435,7 +435,7 @@ R
 
   List of the items that a student's response should cover in an open response assessment.
 
-  See :ref:`Rubrics` for more information.
+  See :ref:`ORA Rubrics` for more information.
 
 
 
@@ -463,16 +463,6 @@ S
 **Simple Editor**
 
   The graphical user interface in a Problem component that contains formatting buttons and is available for some problem types. For more information, see :ref:`Studio UI`.
-
-
-
-.. _Static Pages_g:
- 
-**Static Pages**
-
-  Pages that supplement the courseware for a course. Each static page appears in your course's navigation bar. 
-
-  See :ref:`Add Static Pages` for more information.
 
 
 
@@ -532,15 +522,6 @@ V
   A component that you can use to add recorded videos to your course. 
 
   See :ref:`Working with Video Components` for more information.
-
-
-.. _Visual View:
- 
-**Visual View**
-
-  The view in the HTML component editor that allows you format text without using HTML code.
-
-  See :ref:`The User Interface` for more information.
 
 
 .. _W:
