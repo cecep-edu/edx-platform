@@ -20,4 +20,5 @@ Creating Course Content
    create_html_component
    create_video
    create_discussion
+   create_problem
 
