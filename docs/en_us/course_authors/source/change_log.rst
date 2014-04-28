@@ -11,12 +11,15 @@ April, 2014
    :header-rows: 1
 
    * - Date
-<<<<<<< HEAD
-     - Change  
+     - Change
+   * - 04/26/14
+     - Updated label information; added XML information to :ref:`Problem with Adaptive Hint`  
    * - 04/24/14
      - Expanded the :ref:`Grades` chapter to include topics on interpreting the grade reports and student progress page.
    * -    
      - Updated the :ref:`Beta_Testing` section to reflect feature changes.
+   * -
+     - Updated the :ref:`Working with HTML Components` chapter to reflect changes to the HTML component editor.
    * - 04/23/14
      - Reorganized information about problems into :ref:`Exercises and Tools Index` section.
    * - 04/23/14
