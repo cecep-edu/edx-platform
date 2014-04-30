@@ -20,6 +20,7 @@ USE_I18N = True
 TEMPLATE_DEBUG = True
 SITE_NAME = "beta.iaen.edu.ec"
 
+HTTPS = 'off'
 FEATURES['DISABLE_START_DATES'] = False
 FEATURES['ENABLE_SQL_TRACKING_LOGS'] = True
 FEATURES['SUBDOMAIN_COURSE_LISTINGS'] = False  # Enable to test subdomains--otherwise, want all courses to show up
