@@ -1,8 +1,8 @@
 import re
+import logging
+
 from xmodule.contentstore.content import StaticContent
 from xmodule.modulestore import Location
-
-import logging
 
 
 def _prefix_only_url_replace_regex(prefix):
@@ -12,7 +12,7 @@ def _prefix_only_url_replace_regex(prefix):
     To anyone contemplating making this more complicated:
     http://xkcd.com/1171/
     """
-    return r"""
+    return ur"""
         (?x)                      # flags=re.VERBOSE
         (?P<quote>\\?['"])        # the opening quotes
         (?P<prefix>{prefix})      # the prefix
@@ -28,7 +28,7 @@ def _prefix_and_category_url_replace_regex(prefix):
     To anyone contemplating making this more complicated:
     http://xkcd.com/1171/
     """
-    return r"""
+    return ur"""
         (?x)                      # flags=re.VERBOSE
         (?P<quote>\\?['"])        # the opening quotes
         (?P<prefix>{prefix})      # the prefix

@@ -48,6 +48,7 @@ class @MarkdownEditingDescriptor extends XModule.Descriptor
   ###
   onShowXMLButton: (e) =>
     e.preventDefault();
+    @addRemoveCheatsheetCSS()
     if @confirmConversionToXml()
       @createXMLEditor(MarkdownEditingDescriptor.markdownToXml(@markdown_editor.getValue()))
       # Need to refresh to get line numbers to display properly (and put cursor position to 0)
@@ -94,7 +95,21 @@ class @MarkdownEditingDescriptor extends XModule.Descriptor
       @cheatsheet = $($('#simple-editor-cheatsheet').html())
       $(@markdown_editor.getWrapperElement()).append(@cheatsheet)
 
+    @addRemoveCheatsheetCSS()
+
     setTimeout (=> @cheatsheet.toggleClass('shown')), 10
+
+
+  ###
+  Function to add/remove CSS for cheatsheet.
+  ###
+  addRemoveCheatsheetCSS: () =>
+    if !@cheatsheet.hasClass("shown")
+      $(".CodeMirror").css({"overflow": "visible"})
+      $(".modal-content").css({"overflow-y": "visible", "overflow-x": "visible"})
+    else
+      $(".CodeMirror").removeAttr("style")
+      $(".modal-content").removeAttr("style")
 
   ###
   Stores the current editor and hides the one that is not displayed.
@@ -195,25 +210,35 @@ class @MarkdownEditingDescriptor extends XModule.Descriptor
       xml = xml.replace(/\n^\=\=+$/gm, '');
 
       // group multiple choice answers
-      xml = xml.replace(/(^\s*\(.?\).*?$\n*)+/gm, function (match) {
-          var groupString = '<multiplechoiceresponse>\n',
-              value, correct, options;
-
-          groupString += '  <choicegroup type="MultipleChoice">\n';
-          options = match.split('\n');
-
-          for (i = 0; i < options.length; i += 1) {
-              if(options[i].length > 0) {
-                  value = options[i].split(/^\s*\(.?\)\s*/)[1];
-                  correct = /^\s*\(x\)/i.test(options[i]);
-                  groupString += '    <choice correct="' + correct + '">' + value + '</choice>\n';
-              }
+      xml = xml.replace(/(^\s*\(.{0,3}\).*?$\n*)+/gm, function(match, p) {
+        var choices = '';
+        var shuffle = false;
+        var options = match.split('\n');
+        for(var i = 0; i < options.length; i++) {
+          if(options[i].length > 0) {
+            var value = options[i].split(/^\s*\(.{0,3}\)\s*/)[1];
+            var inparens = /^\s*\((.{0,3})\)\s*/.exec(options[i])[1];
+            var correct = /x/i.test(inparens);
+            var fixed = '';
+            if(/@/.test(inparens)) {
+              fixed = ' fixed="true"';
+            }
+            if(/!/.test(inparens)) {
+              shuffle = true;
+            }
+            choices += '    <choice correct="' + correct + '"' + fixed + '>' + value + '</choice>\n';
           }
-
-          groupString += '  </choicegroup>\n';
-          groupString += '</multiplechoiceresponse>\n\n';
-
-          return groupString;
+        }
+        var result = '<multiplechoiceresponse>\n';
+        if(shuffle) {
+          result += '  <choicegroup type="MultipleChoice" shuffle="true">\n';
+        } else {
+          result += '  <choicegroup type="MultipleChoice">\n';
+        }
+        result += choices;
+        result += '  </choicegroup>\n';
+        result += '</multiplechoiceresponse>\n\n';
+        return result;
       });
 
       // group check answers
@@ -334,7 +359,7 @@ class @MarkdownEditingDescriptor extends XModule.Descriptor
       // looks for >>arbitrary text<< and inserts it into the label attribute of the input type directly below the text. 
       var split = xml.split('\n');
       var new_xml = [];
-      var line, i, curlabel = '';
+      var line, i, curlabel, prevlabel = '';
       var didinput = false;
       for (i = 0; i < split.length; i++) {
         line = split[i];
@@ -345,13 +370,14 @@ class @MarkdownEditingDescriptor extends XModule.Descriptor
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&apos;');
           line = line.replace(/>>|<</g, '');
-        } else if (line.match(/<\w+response/) && didinput) {
+        } else if (line.match(/<\w+response/) && didinput && curlabel == prevlabel) {
           // reset label to prevent gobbling up previous one (if multiple questions)
           curlabel = '';
           didinput = false;
-        } else if (line.match(/<(textline|optioninput|formulaequationinput|choicegroup|checkboxgroup)/) && curlabel != '') {
+        } else if (line.match(/<(textline|optioninput|formulaequationinput|choicegroup|checkboxgroup)/) && curlabel != '' && curlabel != undefined) {
           line = line.replace(/<(textline|optioninput|formulaequationinput|choicegroup|checkboxgroup)/, '<$1 label="' + curlabel + '"');
           didinput = true;
+          prevlabel = curlabel;
         }
         new_xml.push(line);
       }

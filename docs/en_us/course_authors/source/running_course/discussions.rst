@@ -35,7 +35,8 @@ This type of discussion is subject to the release date of the section that conta
 =====================================
 Create discussion categories
 =====================================
-All courses have a static page named **Discussion**. When you create a course, a discussion category named General is available for you to include by default. You can add more discussion categories to guide how students share and find information during your course. Categories might include Feedback, Troubleshooting, or Technical Help. Discussions in these categories can begin as soon as your course is available.
+
+All courses include a page named **Discussion**. When you create a course, a discussion category named General is available for you to include by default. You can add more discussion categories to guide how students share and find information during your course. Categories might include Feedback, Troubleshooting, or Technical Help. Discussions in these categories can begin as soon as your course is available.
 
 To create a discussion category:
 
@@ -45,52 +46,29 @@ To create a discussion category:
 
 #. Scroll down to the Policy Key labeled **discussion_topics**. By default, its Policy Value is:
 
- | {
- |    "General": {
- |        "id": "i4x-test_doc-SB101-course-2014_Jan"
- |    }
- | }
+ .. image:: ../Images/Discussion_Add_initial.png
+  :alt: Policy value of {"General": {"id": "i4x-test_doc-SB101-course-2014_Jan"}}
 
-4. Add a comma between the two closing braces.
+4. Copy the three lines provided for the General discussion category and paste them above the closing brace:
 
- | {
- |    "General": {
- |        "id": "i4x-test_doc-SB101-course-2014_Jan"
- |    },
- | }
+ .. image:: ../Images/Discussion_Add_paste.png
+  :alt: Policy value of {"General": {"id": "i4x-test_doc-SB101-course-2014_Jan"} "General": {"id": "i4x-test_doc-SB101-course-2014_Jan"}}
 
+5. Replace the second "General" with the quoted name of your new discussion category.
 
-5. Copy the three lines provided for the General discussion category and paste them above the closing brace:
+#. Change the second id value to a unique identifier. For example, append a reference to the category name.
 
-  | {
-  |   "General": {
-  |       "id": "i4x-test_doc-SB101-course-2014_Jan"
-  |   },
-  |   "General": {
-  |       "id": "i4x-test_doc-SB101-course-2014_Jan"
-  |   }
-  | }
+#. Add a comma after the first closing brace.
 
-6. Replace the second "General" with the quoted name of your new discussion category.
-
-#. Change the second id value to a unique identifier. For example, append a reference to the category name:
-
-
- | {
- |   "General": {
- |       "id": "i4x-test_doc-SB101-course-2014_Jan"
- |   },
- |    "Questions about the course": {
- |        "id": "i4x-test_doc-SB101-course-2014_Jan_faq"
- |    }
- | }
+ .. image:: ../Images/Discussion_Add_name.png
+  :alt: Policy value of {"General": {"id": "i4x-test_doc-SB101-course-2014_Jan"}, "Course Q&A": {"id": "i4x-test_doc-SB101-course-2014_Jan_faq"}}
 
 8. Click **Save Changes**.
 
-When students click the **Discussion** static page for your course, the drop-down list includes this new category.
+When students click the **Discussion** page for your course, the drop-down list includes this new category.
 
  .. image:: ../Images/NewCategory_Discussion.png
-  :alt: Image of a new discussion category
+  :alt: Image of a new category named Course Q&A in the list of discussions
 
 .. _Assigning_discussion_roles:
 
@@ -108,10 +86,10 @@ You can designate a team of people to help you run course discussions. Different
 
 **Note**: Discussion responses and comments made by course staff and instructors are also marked as "Staff".
 
-Before you can assign roles to your discussion administrators, you need their email addresses. 
+Before you can assign roles to your discussion administrators, you need their email addresses or usernames. 
 
-* To get the email address for a staff member, on the Instructor Dashboard click **Membership** and then select Course Staff from the drop-down list.
-* To get the email address of a student, on the Instructor Dashboard click **Data Download** > **List enrolled students' profile information**.
+* To get this information for a staff member, on the Instructor Dashboard click **Membership** and then select **Course Staff** from the drop-down list.
+* To get this information for an enrolled student, on the Instructor Dashboard click **Data Download** > **Download profile information as a CSV**.
 
 **Tip**: These instructions are for the new Instructor Dashboard: click **Try New Beta Dashboard**.
 
@@ -125,11 +103,9 @@ To assign a role:
 
 #. In the Administration List Management section, use the drop-down list to select Discussion Admins, Discussion Moderators, or Discussion Community TAs.
 
-#. Under the list of users who currently have that role, enter an email address and click **Add** for the role type.
+#. Under the list of users who currently have that role, enter an email address or username and click **Add** for the role type.
 
-#. To remove an assigned role, view the list of users and then click revoke access (the **X**) next to that email address. 
-
-You can also use the older version of the Instructor Dashboard. You need the usernames of your discussion moderators or students. Click **Forum Admin**, enter the username in the appropriate field, then click the **Add** button for the role you want to assign.  
+#. To remove an assigned role, view the list of users and then click **Revoke access**.
 
 .. _Running_discussions:
 
@@ -141,7 +117,7 @@ On an ongoing basis, discussion administrators run the course discussions by mak
 
 ========================
 Seed a discussion
-======================== 
+========================
 
 Before you contribute to a discussion, you can decide whether you want to be identified as a staff member or community TA, or to appear like other students' work. Depending on the subject and your purpose, one or the other might be more appropriate to spark discussion and inform students.
 
@@ -149,9 +125,9 @@ You can also post anonymously. Regardless of your role, you can choose to make a
 
 * To identify your posts with your role, log in with your discussion administrator email address and add the post or response. The responses and comments that you make include a colored banner with either "Staff" or "Community TA".
  
-* To post as a student, you must set up an alternate, test account with a different email address, go to the course URL and register, and then join the discussion. Reponses and comments do not have a banner and appear like any other student post. 
+* To post as a student, you must set up an alternate account with a different email address, go to the course URL and register, and then join the discussion. When you post as a student, your responses and comments do not have a banner or other distinguishing features: they appear the same as any other student post.
 
-note:: Posts by discussion administrators do not include a colored "Staff" or "Community TA" banner. Only responses to posts and comments made on responses do.
+**Note**: Posts by discussion administrators do not include a colored "Staff" or "Community TA" banner. The colored banner appears only when discussion administrators respond to existing posts or make a comment.
 
 ==========================================
 Use conventions in discussion subjects
@@ -209,7 +185,7 @@ For information on setting up moderators for your course, see :ref:`Assigning_di
 Provide guidelines for students
 ========================================
 
-You can develop a set of best practices for discussion participation and make them avaialbe to students as a course handout file or as a static page. These guidelines can define your expectations and optionally introduce features of edX discussions. 
+You can develop a set of best practices for discussion participation and make them available to students as a course handout file or on a defined page in your course. These guidelines can define your expectations and optionally introduce features of edX discussions. 
 
 .. For a template that you can use to develop your own guidelines, see :ref:`Discussion Forum Guidelines`.
 

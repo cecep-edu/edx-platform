@@ -1,13 +1,12 @@
 .. _Tracking Logs:
 
-
 ######################
 Tracking Logs
 ######################
 
 This chapter provides reference information about the event data that is delivered in data packages. Events are initiated by interactions with the courseware and the Instructor Dashboard in the LMS, and are stored in JSON documents. In the data package, event data is delivered in a log file. 
 
-The sections in this chapter provide:
+The sections in this chapter describe:
 
 * A :ref:`sample_events`.
 * :ref:`common` that are included in the JSON document of every event type.
@@ -20,7 +19,9 @@ The sections in this chapter provide:
 Sample Event
 *************************
 
-A sample event from an edX.log file follows. The JSON documents that include the event data are compressed before they are added to the log file, so they appear in this compact format.
+A sample event from an edX.log file follows. The JSON documents that include
+event data are delivered in a compact, machine-readable format that can be
+difficult to read at a glance.
 
 .. code-block:: json
 
@@ -132,7 +133,6 @@ If you use a JSON formatter to "pretty print" this event, a version that is more
     "username": "AAAAAAAAAA"
  }
 
-
 .. _common:
 
 ********************
@@ -149,11 +149,17 @@ This section contains a table of the JSON fields that are common to the schema d
 | ``context``               | For all event types, identifies the course that generated   | string/JSON | Contains these common member       |
 |                           | the event, the organization that lists the course, and the  |             | fields:                            |  
 |                           | individual who is performing the action.                    |             | ``course_id``                      |
-|                           | Also contains member fields that apply to specific event    |             | ``org_id``                         |
-|                           | types only: see the descriptions for each event type.       |             | ``user_id``                        |
+|                           |                                                             |             | ``org_id``                         |
+|                           | ``course_user_tags`` contains a dictionary with the key(s)  |             | ``user_id``                        |
+|                           |  and value(s) from the ``user_api_usercoursetag`` table     |             | ``course_user_tags``               |    
+|                           |  for the user. See :ref:`user_api_usercoursetag`.           |             |                                    | 
+|                           |                                                             |             | These fields are blank if values   |
+|                           | Also contains member fields that apply to specific event    |             | cannot be determined.              |
+|                           | types only: see the description for each event type.        |             |                                    |
 |                           |                                                             |             |                                    |
-|                           | **History**: Added 23 Oct 2013; ``user_id`` added           |             | These fields are blank if values   |
-|                           | 6 Nov 2013. Other fields may duplicate this data.           |             | cannot be determined.              |
+|                           | **History**: Added 23 Oct 2013; ``user_id`` added           |             |                                    |
+|                           | 6 Nov 2013. Other event fields may duplicate this data.     |             |                                    |
+|                           | ``course_user_tags`` added 12 Mar 2014.                     |             |                                    |
 +---------------------------+-------------------------------------------------------------+-------------+------------------------------------+
 | ``event``                 | Specifics of the triggered event.                           | string/JSON |                                    |
 +---------------------------+-------------------------------------------------------------+-------------+------------------------------------+
@@ -161,7 +167,7 @@ This section contains a table of the JSON fields that are common to the schema d
 |                           | browser or on the server.                                   |             |                                    |
 +---------------------------+-------------------------------------------------------------+-------------+------------------------------------+
 | ``event_type``            | The type of event triggered. Values depend on               | string      | For descriptions of member fields, |
-|                           | ``event_source``                                            |             | see the event type descriptions    |
+|                           | ``event_source``.                                           |             | see the event type descriptions    |
 |                           |                                                             |             | that follow.                       |
 +---------------------------+-------------------------------------------------------------+-------------+------------------------------------+
 | ``ip``                    | IP address of the user who triggered the event.             | string      |                                    |
@@ -195,7 +201,9 @@ The Student Event Type table lists the event types that are logged for interacti
 
 * :ref:`ora`
 
-A description follows for each event type that includes what each event type represents, which component it originates from, and what ``event`` fields it contains. The ``event_source`` field from the "Common Fields" table above distinguishes between events that originated in the browser (in javascript) and events that originated on the server (during the processing of a request).
+* :ref:`AB_Event_Types`
+
+The descriptions that follow include what each event type represents, which component it originates from, and what ``event`` fields it contains. The ``event_source`` field from the "Common Fields" table above distinguishes between events that originate in the browser (in javascript) and events that originate on the server (during the processing of a request).
 
 .. _navigational:
 
@@ -205,11 +213,11 @@ Navigational Event Types
 
 These event types are fired when a user selects a navigational control. 
 
-* ``seq_goto`` is fired when a user jumps between units in a sequence. 
+* ``seq_goto`` fires when a user jumps between units in a sequence. 
 
-* ``seq_next`` is fired when a user navigates to the next unit in a sequence. 
+* ``seq_next`` fires when a user navigates to the next unit in a sequence. 
 
-* ``seq_prev`` is fired when a user navigates to the previous unit in a sequence. 
+* ``seq_prev`` fires when a user navigates to the previous unit in a sequence. 
 
 **Component**: Sequence 
 
@@ -217,7 +225,7 @@ These event types are fired when a user selects a navigational control.
 
 **Event Source**: Browser
 
-``event`` **Fields**: All of the navigational event types have the same fields.
+``event`` **Fields**: These navigational event types all have the same fields.
 
 +--------------------+---------------+---------------------------------------------------------------------+
 | Field              | Type          | Details                                                             |
@@ -261,9 +269,9 @@ These event types can fire when a user works with a video.
 ``pause_video``, ``play_video``
 ---------------------------------
 
-* The ``play_video`` event type is fired on video play. 
+* The ``pause_video`` event type fires on video pause. 
 
-* The ``pause_video`` event type is fired on video pause. 
+* The ``play_video`` event type fires on video play. 
 
 ``event`` **Fields**: These event types have the same ``event`` fields.
 
@@ -286,7 +294,7 @@ These event types can fire when a user works with a video.
 ``seek_video``
 -----------------
 
-The ``seek_video`` event is fired when the user clicks the playback bar or transcript to go to a different point in the video file.
+The ``seek_video`` event fires when the user clicks the playback bar or transcript to go to a different point in the video file.
 
 +---------------------+---------------+---------------------------------------------------------------------+
 | Field               | Type          | Details                                                             |
@@ -302,7 +310,7 @@ The ``seek_video`` event is fired when the user clicks the playback bar or trans
 ``speed_change_video`` 
 ------------------------
 
-The ``speed_change_video`` event is fired when a user selects a different playing speed for the video. 
+The ``speed_change_video`` event fires when a user selects a different playing speed for the video. 
 
 **History**: Prior to 12 Feb 2014, this event fired when the user selected either the same speed or a different speed.  
 
@@ -323,27 +331,444 @@ The ``speed_change_video`` event is fired when a user selects a different playin
 
 .. _pdf:
 
-==============================
-PDF Interaction Event Types   
-==============================
+=================================
+Textbook Interaction Event Types   
+=================================
 
-The ``book``  event type is fired when a user is reading a PDF book.  
+----------
+``book``
+----------
+
+The ``book`` event type fires when a user navigates within the PDF Viewer or the
+PNG Viewer.
+
+* For textbooks in PDF format, the URL in the common ``page`` field contains
+  '/pdfbook/'.
+* For textbooks in PNG format, the URL in the common ``page`` field contains
+  '/book/'.
+
+**Component**: PDF Viewer, PNG Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type changed on 16 Apr 2014 to include the ``name`` and
+``chapter`` fields.
+
+``event`` **Fields**: 
+
++-------------+---------+----------------------------------------------------------------------------------+
+| Field       | Type    | Details                                                                          |
++=============+=========+==================================================================================+
+| ``type``    | string  | 'gotopage' fires when a page loads after the student manually enters its number. |
+|             |         +----------------------------------------------------------------------------------+
+|             |         | 'prevpage' fires when the next page button is clicked.                           |
+|             |         +----------------------------------------------------------------------------------+
+|             |         | 'nextpage' fires when the previous page button is clicked.                       |
++-------------+---------+----------------------------------------------------------------------------------+
+| ``name``    | string  | For 'gotopage', set to ``textbook.pdf.page.loaded``.                             |
+|             |         +----------------------------------------------------------------------------------+
+|             |         | For 'prevpage', set to ``textbook.pdf.page.navigatedprevious``.                  |
+|             |         +----------------------------------------------------------------------------------+
+|             |         | For 'nextpage', set to ``textbook.pdf.page.navigatednext``.                      |
+|             |         +----------------------------------------------------------------------------------+
+|             |         | **History**: Added for events produced by the PDF Viewer on 16 Apr 2014.         |
++-------------+---------+----------------------------------------------------------------------------------+
+| ``chapter`` | string  | The name of the PDF file.                                                        |
+|             |         +----------------------------------------------------------------------------------+
+|             |         | **History**: Added for events produced by the PDF Viewer on 16 Apr 2014.         |
++-------------+---------+----------------------------------------------------------------------------------+
+| ``old``     | integer | The original page number. Applies to 'gotopage' event types only.                |
++-------------+---------+----------------------------------------------------------------------------------+
+| ``new``     | integer | Destination page number.                                                         |
++-------------+---------+----------------------------------------------------------------------------------+
+
+------------------------------------
+``textbook.pdf.thumbnails.toggled``
+------------------------------------
+
+The ``textbook.pdf.thumbnails.toggled`` event type fires when a user clicks
+on the icon to show or hide page thumbnails.
 
 **Component**: PDF Viewer 
 
 **Event Source**: Browser
 
+**History**: This event type was added on 16 Apr 2014.
+
 ``event`` **Fields**: 
 
-+---------------------+---------------+---------------------------------------------------------------------+
-| Field               | Type          | Details                                                             |
-+=====================+===============+=====================================================================+
-| ``type``            | string        | 'gotopage', 'prevpage', 'nextpage'                                  |
-+---------------------+---------------+---------------------------------------------------------------------+
-| ``old``             | integer       | Original page number.                                               |
-+---------------------+---------------+---------------------------------------------------------------------+
-| ``new``             | integer       | Destination page number.                                            |
-+---------------------+---------------+---------------------------------------------------------------------+
++-------------+---------+---------------------------------------------------------------------+
+| Field       | Type    | Details                                                             |
++=============+=========+=====================================================================+
+| ``name``    | string  | ``textbook.pdf.thumbnails.toggled``                                 |
++-------------+---------+---------------------------------------------------------------------+
+| ``chapter`` | string  | The name of the PDF file.                                           |
++-------------+---------+---------------------------------------------------------------------+
+| ``page``    | integer | The number of the page that is open when the user clicks this icon. |
++-------------+---------+---------------------------------------------------------------------+
+
+------------------------------------
+``textbook.pdf.thumbnail.navigated``
+------------------------------------
+
+The ``textbook.pdf.thumbnail.navigated`` event type fires when a user clicks
+on a thumbnail image to navigate to a page.
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++---------------------+---------+-------------------------------------------------+
+| Field               | Type    | Details                                         |
++=====================+=========+=================================================+
+| ``name``            | string  | ``textbook.pdf.thumbnail.navigated``            |
++---------------------+---------+-------------------------------------------------+
+| ``chapter``         | string  | The name of the PDF file.                       |
++---------------------+---------+-------------------------------------------------+
+| ``page``            | integer | The page number of the thumbnail clicked.       |
++---------------------+---------+-------------------------------------------------+
+| ``thumbnail_title`` | string  | The identifying name for the destination of the |
+|                     |         | thumbnail. For example, Page 2.                 |
++---------------------+---------+-------------------------------------------------+
+
+------------------------------------
+``textbook.pdf.outline.toggled``
+------------------------------------
+
+The ``textbook.pdf.outline.toggled`` event type fires when a user clicks the
+outline icon to show or hide a list of the book's chapters. 
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++-------------+---------+---------------------------------------------------------------------+
+| Field       | Type    | Details                                                             |
++=============+=========+=====================================================================+
+| ``name``    | string  | ``textbook.pdf.outline.toggled``                                    |
++-------------+---------+---------------------------------------------------------------------+
+| ``chapter`` | string  | The name of the PDF file.                                           |
++-------------+---------+---------------------------------------------------------------------+
+| ``page``    | integer | The number of the page that is open when the user clicks this link. |
++-------------+---------+---------------------------------------------------------------------+
+
+------------------------------------
+``textbook.pdf.chapter.navigated``
+------------------------------------
+
+The ``textbook.pdf.chapter.navigated`` event type fires when a user clicks on
+a link in the outline to navigate to a chapter.
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++-------------------+---------+-------------------------------------------------+
+| Field             | Type    | Details                                         |
++===================+=========+=================================================+
+| ``name``          | string  | ``textbook.pdf.chapter.navigated``              |
++-------------------+---------+-------------------------------------------------+
+| ``chapter``       | string  | The name of the PDF file.                       |
++-------------------+---------+-------------------------------------------------+
+| ``chapter_title`` | string  | The identifying name for the destination of the |
+|                   |         | outline link.                                   |
++-------------------+---------+-------------------------------------------------+
+
+------------------------------------
+``textbook.pdf.page.navigated``
+------------------------------------
+
+The ``textbook.pdf.page.navigated`` event type fires when a user manually enters
+a page number.
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++-------------+---------+--------------------------------------------------+
+| Field       | Type    | Details                                          |
++=============+=========+==================================================+
+| ``name``    | string  | ``textbook.pdf.page.navigated``                  |
++-------------+---------+--------------------------------------------------+
+| ``chapter`` | string  | The name of the PDF file.                        |
++-------------+---------+--------------------------------------------------+
+| ``page``    | integer | The destination page number entered by the user. |
++-------------+---------+--------------------------------------------------+
+
+--------------------------------------
+``textbook.pdf.zoom.buttons.changed``
+--------------------------------------
+
+The ``textbook.pdf.zoom.buttons.changed`` event type fires when a user clicks
+either the Zoom In or Zoom Out icon.
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++---------------+---------+--------------------------------------------------------------------+
+| Field         | Type    | Details                                                            |
++===============+=========+====================================================================+
+| ``name``      | string  | ``textbook.pdf.zoom.buttons.changed``                              |
++---------------+---------+--------------------------------------------------------------------+
+| ``direction`` | string  | 'in', 'out'                                                        |
++---------------+---------+--------------------------------------------------------------------+
+| ``chapter``   | string  | The name of the PDF file.                                          |
++---------------+---------+--------------------------------------------------------------------+
+| ``page``      | integer | The number of the page that is open when the user clicks the icon. |
++---------------+---------+--------------------------------------------------------------------+
+
+------------------------------------
+``textbook.pdf.zoom.menu.changed``
+------------------------------------
+
+The ``textbook.pdf.zoom.menu.changed`` event type fires when a user selects a
+magnification setting.
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++-------------+---------+--------------------------------------------------------------------------------+
+| Field       | Type    | Details                                                                        |
++=============+=========+================================================================================+
+| ``name``    | string  | ``textbook.pdf.zoom.menu.changed``                                             |
++-------------+---------+--------------------------------------------------------------------------------+
+| ``amount``  | string  | '1', '0.75', '1.5', 'custom', 'page_actual', 'auto', 'page_width', 'page_fit'. |
++-------------+---------+--------------------------------------------------------------------------------+
+| ``chapter`` | string  | The name of the PDF file.                                                      |
++-------------+---------+--------------------------------------------------------------------------------+
+| ``page``    | integer | The number of the page that is open when the user selects this value.          |
++-------------+---------+--------------------------------------------------------------------------------+
+
+------------------------------------
+``textbook.pdf.display.scaled``
+------------------------------------
+
+The ``textbook.pdf.display.scaled`` event type fires when the display
+magnification changes. These changes occur after a student selects a
+magnification setting from the zoom menu or resizes the browser window.
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++-------------+---------+-------------------------------------------------------------------+
+| Field       | Type    | Details                                                           |
++=============+=========+===================================================================+
+| ``name``    | string  | ``textbook.pdf.display.scaled``                                   |
++-------------+---------+-------------------------------------------------------------------+
+| ``amount``  | string  | The magnification setting; for example, 0.95 or 1.25.             |
++-------------+---------+-------------------------------------------------------------------+
+| ``chapter`` | string  | The name of the PDF file.                                         |
++-------------+---------+-------------------------------------------------------------------+
+| ``page``    | integer | The number of the page that is open when the scaling takes place. |
++-------------+---------+-------------------------------------------------------------------+
+
+------------------------------------
+``textbook.pdf.display.scrolled``
+------------------------------------
+
+The ``textbook.pdf.display.scrolled`` event type fires each time the displayed
+page changes while a user scrolls up or down.
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++---------------+---------+---------------------------------------------------------------------+
+| Field         | Type    | Details                                                             |
++===============+=========+=====================================================================+
+| ``name``      | string  | ``textbook.pdf.display.scrolled``                                   |
++---------------+---------+---------------------------------------------------------------------+
+| ``chapter``   | string  | The name of the PDF file.                                           |
++---------------+---------+---------------------------------------------------------------------+
+| ``page``      | integer | The number of the page that is open when the scrolling takes place. |
++---------------+---------+---------------------------------------------------------------------+
+| ``direction`` | string  | 'up', 'down'                                                        |
++---------------+---------+---------------------------------------------------------------------+
+
+------------------------------------
+``textbook.pdf.search.executed``
+------------------------------------
+
+The ``textbook.pdf.search.executed`` event type fires when a user searches for a
+text value in the file. To reduce the number of events produced, instead of
+producing one event per entered character this event type defines a search
+string as the set of characters that are consecutively entered in the search
+field within 500ms of each other.
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++-------------------+---------+------------------------------------------------------------------+
+| Field             | Type    | Details                                                          |
++===================+=========+==================================================================+
+| ``name``          | string  | ``textbook.pdf.search.executed``                                 |
++-------------------+---------+------------------------------------------------------------------+
+| ``query``         | string  | The value in the search field.                                   |
++-------------------+---------+------------------------------------------------------------------+
+| ``caseSensitive`` | boolean | 'true' if the case sensitive option is selected,                 |
+|                   |         | 'false' if this option is not selected.                          |
++-------------------+---------+------------------------------------------------------------------+
+| ``highlightAll``  | boolean | 'true' if the option to highlight all matches is selected,       |
+|                   |         | 'false' if this option is not selected.                          |
++-------------------+---------+------------------------------------------------------------------+
+| ``status``        | string  | A "not found" status phrase for a search string that             |
+|                   |         | is unsuccessful. Blank for successful search strings.            |
++-------------------+---------+------------------------------------------------------------------+
+| ``chapter``       | string  | The name of the PDF file.                                        |
++-------------------+---------+------------------------------------------------------------------+
+| ``page``          | integer | The number of the page that is open when the search takes place. |
++-------------------+---------+------------------------------------------------------------------+
+
+---------------------------------------------
+``textbook.pdf.search.navigatednext``
+---------------------------------------------
+
+The ``textbook.pdf.search.navigatednext`` event type fires when a user clicks
+on the Find Next or Find Previous icons for an entered search string.
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++-------------------+---------+------------------------------------------------------------------+
+| Field             | Type    | Details                                                          |
++===================+=========+==================================================================+
+| ``name``          | string  | ``textbook.pdf.search.navigatednext``                            |
++-------------------+---------+------------------------------------------------------------------+
+| ``findprevious``  | string  | 'true' if the user clicks the Find Previous icon, 'false'        |
+|                   |         | if the user clicks the Find Next icon.                           |
++-------------------+---------+------------------------------------------------------------------+
+| ``query``         | string  | The value in the search field.                                   |
++-------------------+---------+------------------------------------------------------------------+
+| ``caseSensitive`` | boolean | 'true' if the case sensitive option is selected,                 |
+|                   |         | 'false' if this option is not selected.                          |
++-------------------+---------+------------------------------------------------------------------+
+| ``highlightAll``  | boolean | 'true' if the option to highlight all matches is selected,       |
+|                   |         | 'false' if this option is not selected.                          |
++-------------------+---------+------------------------------------------------------------------+
+| ``status``        | string  | A "not found" status phrase for a search string that             |
+|                   |         | is unsuccessful. Blank for successful search strings.            |
++-------------------+---------+------------------------------------------------------------------+
+| ``chapter``       | string  | The name of the PDF file.                                        |
++-------------------+---------+------------------------------------------------------------------+
+| ``page``          | integer | The number of the page that is open when the search takes place. |
++-------------------+---------+------------------------------------------------------------------+
+
+---------------------------------------------
+``textbook.pdf.search.highlight.toggled``
+---------------------------------------------
+
+The ``textbook.pdf.search.highlight.toggled`` event type fires when a user
+selects or clears the **Highlight All** option for a search.
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++-------------------+---------+------------------------------------------------------------------+
+| Field             | Type    | Details                                                          |
++===================+=========+==================================================================+
+| ``name``          | string  | ``textbook.pdf.search.highlight.toggled``                        |
++-------------------+---------+------------------------------------------------------------------+
+| ``query``         | string  | The value in the search field.                                   |
++-------------------+---------+------------------------------------------------------------------+
+| ``caseSensitive`` | boolean | 'true' if the case sensitive option is selected,                 |
+|                   |         | 'false' if this option is not selected.                          |
++-------------------+---------+------------------------------------------------------------------+
+| ``highlightAll``  | boolean | 'true' if the option to highlight all matches is selected,       |
+|                   |         | 'false' if this option is not selected.                          |
++-------------------+---------+------------------------------------------------------------------+
+| ``status``        | string  | A "not found" status phrase for a search string that is          |
+|                   |         | unsuccessful. Blank for successful search strings.               |
++-------------------+---------+------------------------------------------------------------------+
+| ``chapter``       | string  | The name of the PDF file.                                        |
++-------------------+---------+------------------------------------------------------------------+
+| ``page``          | integer | The number of the page that is open when the search takes place. |
++-------------------+---------+------------------------------------------------------------------+
+
+------------------------------------------------------
+``textbook.pdf.search.casesensitivity.toggled``
+------------------------------------------------------
+
+The ``textbook.pdf.search.casesensitivity.toggled`` event type fires when a
+user selects or clears the **Match Case** option for a search.
+
+**Component**: PDF Viewer 
+
+**Event Source**: Browser
+
+**History**: This event type was added on 16 Apr 2014.
+
+``event`` **Fields**: 
+
++-------------------+---------+------------------------------------------------------------------+
+| Field             | Type    | Details                                                          |
++===================+=========+==================================================================+
+| ``name``          | string  | ``textbook.pdf.search.casesensitivity.toggled``                  |
++-------------------+---------+------------------------------------------------------------------+
+| ``query``         | string  | The value in the search field.                                   |
++-------------------+---------+------------------------------------------------------------------+
+| ``caseSensitive`` | boolean | 'true' if the case sensitive option is selected,                 |
+|                   |         | 'false' if this option is not selected.                          |
++-------------------+---------+------------------------------------------------------------------+
+| ``highlightAll``  | boolean | 'true' if the option to highlight all matches is selected,       |
+|                   |         | 'false' if this option is not selected.                          |
++-------------------+---------+------------------------------------------------------------------+
+| ``status``        | string  | A "not found" status phrase for a search string that             |
+|                   |         | is unsuccessful. Blank for successful search strings.            |
++-------------------+---------+------------------------------------------------------------------+
+| ``chapter``       | string  | The name of the PDF file.                                        |
++-------------------+---------+------------------------------------------------------------------+
+| ``page``          | integer | The number of the page that is open when the search takes place. |
++-------------------+---------+------------------------------------------------------------------+
 
 .. _problem:
 
@@ -364,7 +789,7 @@ Problem Interaction Event Types
 ``event`` **Fields**: The ``event`` field contains the values of all input fields from the problem being checked, styled as GET parameters.
 
 -----------------------------
-``problem_check``  (Server)
+``problem_check`` (Server)
 -----------------------------
 
 The server fires ``problem_check`` events when a problem is successfully checked.  
@@ -375,7 +800,7 @@ The server fires ``problem_check`` events when a problem is successfully checked
 
 **History**: 
 
-* The ``submission`` dictionary was added to the ``event`` field, and  ``module`` was added to the ``context`` field, on 5 Mar 2014.
+* On 5 Mar 2014, the ``submission`` dictionary was added to the ``event`` field and  ``module`` was added to the ``context`` field.
 
 * Prior to 15 Oct 2013, this event type was named ``save_problem_check``.
 
@@ -481,16 +906,20 @@ The server fires ``problem_check_fail`` events when a problem cannot be checked 
 
 **Event Source**: Server
 
+**History**: Prior to 15 Oct 2013, this event type was named ``save_problem_check_fail``.
+
 ``event`` **Fields**: 
 
 +---------------------+---------------+---------------------------------------------------------------------+
 | Field               | Type          | Details                                                             |
 +=====================+===============+=====================================================================+
+| ``state``           | string / JSON | Current problem state.                                              |
++---------------------+---------------+---------------------------------------------------------------------+
 | ``problem_id``      | string        | ID of the problem being checked.                                    |
 +---------------------+---------------+---------------------------------------------------------------------+
 | ``answers``         | dict          |                                                                     |
 +---------------------+---------------+---------------------------------------------------------------------+
-| ``failure``         | string        | `'closed'`, `'unreset'`                                             |
+| ``failure``         | string        | 'closed', 'unreset'                                                 |
 +---------------------+---------------+---------------------------------------------------------------------+
 
 -----------------------------
@@ -522,7 +951,7 @@ The server fires ``problem_rescore`` events when a problem is successfully resco
 +=====================+===============+=====================================================================+
 | ``state``           | string / JSON | Current problem state.                                              |
 +---------------------+---------------+---------------------------------------------------------------------+
-| ``problem_id``      | string        | ID of the problem being checked.                                    |
+| ``problem_id``      | string        | ID of the problem being rescored.                                   |
 +---------------------+---------------+---------------------------------------------------------------------+
 | ``orig_score``      | integer       |                                                                     |
 +---------------------+---------------+---------------------------------------------------------------------+
@@ -565,7 +994,7 @@ The server fires ``problem_rescore_fail`` events when a problem cannot be succes
 ``problem_save``
 -----------------------------
 
-``problem_show`` fires when a problem is saved.
+``problem_save`` fires when a problem is saved.
 
 **Component**: Capa Module
 
@@ -637,18 +1066,18 @@ The server fires ``problem_rescore_fail`` events when a problem cannot be succes
 +---------------------+---------------+---------------------------------------------------------------------+
 
 ------------------------------------------------
-``show_answer`` or ``showanswer`` 
+``show_answer`` 
 ------------------------------------------------
 
 Server-side event which displays the answer to a problem. 
 
-**History**: The original name for this event type was ``showanswer``. 
-
-.. **Question** is that correct?
-
 **Component**: Capa Module
 
 **Event Source**: Server
+
+**History**: The original name for this event type was ``showanswer``. 
+
+.. **Question** is this renaming info correct?
 
 ``event`` **Fields**: 
 
@@ -816,6 +1245,68 @@ The ``staff_grading_hide_question`` and ``staff_grading_show_question`` event ty
 +=====================+===============+=====================================================================+
 | ``location``        | string        | The location of the question whose prompt is being shown or hidden. |
 +---------------------+---------------+---------------------------------------------------------------------+
+
+.. _AB_Event_Types:
+
+==========================
+A/B Testing Event Types
+==========================
+
+Course authors can configure course content to present modules that contain other modules. For example, a parent module can include two child modules with content that differs in some way for comparison testing. When a student navigates to a module that is set up for A/B testing in this way, the student is randomly assigned to a group and shown only one of the child modules. 
+
+* Internally, a *partition* defines the type of experiment: between video and text, for example. A course can include any number of modules with the same partition, or experiment type.
+* For each partition, students are randomly assigned to a *group*. The group determines which content, either video or text in this example, is shown by every module with that partitioning. 
+
+The event types that follow apply to modules that are set up to randomly assign students to groups so that different content can be shown to the different groups. 
+
+**History**: These event types were added on 12 Mar 2014.
+
+----------------------------------
+``assigned_user_to_partition``
+----------------------------------
+
+When a student views a module that is set up to test different child modules, the server checks the ``user_api_usercoursetag`` table for the student's assignment to the relevant partition, and to a group for that partition. The partition ID is the ``user_api_usercoursetag.key`` and the group ID is the ``user_api_usercoursetag.value``. If the student does not yet have an assignment, the server fires an ``assigned_user_to_partition`` event and adds a row to the ``user_api_usercoursetag`` table for the student. See :ref:`user_api_usercoursetag`. 
+
+.. note:: After this event fires, the common ``context`` field in all subsequent events includes a ``course_user_tags`` member field with the student's assigned partition and group.
+
+**Component**: Split Test
+
+**Event Source**: Browser
+
+``event`` **Fields**: 
+
++---------------------+---------------+---------------------------------------------------------------------+
+| Field               | Type          | Details                                                             |
++=====================+===============+=====================================================================+
+| ``group_id``        | integer       | Identifier of the group.                                            |
++---------------------+---------------+---------------------------------------------------------------------+
+| ``group_name``      | string        | Name of the group.                                                  |
++---------------------+---------------+---------------------------------------------------------------------+
+| ``partition_id``    | integer       | Identifier for the partition, in the format                         |
+|                     |               | ``xblock.partition_service.partition_ID`` where ID is an integer.   |
++---------------------+---------------+---------------------------------------------------------------------+
+| ``partition_name``  | string        | Name of the partition.                                              |
++---------------------+---------------+---------------------------------------------------------------------+
+
+----------------------------------
+``child_render``
+----------------------------------
+
+When a student views a module that is set up to test different content using child modules, a ``child_render`` event fires to identify the child module that is shown to the student. 
+
+**Component**: Split Test
+
+**Event Source**: Server
+
+``event`` **Fields**: 
+
++---------------------+---------------+---------------------------------------------------------------------+
+| Field               | Type          | Details                                                             |
++=====================+===============+=====================================================================+
+| ``child-id``        | string        | ID of the module that displays to the student.                      |
++---------------------+---------------+---------------------------------------------------------------------+
+
+.. this might be renamed to child_id
 
 .. _Instructor_Event_Types:
 

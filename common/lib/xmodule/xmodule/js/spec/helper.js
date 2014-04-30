@@ -1,6 +1,7 @@
-(function ($, undefined) {
-    // Stub YouTube API.
-    window.YT = {
+(function () {
+    'use strict';
+
+    var stubbedYT = {
         Player: function () {
             var Player = jasmine.createSpyObj(
                 'YT.Player',
@@ -9,12 +10,16 @@
                     'getPlayerState', 'getVolume', 'setVolume',
                     'loadVideoById', 'getAvailablePlaybackRates', 'playVideo',
                     'pauseVideo', 'seekTo', 'getDuration', 'setPlaybackRate',
-                    'getPlaybackQuality', 'destroy'
+                    'getAvailableQualityLevels', 'getPlaybackQuality',
+                    'setPlaybackQuality', 'destroy'
                 ]
             );
 
             Player.getDuration.andReturn(60);
             Player.getAvailablePlaybackRates.andReturn([0.50, 1.0, 1.50, 2.0]);
+            Player.getAvailableQualityLevels.andReturn(
+                ['highres', 'hd1080', 'hd720', 'large', 'medium', 'small']
+            );
 
             return Player;
         },
@@ -31,6 +36,9 @@
             return f();
         }
     };
+
+    // Stub YouTube API.
+    window.YT = stubbedYT;
 
     window.STATUS = window.YT.PlayerState;
 
@@ -142,13 +150,13 @@
                         }
                     };
                 }
-            } else if (settings.url == '/transcript/translation') {
+            } else if (settings.url.match(/transcript\/translation\/.+$/)) {
                 return settings.success(jasmine.stubbedCaption);
-            } else if (settings.url == '/transcript/available_translations') {
+            } else if (settings.url === '/transcript/available_translations') {
                 return settings.success(['uk', 'de']);
             } else if (settings.url.match(/.+\/problem_get$/)) {
                 return settings.success({
-                    html: readFixtures('problem_content.html')
+                    html: window.readFixtures('problem_content.html')
                 });
             } else if (
                 settings.url === '/calculate' ||
@@ -157,7 +165,17 @@
                 settings.url.match(/.+\/problem_(check|reset|show|save)$/)
             ) {
                 // Do nothing.
-            } else if (settings.url == '/save_user_state') {
+                return;
+            } else if (settings.url === '/save_user_state') {
+                return {success: true};
+            } else if (settings.url === 'http://www.youtube.com/iframe_api') {
+                // Stub YouTube API.
+                window.YT = stubbedYT;
+
+                // Call the callback that must be called when YouTube API is
+                // loaded. By specification.
+                window.onYouTubeIframeAPIReady();
+
                 return {success: true};
             } else {
                 throw 'External request attempted for ' +
@@ -191,7 +209,7 @@
             }
         });
 
-        return this.addMatchers(imagediff.jasmine);
+        return this.addMatchers(window.imagediff.jasmine);
     });
 
     // Stub jQuery.cookie module.
@@ -230,7 +248,7 @@
         }
 
         jasmine.stubRequests();
-        state = new Video('#example');
+        state = new window.Video('#example');
 
         state.resizer = (function () {
             var methods = [
@@ -265,4 +283,4 @@
         // "video.html" contains HTML template for a YouTube video.
         return jasmine.initializePlayer('video.html', params);
     };
-}).call(this, window.jQuery);
+}).call(this);

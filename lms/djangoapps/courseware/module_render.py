@@ -37,7 +37,7 @@ from xmodule.modulestore import Location
 from xmodule.modulestore.django import modulestore, ModuleI18nService
 from xmodule.modulestore.exceptions import ItemNotFoundError
 from xmodule.util.duedate import get_extended_due_date
-from xmodule_modifiers import replace_course_urls, replace_jump_to_id_urls, replace_static_urls, add_staff_debug_info, wrap_xblock
+from xmodule_modifiers import replace_course_urls, replace_jump_to_id_urls, replace_static_urls, add_staff_markup, wrap_xblock
 from xmodule.lti_module import LTIModule
 from xmodule.x_module import XModuleDescriptor
 
@@ -58,6 +58,13 @@ xqueue_interface = XQueueInterface(
     settings.XQUEUE_INTERFACE['django_auth'],
     requests_auth,
 )
+
+
+class LmsModuleRenderError(Exception):
+    """
+    An exception class for exceptions thrown by module_render that don't fit well elsewhere
+    """
+    pass
 
 
 def make_track_function(request):
@@ -210,24 +217,30 @@ def get_module_for_descriptor(user, request, descriptor, field_data_cache, cours
                                               static_asset_path)
 
 
-def get_module_for_descriptor_internal(user, descriptor, field_data_cache, course_id,
-                                       track_function, xqueue_callback_url_prefix,
-                                       position=None, wrap_xmodule_display=True, grade_bucket_type=None,
-                                       static_asset_path=''):
+def get_module_system_for_user(user, field_data_cache,
+                               # Arguments preceding this comment have user binding, those following don't
+                               descriptor, course_id, track_function, xqueue_callback_url_prefix,
+                               position=None, wrap_xmodule_display=True, grade_bucket_type=None,
+                               static_asset_path=''):
     """
-    Actually implement get_module, without requiring a request.
+    Helper function that returns a module system and student_data bound to a user and a descriptor.
 
-    See get_module() docstring for further details.
+    The purpose of this function is to factor out everywhere a user is implicitly bound when creating a module,
+    to allow an existing module to be re-bound to a user.  Most of the user bindings happen when creating the
+    closures that feed the instantiation of ModuleSystem.
+
+    The arguments fall into two categories: those that have explicit or implicit user binding, which are user
+    and field_data_cache, and those don't and are just present so that ModuleSystem can be instantiated, which
+    are all the other arguments.  Ultimately, this isn't too different than how get_module_for_descriptor_internal
+    was before refactoring.
+
+    Arguments:
+        see arguments for get_module()
+
+    Returns:
+        (LmsModuleSystem, KvsFieldData):  (module system, student_data) bound to, primarily, the user and descriptor
     """
-
-    # Do not check access when it's a noauth request.
-    if getattr(user, 'known', True):
-        # Short circuit--if the user shouldn't have access, bail without doing any work
-        if not has_access(user, descriptor, 'load', course_id):
-            return None
-
     student_data = KvsFieldData(DjangoKeyValueStore(field_data_cache))
-
 
     def make_xqueue_callback(dispatch='score_update'):
         # Fully qualified callback URL for external queueing system
@@ -292,15 +305,8 @@ def get_module_for_descriptor_internal(user, descriptor, field_data_cache, cours
                                                   position, wrap_xmodule_display, grade_bucket_type,
                                                   static_asset_path)
 
-    def publish(block, event, custom_user=None):
-        """A function that allows XModules to publish events. This only supports grade changes right now."""
-        if event.get('event_name') != 'grade':
-            return
-
-        if custom_user:
-            user_id = custom_user.id
-        else:
-            user_id = user.id
+    def handle_grade_event(block, event_type, event):
+        user_id = event.get('user_id', user.id)
 
         # Construct the key for the module
         key = KeyValueStore.Key(
@@ -332,6 +338,56 @@ def get_module_for_descriptor_internal(user, descriptor, field_data_cache, cours
             tags.append('type:%s' % grade_bucket_type)
 
         dog_stats_api.increment("lms.courseware.question_answered", tags=tags)
+
+    def publish(block, event_type, event):
+        """A function that allows XModules to publish events."""
+        if event_type == 'grade':
+            handle_grade_event(block, event_type, event)
+        else:
+            track_function(event_type, event)
+
+    def rebind_noauth_module_to_user(module, real_user):
+        """
+        A function that allows a module to get re-bound to a real user if it was previously bound to an AnonymousUser.
+
+        Will only work within a module bound to an AnonymousUser, e.g. one that's instantiated by the noauth_handler.
+
+        Arguments:
+            module (any xblock type):  the module to rebind
+            real_user (django.contrib.auth.models.User):  the user to bind to
+
+        Returns:
+            nothing (but the side effect is that module is re-bound to real_user)
+        """
+        if user.is_authenticated():
+            err_msg = ("rebind_noauth_module_to_user can only be called from a module bound to "
+                       "an anonymous user")
+            log.error(err_msg)
+            raise LmsModuleRenderError(err_msg)
+
+        field_data_cache_real_user = FieldDataCache.cache_for_descriptor_descendents(
+            course_id,
+            real_user,
+            module.descriptor
+        )
+
+        (inner_system, inner_student_data) = get_module_system_for_user(
+            real_user, field_data_cache_real_user,  # These have implicit user bindings, rest of args considered not to
+            module.descriptor, course_id, track_function, xqueue_callback_url_prefix, position, wrap_xmodule_display,
+            grade_bucket_type, static_asset_path
+        )
+        # rebinds module to a different student.  We'll change system, student_data, and scope_ids
+        module.descriptor.bind_for_student(
+            inner_system,
+            LmsFieldData(module.descriptor._field_data, inner_student_data)  # pylint: disable=protected-access
+        )
+        module.descriptor.scope_ids = (
+            module.descriptor.scope_ids._replace(user_id=real_user.id)  # pylint: disable=protected-access
+        )
+        module.scope_ids = module.descriptor.scope_ids  # this is needed b/c NamedTuples are immutable
+        # now bind the module to the new ModuleSystem instance and vice-versa
+        module.runtime = inner_system
+        inner_system.xmodule_instance = module
 
     # Build a list of wrapping functions that will be applied in order
     # to the Fragment content coming out of the xblocks that are about to be rendered.
@@ -371,7 +427,7 @@ def get_module_for_descriptor_internal(user, descriptor, field_data_cache, cours
 
     if settings.FEATURES.get('DISPLAY_DEBUG_INFO_TO_STAFF'):
         if has_access(user, descriptor, 'staff', course_id):
-            block_wrappers.append(partial(add_staff_debug_info, user))
+            block_wrappers.append(partial(add_staff_markup, user))
 
     # These modules store data using the anonymous_student_id as a key.
     # To prevent loss of data, we will continue to provide old modules with
@@ -433,6 +489,7 @@ def get_module_for_descriptor_internal(user, descriptor, field_data_cache, cours
         },
         get_user_role=lambda: get_user_role(user, course_id),
         descriptor_runtime=descriptor.runtime,
+        rebind_noauth_module_to_user=rebind_noauth_module_to_user,
     )
 
     # pass position specified in URL to module through ModuleSystem
@@ -450,6 +507,31 @@ def get_module_for_descriptor_internal(user, descriptor, field_data_cache, cours
         system.error_descriptor_class = ErrorDescriptor
     else:
         system.error_descriptor_class = NonStaffErrorDescriptor
+
+    return system, student_data
+
+
+def get_module_for_descriptor_internal(user, descriptor, field_data_cache, course_id,  # pylint: disable=invalid-name
+                                       track_function, xqueue_callback_url_prefix,
+                                       position=None, wrap_xmodule_display=True, grade_bucket_type=None,
+                                       static_asset_path=''):
+    """
+    Actually implement get_module, without requiring a request.
+
+    See get_module() docstring for further details.
+    """
+
+    # Do not check access when it's a noauth request.
+    if getattr(user, 'known', True):
+        # Short circuit--if the user shouldn't have access, bail without doing any work
+        if not has_access(user, descriptor, 'load', course_id):
+            return None
+
+    (system, student_data) = get_module_system_for_user(
+        user, field_data_cache,  # These have implicit user bindings, the rest of args are considered not to
+        descriptor, course_id, track_function, xqueue_callback_url_prefix, position, wrap_xmodule_display,
+        grade_bucket_type, static_asset_path
+    )
 
     descriptor.bind_for_student(system, LmsFieldData(descriptor._field_data, student_data))  # pylint: disable=protected-access
     descriptor.scope_ids = descriptor.scope_ids._replace(user_id=user.id)  # pylint: disable=protected-access

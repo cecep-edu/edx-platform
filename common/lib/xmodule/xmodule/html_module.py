@@ -36,6 +36,16 @@ class HtmlFields(object):
         default=False,
         scope=Scope.settings
     )
+    editor = String(
+        help="Select Visual to enter content and have the editor automatically create the HTML. Select Raw to edit HTML directly. If you change this setting, you must save the component and then re-open it for editing.",
+        display_name="Editor",
+        default="visual",
+        values=[
+            {"display_name": "Visual", "value": "visual"},
+            {"display_name": "Raw", "value": "raw"}
+        ],
+        scope=Scope.settings
+    )
 
 
 class HtmlModule(HtmlFields, XModule):
@@ -113,6 +123,7 @@ class HtmlDescriptor(HtmlFields, XmlDescriptor, EditingDescriptor):
         _context.update({
             'base_asset_url': StaticContent.get_base_url_path_for_course_assets(self.location) + '/',
             'enable_latex_compiler': self.use_latex_compiler,
+            'editor': self.editor
         })
         return _context
 
@@ -264,7 +275,7 @@ class StaticTabFields(object):
     )
     data = String(
         default=textwrap.dedent(u"""\
-            <p>This is where you can add additional pages to your courseware. Click the 'edit' button to begin editing.</p>
+            <p>Add the content you want students to see on this page.</p>
         """),
         scope=Scope.content,
         help="HTML for the additional pages"

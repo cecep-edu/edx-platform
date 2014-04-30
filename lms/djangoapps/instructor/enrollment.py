@@ -14,6 +14,11 @@ from student.models import CourseEnrollment, CourseEnrollmentAllowed
 from courseware.models import StudentModule
 from edxmako.shortcuts import render_to_string
 
+# Submissions is a Django app that is currently installed
+# from the edx-ora2 repo, although it will likely move in the future.
+from submissions import api as sub_api
+from student.models import anonymous_id_for_user
+
 from microsite_configuration import microsite
 
 # For determining if a shibboleth course
@@ -140,6 +145,30 @@ def unenroll_email(course_id, student_email, email_students=False, email_params=
     return previous_state, after_state
 
 
+def send_beta_role_email(action, user, email_params):
+    """
+    Send an email to a user added or removed as a beta tester.
+
+    `action` is one of 'add' or 'remove'
+    `user` is the User affected
+    `email_params` parameters used while parsing email templates (a `dict`).
+    """
+    if action == 'add':
+        email_params['message'] = 'add_beta_tester'
+        email_params['email_address'] = user.email
+        email_params['full_name'] = user.profile.name
+
+    elif action == 'remove':
+        email_params['message'] = 'remove_beta_tester'
+        email_params['email_address'] = user.email
+        email_params['full_name'] = user.profile.name
+
+    else:
+        raise ValueError("Unexpected action received '{}' - expected 'add' or 'remove'".format(action))
+
+    send_mail_to_student(user.email, email_params)
+
+
 def reset_student_attempts(course_id, student, module_state_key, delete_module=False):
     """
     Reset student attempts for a problem. Optionally deletes all student state for the specified problem.
@@ -151,11 +180,28 @@ def reset_student_attempts(course_id, student, module_state_key, delete_module=F
     `problem_to_reset` is the name of a problem e.g. 'L2Node1'.
     To build the module_state_key 'problem/' and course information will be appended to `problem_to_reset`.
 
-    Throws ValueError if `problem_state` is invalid JSON.
+    Raises:
+        ValueError: `problem_state` is invalid JSON.
+        StudentModule.DoesNotExist: could not load the student module.
+        submissions.SubmissionError: unexpected error occurred while resetting the score in the submissions API.
+
     """
-    module_to_reset = StudentModule.objects.get(student_id=student.id,
-                                                course_id=course_id,
-                                                module_state_key=module_state_key)
+    # Reset the student's score in the submissions API
+    # Currently this is used only by open assessment (ORA 2)
+    # We need to do this *before* retrieving the `StudentModule` model,
+    # because it's possible for a score to exist even if no student module exists.
+    if delete_module:
+        sub_api.reset_score(
+            anonymous_id_for_user(student, course_id),
+            course_id,
+            module_state_key,
+        )
+
+    module_to_reset = StudentModule.objects.get(
+        student_id=student.id,
+        course_id=course_id,
+        module_state_key=module_state_key
+    )
 
     if delete_module:
         module_to_reset.delete()
@@ -187,8 +233,27 @@ def get_email_params(course, auto_enroll):
     Returns a dict of parameters
     """
 
-    stripped_site_name = settings.SITE_NAME
-    registration_url = 'https://' + stripped_site_name + reverse('student.views.register_user')
+    stripped_site_name = microsite.get_value(
+        'SITE_NAME',
+        settings.SITE_NAME
+    )
+    registration_url = u'https://{}{}'.format(
+        stripped_site_name,
+        reverse('student.views.register_user')
+    )
+    course_url = u'https://{}{}'.format(
+        stripped_site_name,
+        reverse('course_root', kwargs={'course_id': course.id})
+    )
+
+    # We can't get the url to the course's About page if the marketing site is enabled.
+    course_about_url = None
+    if not settings.FEATURES.get('ENABLE_MKTG_SITE', False):
+        course_about_url = u'https://{}{}'.format(
+            stripped_site_name,
+            reverse('about_course', kwargs={'course_id': course.id})
+        )
+
     is_shib_course = uses_shib(course)
 
     # Composition of email
@@ -197,8 +262,8 @@ def get_email_params(course, auto_enroll):
         'registration_url': registration_url,
         'course': course,
         'auto_enroll': auto_enroll,
-        'course_url': 'https://' + stripped_site_name + '/courses/' + course.id,
-        'course_about_url': 'https://' + stripped_site_name + '/courses/' + course.id + '/about',
+        'course_url': course_url,
+        'course_about_url': course_about_url,
         'is_shib_course': is_shib_course,
     }
     return email_params
@@ -257,7 +322,15 @@ def send_mail_to_student(student, param_dict):
         'enrolled_unenroll': (
             'emails/unenroll_email_subject.txt',
             'emails/unenroll_email_enrolledmessage.txt'
-        )
+        ),
+        'add_beta_tester': (
+            'emails/add_beta_tester_email_subject.txt',
+            'emails/add_beta_tester_email_message.txt'
+        ),
+        'remove_beta_tester': (
+            'emails/remove_beta_tester_email_subject.txt',
+            'emails/remove_beta_tester_email_message.txt'
+        ),
     }
 
     subject_template, message_template = email_template_dict.get(message_type, (None, None))

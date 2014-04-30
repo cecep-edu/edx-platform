@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#pylint: disable=W0212
+# pylint: disable=W0212
 """Test for Video Xmodule functional logic.
 These test data read from xml, not from mongo.
 
@@ -20,7 +20,7 @@ from mock import Mock
 from . import LogicTest
 from lxml import etree
 from xmodule.modulestore import Location
-from xmodule.video_module import VideoDescriptor, create_youtube_string
+from xmodule.video_module import VideoDescriptor, create_youtube_string, get_ext
 from .test_import import DummySystem
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
@@ -107,6 +107,18 @@ class VideoModuleTest(LogicTest):
              '1.50': ''}
         )
 
+    def test_get_ext(self):
+        """Test get the file's extension in a url without query string."""
+        filename_str = 'http://www.example.com/path/video.mp4'
+        output = get_ext(filename_str)
+        self.assertEqual(output, 'mp4')
+
+    def test_get_ext_with_query_string(self):
+        """Test get the file's extension in a url with query string."""
+        filename_str = 'http://www.example.com/path/video.mp4?param1=1&p2=2'
+        output = get_ext(filename_str)
+        self.assertEqual(output, 'mp4')
+
 
 class VideoDescriptorTest(unittest.TestCase):
     """Test for VideoDescriptor"""
@@ -119,22 +131,6 @@ class VideoDescriptorTest(unittest.TestCase):
             scope_ids=ScopeIds(None, None, location, location),
             field_data=DictFieldData({}),
         )
-
-    def test_get_context(self):
-        """"test get_context"""
-        correct_tabs = [
-            {
-                'name': "Basic",
-                'template': "video/transcripts.html",
-                'current': True
-            },
-            {
-                'name': 'Advanced',
-                'template': 'tabs/metadata-edit-tab.html'
-            }
-        ]
-        rendered_context = self.descriptor.get_context()
-        self.assertListEqual(rendered_context['tabs'], correct_tabs)
 
     def test_create_youtube_string(self):
         """
@@ -193,6 +189,7 @@ class VideoDescriptorImportTestCase(unittest.TestCase):
               <source src="http://www.example.com/source.mp4"/>
               <source src="http://www.example.com/source.ogg"/>
               <track src="http://www.example.com/track"/>
+              <handout src="http://www.example.com/handout"/>
               <transcript language="ua" src="ukrainian_translation.srt" />
               <transcript language="ge" src="german_translation.srt" />
             </video>
@@ -215,6 +212,7 @@ class VideoDescriptorImportTestCase(unittest.TestCase):
             'start_time': datetime.timedelta(seconds=1),
             'end_time': datetime.timedelta(seconds=60),
             'track': 'http://www.example.com/track',
+            'handout': 'http://www.example.com/handout',
             'download_track': True,
             'html5_sources': ['http://www.example.com/source.mp4', 'http://www.example.com/source.ogg'],
             'data': '',
@@ -233,6 +231,7 @@ class VideoDescriptorImportTestCase(unittest.TestCase):
                    end_time="00:01:00">
               <source src="http://www.example.com/source.mp4"/>
               <track src="http://www.example.com/track"/>
+              <handout src="http://www.example.com/handout"/>
               <transcript language="uk" src="ukrainian_translation.srt" />
               <transcript language="de" src="german_translation.srt" />
             </video>
@@ -247,6 +246,7 @@ class VideoDescriptorImportTestCase(unittest.TestCase):
             'start_time': datetime.timedelta(seconds=1),
             'end_time': datetime.timedelta(seconds=60),
             'track': 'http://www.example.com/track',
+            'handout': 'http://www.example.com/handout',
             'download_track': False,
             'download_video': False,
             'html5_sources': ['http://www.example.com/source.mp4'],
@@ -277,6 +277,7 @@ class VideoDescriptorImportTestCase(unittest.TestCase):
             'start_time': datetime.timedelta(seconds=0.0),
             'end_time': datetime.timedelta(seconds=0.0),
             'track': '',
+            'handout': None,
             'download_track': False,
             'download_video': True,
             'html5_sources': ['http://www.example.com/source.mp4'],
@@ -330,6 +331,7 @@ class VideoDescriptorImportTestCase(unittest.TestCase):
             'start_time': datetime.timedelta(seconds=0.0),
             'end_time': datetime.timedelta(seconds=0.0),
             'track': '',
+            'handout': None,
             'download_track': False,
             'download_video': False,
             'html5_sources': [],
@@ -349,7 +351,8 @@ class VideoDescriptorImportTestCase(unittest.TestCase):
                 show_captions="false"
                 download_video="true"
                 sub="&quot;html5_subtitles&quot;"
-                track="&quot;http://download_track&quot;"
+                track="&quot;http://www.example.com/track&quot;"
+                handout="&quot;http://www.example.com/handout&quot;"
                 download_track="true"
                 youtube_id_0_75="&quot;OEoXaMPEzf65&quot;"
                 youtube_id_1_25="&quot;OEoXaMPEzf125&quot;"
@@ -366,7 +369,8 @@ class VideoDescriptorImportTestCase(unittest.TestCase):
             'show_captions': False,
             'start_time': datetime.timedelta(seconds=0.0),
             'end_time': datetime.timedelta(seconds=0.0),
-            'track': 'http://download_track',
+            'track': 'http://www.example.com/track',
+            'handout': 'http://www.example.com/handout',
             'download_track': True,
             'download_video': True,
             'html5_sources': ["source_1", "source_2"],
@@ -390,6 +394,7 @@ class VideoDescriptorImportTestCase(unittest.TestCase):
             'start_time': datetime.timedelta(seconds=0.0),
             'end_time': datetime.timedelta(seconds=0.0),
             'track': '',
+            'handout': None,
             'download_track': False,
             'download_video': False,
             'html5_sources': [],
@@ -513,6 +518,7 @@ class VideoExportTestCase(unittest.TestCase):
         desc.start_time = datetime.timedelta(seconds=1.0)
         desc.end_time = datetime.timedelta(seconds=60)
         desc.track = 'http://www.example.com/track'
+        desc.handout = 'http://www.example.com/handout'
         desc.download_track = True
         desc.html5_sources = ['http://www.example.com/source.mp4', 'http://www.example.com/source.ogg']
         desc.download_video = True
@@ -524,6 +530,7 @@ class VideoExportTestCase(unittest.TestCase):
            <source src="http://www.example.com/source.mp4"/>
            <source src="http://www.example.com/source.ogg"/>
            <track src="http://www.example.com/track"/>
+           <handout src="http://www.example.com/handout"/>
            <transcript language="ge" src="german_translation.srt" />
            <transcript language="ua" src="ukrainian_translation.srt" />
          </video>
