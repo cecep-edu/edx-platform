@@ -194,6 +194,7 @@ class CourseTab(object):  # pylint: disable=incomplete-protocol
             'open_ended': OpenEndedGradingTab,
             'notes': NotesTab,
             'syllabus': SyllabusTab,
+            'topic_syllabuses':TopicSyllabusTab,
             'instructor': InstructorTab,  # not persisted
         }
 
@@ -634,6 +635,26 @@ class OpenEndedGradingTab(AuthenticatedCourseTab, GradingTab):
             tab_id=self.type,
             link_func=link_reverse_func('open_ended_notifications'),
         )
+
+
+class TopicSyllabusTab(TextbookTabsBase):
+    """
+    A tab representing the collection of all Topic Syllabus
+    """
+    type = 'topic_syllabuses'
+
+    def __init__(self, tab_dict=None):  # pylint: disable=unused-argument
+        super(TopicSyllabusTab, self).__init__(
+            tab_id=self.type,
+        )
+
+    def items(self, course):
+        for index, textbook in enumerate(course.pdf_textbooks):
+            yield SingleTextbookTab(
+                name=textbook['tab_title'],
+                tab_id='topicsyllabus/{0}'.format(index),
+                link_func=lambda course, reverse_func: reverse_func('topic_syllabuses', args=[course.id, index]),
+            )
 
 
 class SyllabusTab(CourseTab):

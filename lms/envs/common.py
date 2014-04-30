@@ -504,8 +504,7 @@ ALLOWED_HOSTS = [
     'upex.iaen.edu.ec',
     'cms.iaen.edu.ec',
     'iaen.edu.ec',
-    'gmail.com',
-    'yahoo.com',
+    '192.168.20.87'
     ]
 
 # Platform Email
