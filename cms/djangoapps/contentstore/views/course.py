@@ -1037,7 +1037,7 @@ def syllabus_detail_handler(request, tid, tag=None, package_id=None, branch=None
     )
     store = get_modulestore(course.location)
     matching_id = [tb for tb in course.topic_syllabuses
-                   if str(tb.get("id")) == str(tid)]
+                   if tb.get("id") == tid]
     if matching_id:
         syllabus = matching_id[0]
     else:
