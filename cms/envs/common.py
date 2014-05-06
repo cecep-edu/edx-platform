@@ -640,7 +640,7 @@ ALLOWED_HOSTS = [
     'beta.evex.iaen.edu.ec',
     'upex.iaen.edu.ec',
     'cms.iaen.edu.ec',
-    '192.168.20.87'
+    '192.168.5.230'
     ]
 
 FEATURES['ENABLE_CREATOR_GROUP'] = True
