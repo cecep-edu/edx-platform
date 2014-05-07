@@ -2,9 +2,9 @@
 Change Log
 ############
 
-************
+***********
 May, 2014
-************
+***********
 
 .. list-table::
    :widths: 10 70
@@ -12,9 +12,15 @@ May, 2014
 
    * - Date
      - Change
+   * - 05/07/14
+     - Updated the :ref:`Discussions` chapter to include a topic on closing
+       discussions.
+   * - 05/06/14
+     - Expanded the :ref:`Grades` chapter to include a topic on interpreting the score histograms for problems.
+   * - 
+     - Updated :ref:`LTI Component` to reflect changes to the Studio UI.
    * - 05/02/14
      - Updated :ref:`Drag and Drop` information
-
 
 ************
 April, 2014

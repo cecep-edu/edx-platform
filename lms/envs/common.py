@@ -354,8 +354,6 @@ LIB_URL = '/static/js/'
 # Dev machines shouldn't need the book
 # BOOK_URL = '/static/book/'
 BOOK_URL = 'https://mitxstatic.s3.amazonaws.com/book_images/'  # For AWS deploys
-# RSS_URL = r'lms/templates/feed.rss'
-# PRESS_URL = r''
 RSS_TIMEOUT = 600
 
 # Configuration option for when we want to grab server error pages
@@ -523,7 +521,6 @@ SITE_ID = 1
 SITE_NAME = "edx.org"
 HTTPS = 'on'
 ROOT_URLCONF = 'lms.urls'
-IGNORABLE_404_ENDS = ('favicon.ico')
 # NOTE: Please set ALLOWED_HOSTS to some sane value, as we do not allow the default '*'
 ALLOWED_HOSTS = [
     'beta.cms.iaen.edu.ec',
