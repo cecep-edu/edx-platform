@@ -17,6 +17,7 @@
 %>
 
 <section class="home">
+
   <header>
     <section id="slideshow">
       <div class="html_carousel">
@@ -40,6 +41,7 @@
        </div>         
       </div>
     </section>
+
     <div class="outer-wrapper">
       <div class="title">
         <hgroup>
@@ -89,8 +91,7 @@
       % endif
     </div>
   </header>
-  <section class="container">  
-    
+  <section class="container">
     <section class="highlighted-courses">
 
       % if settings.FEATURES.get('COURSES_ARE_BROWSABLE'):
@@ -148,7 +149,6 @@
 </script>
 % endif
 
-## script del slider------------->
 <script type="text/javascript">
     $("#slider").carouFredSel({
     responsive  : true,
@@ -163,4 +163,3 @@
       }
     });
 </script>
-##<----------------------------->
