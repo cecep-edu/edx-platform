@@ -169,8 +169,10 @@ FEATURES = {
     # Enable instructor to assign individual due dates
     'INDIVIDUAL_DUE_DATES': False,
 
-    # Enable instructor dash beta version link
-    'ENABLE_INSTRUCTOR_BETA_DASHBOARD': True,
+    # Enable legacy instructor dashboard
+    'ENABLE_INSTRUCTOR_LEGACY_DASHBOARD': True,
+    # Is this an edX-owned domain? (used on instructor dashboard)
+    'IS_EDX_DOMAIN': False,
 
     # Toggle to enable certificates of courses on dashboard
     'ENABLE_VERIFIED_CERTIFICATES': False,
@@ -443,7 +445,7 @@ if FEATURES.get('ENABLE_SQL_TRACKING_LOGS'):
     })
 
 ######################## GOOGLE ANALYTICS ###########################
-GOOGLE_ANALYTICS_ACCOUNT = 'GOOGLE_ANALYTICS_ACCOUNT_DUMMY'
+GOOGLE_ANALYTICS_ACCOUNT = None
 GOOGLE_ANALYTICS_LINKEDIN = 'GOOGLE_ANALYTICS_LINKEDIN_DUMMY'
 
 ######################## subdomain specific settings ###########################
@@ -834,6 +836,7 @@ main_vendor_js = [
     'js/vendor/swfobject/swfobject.js',
     'js/vendor/jquery.ba-bbq.min.js',
     'js/vendor/ova/annotator-full.js',
+    'js/vendor/ova/annotator-full-firebase-auth.js',
     'js/vendor/ova/video.dev.js',
     'js/vendor/ova/vjs.youtube.js',
     'js/vendor/ova/rangeslider.js',
