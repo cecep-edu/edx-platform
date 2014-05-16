@@ -531,7 +531,7 @@ ALLOWED_HOSTS = [
     'cms.iaen.edu.ec',
     'iaen.edu.ec',
     '192.168.5.230',
-    '23.253.164.75',
+    '23.253.164.73',
     ]
 
 # Platform Email
