@@ -260,7 +260,6 @@ SITE_ID = 1
 SITE_NAME = "localhost:8001"
 HTTPS = 'on'
 ROOT_URLCONF = 'cms.urls'
-IGNORABLE_404_ENDS = ('favicon.ico')
 
 # Email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -321,7 +320,7 @@ PIPELINE_CSS = {
             'css/vendor/ui-lightness/jquery-ui-1.8.22.custom.css',
             'css/vendor/jquery.qtip.min.css',
             'js/vendor/markitup/skins/simple/style.css',
-            'js/vendor/markitup/sets/wiki/style.css'
+            'js/vendor/markitup/sets/wiki/style.css',
         ],
         'output_filename': 'css/cms-style-vendor.css',
     },
@@ -640,7 +639,8 @@ ALLOWED_HOSTS = [
     'beta.evex.iaen.edu.ec',
     'upex.iaen.edu.ec',
     'cms.iaen.edu.ec',
-    '192.168.5.230'
+    '192.168.5.230',
+    '23.253.164.73', 
     ]
 
 FEATURES['ENABLE_CREATOR_GROUP'] = True
