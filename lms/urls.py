@@ -222,7 +222,7 @@ if settings.COURSEWARE_ENABLED:
         url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/mktg-about$',
             'courseware.views.mktg_course_about', name="mktg_about_course"),
         #View for mktg site
-        url(r'^mktg/(?P<course_id>[^/]+/[^/]+/[^/]+)/?$',
+        url(r'^mktg/(?P<course_id>.*)$',
             'courseware.views.mktg_course_about', name="mktg_about_course"),
 
         #Inside the course
@@ -299,21 +299,21 @@ if settings.COURSEWARE_ENABLED:
             'open_ended_grading.views.take_action_on_flags', name='open_ended_flagged_problems_take_action'),
 
         # Cohorts management
-        url(r'^courses/(?P<course_key>[^/]+/[^/]+/[^/]+)/cohorts$',
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/cohorts$',
             'course_groups.views.list_cohorts', name="cohorts"),
-        url(r'^courses/(?P<course_key>[^/]+/[^/]+/[^/]+)/cohorts/add$',
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/cohorts/add$',
             'course_groups.views.add_cohort',
             name="add_cohort"),
-        url(r'^courses/(?P<course_key>[^/]+/[^/]+/[^/]+)/cohorts/(?P<cohort_id>[0-9]+)$',
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/cohorts/(?P<cohort_id>[0-9]+)$',
             'course_groups.views.users_in_cohort',
             name="list_cohort"),
-        url(r'^courses/(?P<course_key>[^/]+/[^/]+/[^/]+)/cohorts/(?P<cohort_id>[0-9]+)/add$',
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/cohorts/(?P<cohort_id>[0-9]+)/add$',
             'course_groups.views.add_users_to_cohort',
             name="add_to_cohort"),
-        url(r'^courses/(?P<course_key>[^/]+/[^/]+/[^/]+)/cohorts/(?P<cohort_id>[0-9]+)/delete$',
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/cohorts/(?P<cohort_id>[0-9]+)/delete$',
             'course_groups.views.remove_user_from_cohort',
             name="remove_from_cohort"),
-        url(r'^courses/(?P<course_key>[^/]+/[^/]+/[^/]+)/cohorts/debug$',
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/cohorts/debug$',
             'course_groups.views.debug_cohort_mgmt',
             name="debug_cohort_mgmt"),
 
@@ -377,7 +377,23 @@ if settings.COURSEWARE_ENABLED and settings.FEATURES.get('ENABLE_INSTRUCTOR_LEGA
 
 if settings.FEATURES.get('CLASS_DASHBOARD'):
     urlpatterns += (
-        url(r'^class_dashboard/', include('class_dashboard.urls')),
+        # Json request data for metrics for entire course
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/all_sequential_open_distrib$',
+            'class_dashboard.views.all_sequential_open_distrib', name="all_sequential_open_distrib"),
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/all_problem_grade_distribution$',
+            'class_dashboard.views.all_problem_grade_distribution', name="all_problem_grade_distribution"),
+
+        # Json request data for metrics for particular section
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/problem_grade_distribution/(?P<section>\d+)$',
+            'class_dashboard.views.section_problem_grade_distrib', name="section_problem_grade_distrib"),
+
+        # For listing students that opened a sub-section
+        url(r'^get_students_opened_subsection$',
+            'class_dashboard.dashboard_data.get_students_opened_subsection', name="get_students_opened_subsection"),
+
+        # For listing of students' grade per problem
+        url(r'^get_students_problem_grades$',
+            'class_dashboard.dashboard_data.get_students_problem_grades', name="get_students_problem_grades"),
     )
 
 if settings.DEBUG or settings.FEATURES.get('ENABLE_DJANGO_ADMIN_SITE'):

@@ -32,10 +32,12 @@ $ ->
 
   $('#login').click ->
     $('#login_form input[name="email"]').focus()
+    _gaq.push(['_trackPageview', '/login'])
     false
 
   $('#signup').click ->
     $('#signup-modal input[name="email"]').focus()
+    _gaq.push(['_trackPageview', '/signup'])
     false
 
   # fix for ie

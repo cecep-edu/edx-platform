@@ -1,12 +1,8 @@
-import logging
-
-from eventtracking import tracker
 from .utils import merge_dict, strip_blank, strip_none, extract, perform_request
 from .utils import CommentClientRequestError
 import models
 import settings
 
-log = logging.getLogger(__name__)
 
 class Thread(models.Model):
 
@@ -58,29 +54,6 @@ class Thread(models.Model):
             metric_action='thread.search',
             paged_results=True
         )
-        if query_params.get('text'):
-            search_query = query_params['text']
-            course_id = query_params['course_id']
-            requested_page = params['page']
-            total_results = response.get('total_results')
-            # Record search result metric to allow search quality analysis.
-            # course_id is already included in the context for the event tracker
-            tracker.emit(
-                'edx.forum.searched',
-                {
-                    'query': search_query,
-                    'page': requested_page,
-                    'total_results': total_results,
-                }
-            )
-            log.info(
-                'forum_text_search query="{search_query}" course_id={course_id} page={requested_page} total_results={total_results}'.format(
-                    search_query=search_query,
-                    course_id=course_id,
-                    requested_page=requested_page,
-                    total_results=total_results
-                )
-            )
         return response.get('collection', []), response.get('page', 1), response.get('num_pages', 1)
 
     @classmethod

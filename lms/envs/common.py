@@ -225,11 +225,8 @@ FEATURES = {
     # Hide any Personally Identifiable Information from application logs
     'SQUELCH_PII_IN_LOGS': False,
 
-    # Toggles the embargo functionality, which enable embargoing for particular courses
+    # Toggle embargo functionality
     'EMBARGO': False,
-
-    # Toggles the embargo site functionality, which enable embargoing for the whole site
-    'SITE_EMBARGOED': False,
 
     # Whether the Wiki subsystem should be accessible via the direct /wiki/ paths. Setting this to True means
     # that people can submit content and modify the Wiki in any arbitrary manner. We're leaving this as True in the
@@ -533,7 +530,8 @@ ALLOWED_HOSTS = [
     'upex.iaen.edu.ec',
     'cms.iaen.edu.ec',
     'iaen.edu.ec',
-    '192.168.20.87'
+    '192.168.5.230',
+    '23.253.164.73',
     ]
 
 # Platform Email
@@ -599,7 +597,6 @@ LANGUAGES = (
     ('gl', u'Galego'),  # Galician
     ('he', u'עברית'),  # Hebrew
     ('hi', u'हिन्दी'),  # Hindi
-    ('hr', u'hrvatski'),  # Croatian
     ('hu', u'magyar'),  # Hungarian
     ('hy-am', u'Հայերեն (Հայաստան)'),  # Armenian (Armenia)
     ('id', u'Bahasa Indonesia'),  # Indonesian
@@ -687,9 +684,6 @@ FEEDBACK_SUBMISSION_EMAIL = None
 ZENDESK_URL = None
 ZENDESK_USER = None
 ZENDESK_API_KEY = None
-
-##### EMBARGO #####
-EMBARGO_SITE_REDIRECT_URL = None
 
 ##### shoppingcart Payment #####
 PAYMENT_SUPPORT_EMAIL = 'payment@example.com'
@@ -848,6 +842,7 @@ main_vendor_js = [
     'js/vendor/ova/vjs.youtube.js',
     'js/vendor/ova/rangeslider.js',
     'js/vendor/ova/share-annotator.js',
+    'js/vendor/ova/tinymce.min.js',
     'js/vendor/ova/richText-annotator.js',
     'js/vendor/ova/reply-annotator.js',
     'js/vendor/ova/tags-annotator.js',
