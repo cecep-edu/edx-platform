@@ -19,7 +19,6 @@ from xmodule.modulestore.tests.factories import CourseFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase, mixed_store_config
 from xmodule.modulestore.inheritance import own_metadata
 from xmodule.modulestore.django import editable_modulestore
-from xmodule.modulestore.locations import SlashSeparatedCourseKey
 
 from external_auth.models import ExternalAuthMap
 from external_auth.views import shib_login, course_specific_login, course_specific_register, _flatten_to_ascii
@@ -208,58 +207,6 @@ class ShibSPTest(ModuleStoreTestCase):
                     # no audit logging calls
                     self.assertEquals(len(audit_log_calls), 0)
 
-    def _base_test_extauth_auto_activate_user_with_flag(self, log_user_string="inactive@stanford.edu"):
-        """
-        Tests that FEATURES['BYPASS_ACTIVATION_EMAIL_FOR_EXTAUTH'] means extauth automatically
-        linked users, activates them, and logs them in
-        """
-        inactive_user = UserFactory.create(email='inactive@stanford.edu')
-        inactive_user.is_active = False
-        inactive_user.save()
-        request = self.request_factory.get('/shib-login')
-        request.session = import_module(settings.SESSION_ENGINE).SessionStore()  # empty session
-        request.META.update({
-            'Shib-Identity-Provider': 'https://idp.stanford.edu/',
-            'REMOTE_USER': 'inactive@stanford.edu',
-            'mail': 'inactive@stanford.edu'
-        })
-
-        request.user = AnonymousUser()
-        with patch('external_auth.views.AUDIT_LOG') as mock_audit_log:
-            response = shib_login(request)
-        audit_log_calls = mock_audit_log.method_calls
-        # reload user from db, since the view function works via db side-effects
-        inactive_user = User.objects.get(id=inactive_user.id)
-        self.assertIsNotNone(ExternalAuthMap.objects.get(user=inactive_user))
-        self.assertTrue(inactive_user.is_active)
-        self.assertIsInstance(response, HttpResponseRedirect)
-        self.assertEqual(request.user, inactive_user)
-        self.assertEqual(response['Location'], '/')
-        # verify logging:
-        self.assertEquals(len(audit_log_calls), 3)
-        self._assert_shib_login_is_logged(audit_log_calls[0], log_user_string)
-        method_name, args, _kwargs = audit_log_calls[2]
-        self.assertEquals(method_name, 'info')
-        self.assertEquals(len(args), 1)
-        self.assertIn(u'Login success', args[0])
-        self.assertIn(log_user_string, args[0])
-
-    @unittest.skipUnless(settings.FEATURES.get('AUTH_USE_SHIB'), "AUTH_USE_SHIB not set")
-    @patch.dict(settings.FEATURES, {'BYPASS_ACTIVATION_EMAIL_FOR_EXTAUTH': True, 'SQUELCH_PII_IN_LOGS': False})
-    def test_extauth_auto_activate_user_with_flag_no_squelch(self):
-        """
-        Wrapper to run base_test_extauth_auto_activate_user_with_flag with {'SQUELCH_PII_IN_LOGS': False}
-        """
-        self._base_test_extauth_auto_activate_user_with_flag(log_user_string="inactive@stanford.edu")
-
-    @unittest.skipUnless(settings.FEATURES.get('AUTH_USE_SHIB'), "AUTH_USE_SHIB not set")
-    @patch.dict(settings.FEATURES, {'BYPASS_ACTIVATION_EMAIL_FOR_EXTAUTH': True, 'SQUELCH_PII_IN_LOGS': True})
-    def test_extauth_auto_activate_user_with_flag_squelch(self):
-        """
-        Wrapper to run base_test_extauth_auto_activate_user_with_flag with {'SQUELCH_PII_IN_LOGS': True}
-        """
-        self._base_test_extauth_auto_activate_user_with_flag(log_user_string="user.id: 1")
-
     @unittest.skipUnless(settings.FEATURES.get('AUTH_USE_SHIB'), "AUTH_USE_SHIB not set")
     def test_registration_form(self):
         """
@@ -393,8 +340,8 @@ class ShibSPTest(ModuleStoreTestCase):
                                                     '?course_id=MITx/999/course/Robot_Super_Course' +
                                                     '&enrollment_action=enroll')
 
-            login_response = course_specific_login(login_request, SlashSeparatedCourseKey('MITx', '999', 'Robot_Super_Course'))
-            reg_response = course_specific_register(login_request, SlashSeparatedCourseKey('MITx', '999', 'Robot_Super_Course'))
+            login_response = course_specific_login(login_request, 'MITx/999/Robot_Super_Course')
+            reg_response = course_specific_register(login_request, 'MITx/999/Robot_Super_Course')
 
             if "shib" in domain:
                 self.assertIsInstance(login_response, HttpResponseRedirect)
@@ -428,8 +375,8 @@ class ShibSPTest(ModuleStoreTestCase):
                                                     '?course_id=DNE/DNE/DNE/Robot_Super_Course' +
                                                     '&enrollment_action=enroll')
 
-            login_response = course_specific_login(login_request, SlashSeparatedCourseKey('DNE', 'DNE', 'DNE'))
-            reg_response = course_specific_register(login_request, SlashSeparatedCourseKey('DNE', 'DNE', 'DNE'))
+            login_response = course_specific_login(login_request, 'DNE/DNE/DNE')
+            reg_response = course_specific_register(login_request, 'DNE/DNE/DNE')
 
             self.assertIsInstance(login_response, HttpResponseRedirect)
             self.assertEqual(login_response['Location'],
@@ -489,7 +436,7 @@ class ShibSPTest(ModuleStoreTestCase):
             for student in [shib_student, other_ext_student, int_student]:
                 request = self.request_factory.post('/change_enrollment')
                 request.POST.update({'enrollment_action': 'enroll',
-                                     'course_id': course.id.to_deprecated_string()})
+                                     'course_id': course.id})
                 request.user = student
                 response = change_enrollment(request)
                 # If course is not limited or student has correct shib extauth then enrollment should be allowed
@@ -529,7 +476,7 @@ class ShibSPTest(ModuleStoreTestCase):
         self.assertFalse(CourseEnrollment.is_enrolled(student, course.id))
         self.client.logout()
         request_kwargs = {'path': '/shib-login/',
-                          'data': {'enrollment_action': 'enroll', 'course_id': course.id.to_deprecated_string(), 'next': '/testredirect'},
+                          'data': {'enrollment_action': 'enroll', 'course_id': course.id, 'next': '/testredirect'},
                           'follow': False,
                           'REMOTE_USER': 'testuser@stanford.edu',
                           'Shib-Identity-Provider': 'https://idp.stanford.edu/'}

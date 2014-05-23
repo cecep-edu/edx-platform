@@ -44,7 +44,6 @@ def get_ext(filename):
 
 
 log = logging.getLogger(__name__)
-_ = lambda text: text
 
 
 class VideoModule(VideoFields, VideoStudentViewHandlers, XModule):
@@ -178,12 +177,12 @@ class VideoDescriptor(VideoFields, VideoStudioViewHandlers, TabsEditingDescripto
 
     tabs = [
         {
-            'name': _("Basic"),
+            'name': "Basic",
             'template': "video/transcripts.html",
             'current': True
         },
         {
-            'name': _("Advanced"),
+            'name': "Advanced",
             'template': "tabs/metadata-edit-tab.html"
         }
     ]
@@ -359,7 +358,7 @@ class VideoDescriptor(VideoFields, VideoStudioViewHandlers, TabsEditingDescripto
         _ = self.runtime.service(self, "i18n").ugettext
         video_url.update({
             'help': _('The URL for your video. This can be a YouTube URL or a link to an .mp4, .ogg, or .webm video file hosted elsewhere on the Internet.'),
-            'display_name': _('Default Video URL'),
+            'display_name': 'Default Video URL',
             'field_name': 'video_url',
             'type': 'VideoList',
             'default_value': [get_youtube_link(youtube_id_1_0['default_value'])]

@@ -301,7 +301,6 @@ function (VideoPlayer, VideoStorage) {
             // TODO: use 1 class to work with.
             state.el.find('.video-player div').addClass('hidden');
             state.el.find('.video-player h3').removeClass('hidden');
-            _hideWaitPlaceholder(state);
 
             console.log(
                 '[Video info]: Non-youtube video sources aren\'t available.'
@@ -674,15 +673,6 @@ function (VideoPlayer, VideoStorage) {
                 }
             }
         });
-
-        // None of the supported video formats can be played. Hide the spinner.
-        if (!(_.compact(_.values(this.html5Sources)))) {
-            _hideWaitPlaceholder(state);
-            console.log(
-                '[Video info]: This browser cannot play .mp4, .ogg, or .webm ' +
-                'files'
-            );
-        }
     }
 
     // function fetchMetadata()

@@ -85,11 +85,8 @@ FEATURES = {
     # Hide any Personally Identifiable Information from application logs
     'SQUELCH_PII_IN_LOGS': False,
 
-    # Toggles the embargo functionality, which enable embargoing for particular courses
+    # Toggles embargo functionality
     'EMBARGO': False,
-
-    # Toggles the embargo site functionality, which enable embargoing for the whole site
-    'SITE_EMBARGOED': False,
 
     # Turn on/off Microsites feature
     'USE_MICROSITES': False,
@@ -102,6 +99,12 @@ FEATURES = {
 
     # Turn off Advanced Security by default
     'ADVANCED_SECURITY': False,
+
+    # Temporary feature flag for duplicating xblock leaves
+    'ENABLE_DUPLICATE_XBLOCK_LEAF_COMPONENT': False,
+
+    # Temporary feature flag for deleting xblock leaves
+    'ENABLE_DELETE_XBLOCK_LEAF_COMPONENT': False,
 }
 ENABLE_JASMINE = False
 
@@ -300,9 +303,6 @@ LOCALE_PATHS = (REPO_ROOT + '/conf/locale',)  # edx-platform/conf/locale/
 
 # Messages
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
-
-##### EMBARGO #####
-EMBARGO_SITE_REDIRECT_URL = None
 
 ############################### Pipeline #######################################
 
@@ -639,7 +639,8 @@ ALLOWED_HOSTS = [
     'beta.evex.iaen.edu.ec',
     'upex.iaen.edu.ec',
     'cms.iaen.edu.ec',
-    '192.168.20.87'
+    '192.168.5.230',
+    '23.253.164.73', 
     ]
 
 FEATURES['ENABLE_CREATOR_GROUP'] = True

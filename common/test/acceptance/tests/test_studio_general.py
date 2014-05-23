@@ -75,7 +75,7 @@ class CoursePagesTest(UniqueCourseTest):
         """
         Install a course with no content using a fixture.
         """
-        super(CoursePagesTest, self).setUp()
+        super(UniqueCourseTest, self).setUp()
 
         CourseFixture(
             self.course_info['org'],

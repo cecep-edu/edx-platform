@@ -4,8 +4,7 @@ define(
     ],
 function ($, _, create_sinon, Squire) {
     'use strict';
-    // TODO: fix BLD-1100 Disabled due to intermittent failure on master and in PR builds
-    xdescribe('VideoTranslations', function () {
+    describe('VideoTranslations', function () {
         var TranslationsEntryTemplate = readFixtures(
                 'video/metadata-translations-entry.underscore'
             ),

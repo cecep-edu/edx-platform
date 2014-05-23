@@ -216,23 +216,13 @@ def _external_login_or_signup(request,
         return _signup(request, eamap, retfun)
 
     if not user.is_active:
-        if settings.FEATURES.get('BYPASS_ACTIVATION_EMAIL_FOR_EXTAUTH'):
-            # if BYPASS_ACTIVATION_EMAIL_FOR_EXTAUTH, we trust external auth and activate any users
-            # that aren't already active
-            user.is_active = True
-            user.save()
-            if settings.FEATURES['SQUELCH_PII_IN_LOGS']:
-                AUDIT_LOG.info('Activating user {0} due to external auth'.format(user.id))
-            else:
-                AUDIT_LOG.info('Activating user "{0}" due to external auth'.format(uname))
+        if settings.FEATURES['SQUELCH_PII_IN_LOGS']:
+            AUDIT_LOG.warning('User {0} is not active after external login'.format(user.id))
         else:
-            if settings.FEATURES['SQUELCH_PII_IN_LOGS']:
-                AUDIT_LOG.warning('User {0} is not active after external login'.format(user.id))
-            else:
-                AUDIT_LOG.warning('User "{0}" is not active after external login'.format(uname))
-            # TODO: improve error page
-            msg = 'Account not yet activated: please look for link in your email'
-            return default_render_failure(request, msg)
+            AUDIT_LOG.warning('User "{0}" is not active after external login'.format(uname))
+        # TODO: improve error page
+        msg = 'Account not yet activated: please look for link in your email'
+        return default_render_failure(request, msg)
 
     login(request, user)
     request.session.set_expiry(0)
@@ -589,8 +579,9 @@ def course_specific_login(request, course_id):
        Dispatcher function for selecting the specific login method
        required by the course
     """
-    course = student.views.course_from_id(course_id)
-    if not course:
+    try:
+        course = course_from_id(course_id)
+    except ItemNotFoundError:
         # couldn't find the course, will just return vanilla signin page
         return redirect_with_get('signin_user', request.GET)
 
@@ -607,9 +598,9 @@ def course_specific_register(request, course_id):
         Dispatcher function for selecting the specific registration method
         required by the course
     """
-    course = student.views.course_from_id(course_id)
-
-    if not course:
+    try:
+        course = course_from_id(course_id)
+    except ItemNotFoundError:
         # couldn't find the course, will just return vanilla registration page
         return redirect_with_get('register_user', request.GET)
 
@@ -950,3 +941,9 @@ def provider_xrds(request):
     # custom XRDS header necessary for discovery process
     response['X-XRDS-Location'] = get_xrds_url('xrds', request)
     return response
+
+
+def course_from_id(course_id):
+    """Return the CourseDescriptor corresponding to this course_id"""
+    course_loc = CourseDescriptor.id_to_location(course_id)
+    return modulestore().get_instance(course_id, course_loc)

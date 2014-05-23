@@ -10,12 +10,9 @@ import textwrap
 
 log = logging.getLogger(__name__)
 
-# Make '_' a no-op so we can scrape strings
-_ = lambda text: text
-
 
 class AnnotatableFields(object):
-    data = String(help=_("XML data for the annotation"), scope=Scope.content,
+    data = String(help="XML data for the annotation", scope=Scope.content,
         default=textwrap.dedent(
         """\
         <annotatable>
@@ -35,8 +32,8 @@ class AnnotatableFields(object):
         </annotatable>
         """))
     display_name = String(
-        display_name=_("Display Name"),
-        help=_("Display name for this module"),
+        display_name="Display Name",
+        help="Display name for this module",
         scope=Scope.settings,
         default='Annotation',
     )

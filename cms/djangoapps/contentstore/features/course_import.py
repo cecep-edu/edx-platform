@@ -1,9 +1,5 @@
-# pylint: disable=C0111
-# pylint: disable=W0621
-# pylint: disable=W0613
-
 import os
-from lettuce import world, step
+from lettuce import world
 from django.conf import settings
 
 
@@ -18,8 +14,7 @@ def import_file(filename):
     world.css_click(outline_css)
 
 
-@step('I go to the import page$')
-def go_to_import(step):
+def go_to_import():
     menu_css = 'li.nav-course-tools'
     import_css = 'li.nav-course-tools-import a'
     world.css_click(menu_css)

@@ -6,7 +6,7 @@ from pipeline.utils import guess_type
 from static_replace import try_staticfiles_lookup
 
 
-def compressed_css(package_name, raw=False):
+def compressed_css(package_name):
     package = settings.PIPELINE_CSS.get(package_name, {})
     if package:
         package = {package_name: package}
@@ -15,19 +15,17 @@ def compressed_css(package_name, raw=False):
     package = packager.package_for('css', package_name)
 
     if settings.PIPELINE:
-        return render_css(package, package.output_filename, raw=raw)
+        return render_css(package, package.output_filename)
     else:
         paths = packager.compile(package.paths)
-        return render_individual_css(package, paths, raw=raw)
+        return render_individual_css(package, paths)
 
 
-def render_css(package, path, raw=False):
+def render_css(package, path):
     template_name = package.template_name or "mako/css.html"
     context = package.extra_context
 
     url = try_staticfiles_lookup(path)
-    if raw:
-        url += "?raw"
     context.update({
         'type': guess_type(path, 'text/css'),
         'url': url,
@@ -35,8 +33,8 @@ def render_css(package, path, raw=False):
     return render_to_string(template_name, context)
 
 
-def render_individual_css(package, paths, raw=False):
-    tags = [render_css(package, path, raw) for path in paths]
+def render_individual_css(package, paths):
+    tags = [render_css(package, path) for path in paths]
     return '\n'.join(tags)
 
 

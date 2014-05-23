@@ -64,7 +64,7 @@ define(['js/capa/drag_and_drop/draggable_events', 'js/capa/drag_and_drop/draggab
                                 'color: black; ' +
                                 'font-size: 0.95em; ' +
                             '" ' +
-                        'role="label">' +
+                        '>' +
                             draggableObj.originalConfigObj.label +
                         '</div>'
                     );
@@ -160,7 +160,6 @@ define(['js/capa/drag_and_drop/draggable_events', 'js/capa/drag_and_drop/draggab
             'correctZIndexes': draggableLogic.correctZIndexes,
             'moveBackToSlider': draggableLogic.moveBackToSlider,
             'moveDraggableTo': draggableLogic.moveDraggableTo,
-            'toggleTargets': draggableLogic.toggleTargets,
 
             'makeDraggableCopy': makeDraggableCopy,
 
@@ -182,9 +181,8 @@ define(['js/capa/drag_and_drop/draggable_events', 'js/capa/drag_and_drop/draggab
                     'border-right: 1px solid #CCC; ' +
                     'text-align: center; ' +
                     'position: relative; ' +
-                    'cursor: move; ' +
                 '" ' +
-                'role="listitem"></div>'
+                '></div>'
         );
 
         draggableObj.containerEl.appendTo(state.sliderEl);
@@ -239,7 +237,6 @@ define(['js/capa/drag_and_drop/draggable_events', 'js/capa/drag_and_drop/draggab
                                 'position: absolute; ' +
                                 'color: black; ' +
                                 'font-size: 0.95em; ' +
-                                'cursor: move; ' +
                             '" ' +
                         '>' +
                             obj.label +
@@ -279,9 +276,7 @@ define(['js/capa/drag_and_drop/draggable_events', 'js/capa/drag_and_drop/draggab
                             'position: absolute; ' +
                             'color: black; ' +
                             'font-size: 0.95em; ' +
-                            'cursor: move; ' +
                         '" ' +
-                        'tabindex="0" aria-grabbed="false" role="listitem"' +
                     '>' +
                         obj.label +
                     '</div>'

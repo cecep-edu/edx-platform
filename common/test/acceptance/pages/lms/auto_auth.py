@@ -65,9 +65,7 @@ class AutoAuthPage(PageObject):
         return url
 
     def is_browser_on_page(self):
-        message = self.q(css='BODY').text[0]
-        match = re.search(r'Logged in user ([^$]+) with password ([^$]+) and user_id ([^$]+)$', message)
-        return True if match else False
+        return True
 
     def get_user_id(self):
         """

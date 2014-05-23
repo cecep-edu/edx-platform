@@ -265,8 +265,7 @@
 
     <!-- view -->
     <div class="wrapper wrapper-view">
-        <% online_help_token = self.online_help_token() if hasattr(self, 'online_help_token') else None %>
-        <%include file="widgets/header.html" args="online_help_token=online_help_token" />
+      <%include file="widgets/header.html" />
 
       <div id="page-alert"></div>
 
@@ -278,7 +277,7 @@
       <script type="text/javascript">
         require(['js/sock']);
       </script>
-      <%include file="widgets/sock.html" args="online_help_token=online_help_token" />
+      <%include file="widgets/sock.html" />
       % endif
 
       <%include file="widgets/footer.html" />
@@ -291,6 +290,28 @@
     <%block name="jsextra"></%block>
     <div class="modal-cover"></div>
   </body>
+
+<!-- Piwik -->
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+  _paq.push(["setCookieDomain", "*.upex.iaen.edu.ec"]);
+  _paq.push(["trackPageView"]);
+  _paq.push(["enableLinkTracking"]);
+
+  (function() {
+    var u=(("https:" == document.location.protocol) ? "https" : "http")
++ "://stats.iaen.edu.ec/";
+    _paq.push(["setTrackerUrl", u+"piwik.php"]);
+    _paq.push(["setSiteId", "7"]);
+    var d=document, g=d.createElement("script"),
+s=d.getElementsByTagName("script")[0]; g.type="text/javascript";
+    g.defer=true; g.async=true; g.src=u+"piwik.js";
+s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Piwik Code -->
+
 
   <%include file="widgets/qualaroo.html" />
 </html>

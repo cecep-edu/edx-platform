@@ -1,4 +1,4 @@
-define(["sinon", "underscore"], function(sinon, _) {
+define(["sinon"], function(sinon) {
     var fakeServer, fakeRequests, respondWithJson, respondWithError;
 
     /* These utility methods are used by Jasmine tests to create a mock server or
@@ -46,18 +46,14 @@ define(["sinon", "underscore"], function(sinon, _) {
     };
 
     respondWithJson = function(requests, jsonResponse, requestIndex) {
-        if (_.isUndefined(requestIndex)) {
-            requestIndex = requests.length - 1;
-        }
+        requestIndex = requestIndex || requests.length - 1;
         requests[requestIndex].respond(200,
             { "Content-Type": "application/json" },
             JSON.stringify(jsonResponse));
     };
 
     respondWithError = function(requests, requestIndex) {
-        if (_.isUndefined(requestIndex)) {
-            requestIndex = requests.length - 1;
-        }
+        requestIndex = requestIndex || requests.length - 1;
         requests[requestIndex].respond(500,
             { "Content-Type": "application/json" },
             JSON.stringify({ }));
