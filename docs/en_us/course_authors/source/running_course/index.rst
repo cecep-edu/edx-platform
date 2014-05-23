@@ -13,6 +13,5 @@ Running Your Course
    discussion_guidance_moderators
    course_data
    course_student
-   course_answers
    course_grades
    checking_student_progress

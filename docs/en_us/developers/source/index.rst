@@ -23,8 +23,6 @@ Contents:
     analytics.rst
     process/index
     testing/index
-    code-considerations
-    deploy-new-service
 
 APIs
 -----

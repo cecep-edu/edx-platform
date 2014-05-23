@@ -22,8 +22,6 @@ from xmodule.video_module.transcripts_utils import (
     TranscriptException,
     TranscriptsGenerationException,
 )
-from xmodule.modulestore.mongo.base import MongoModuleStore
-from xmodule.modulestore.locations import AssetLocation
 
 SRT_content = textwrap.dedent("""
         0
@@ -49,7 +47,7 @@ def _check_asset(location, asset_name):
     Check that asset with asset_name exists in assets.
     """
     content_location = StaticContent.compute_location(
-        location.course_key, asset_name
+        location.org, location.course, asset_name
     )
     try:
         contentstore().find(content_location)
@@ -64,12 +62,16 @@ def _clear_assets(location):
     """
     store = contentstore()
 
-    assets, __ = store.get_all_content_for_course(location.course_key)
+    content_location = StaticContent.compute_location(
+        location.org, location.course, location.name
+    )
+
+    assets, __ = store.get_all_content_for_course(content_location)
     for asset in assets:
-        asset_location = AssetLocation._from_deprecated_son(asset["_id"], location.course_key.run)
+        asset_location = Location(asset["_id"])
         del_cached_content(asset_location)
-        mongo_id = asset_location.to_deprecated_son()
-        store.delete(mongo_id)
+        id = StaticContent.get_id_from_location(asset_location)
+        store.delete(id)
 
 
 def _get_subs_id(filename):
@@ -96,7 +98,7 @@ def _upload_sjson_file(subs_file, location, default_filename='subs_{}.srt.sjson'
 def _upload_file(subs_file, location, filename):
     mime_type = subs_file.content_type
     content_location = StaticContent.compute_location(
-        location.course_key, filename
+        location.org, location.course, filename
     )
     content = StaticContent(content_location, filename, mime_type, subs_file.read())
     contentstore().save(content)
@@ -411,42 +413,6 @@ class TestTranscriptTranslationGetDispatch(TestVideo):
         self.course.save()
         store = editable_modulestore()
         store.update_item(self.course, 'OEoXaMPEzfM')
-
-        # Test youtube style en
-        request = Request.blank('/translation/en?videoId=12345')
-        response = self.item.transcript(request=request, dispatch='translation/en')
-        self.assertEqual(response.status, '307 Temporary Redirect')
-        self.assertIn(
-            ('Location', '/static/dummy/static/subs_12345.srt.sjson'),
-            response.headerlist
-        )
-
-        # Test HTML5 video style
-        self.item.sub = 'OEoXaMPEzfM'
-        request = Request.blank('/translation/en')
-        response = self.item.transcript(request=request, dispatch='translation/en')
-        self.assertEqual(response.status, '307 Temporary Redirect')
-        self.assertIn(
-            ('Location', '/static/dummy/static/subs_OEoXaMPEzfM.srt.sjson'),
-            response.headerlist
-        )
-
-        # Test different language to ensure we are just ignoring it since we can't
-        # translate with static fallback
-        request = Request.blank('/translation/uk')
-        response = self.item.transcript(request=request, dispatch='translation/uk')
-        self.assertEqual(response.status, '404 Not Found')
-
-    def test_xml_transcript(self):
-        """
-        Set data_dir and remove runtime modulestore to simulate an XMLModuelStore course.
-        Then run the same tests as static_asset_path run.
-        """
-        # Simulate XMLModuleStore xmodule
-        self.item_descriptor.data_dir = 'dummy/static'
-        del self.item_descriptor.runtime.modulestore
-
-        self.assertFalse(self.course.static_asset_path)
 
         # Test youtube style en
         request = Request.blank('/translation/en?videoId=12345')

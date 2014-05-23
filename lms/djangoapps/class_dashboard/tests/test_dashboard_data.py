@@ -14,6 +14,7 @@ from courseware.tests.tests import TEST_DATA_MONGO_MODULESTORE
 from courseware.tests.factories import StudentModuleFactory
 from student.tests.factories import UserFactory, CourseEnrollmentFactory, AdminFactory
 from capa.tests.response_xml_factory import StringResponseXMLFactory
+from xmodule.modulestore import Location
 
 from class_dashboard.dashboard_data import (get_problem_grade_distribution, get_sequential_open_distrib,
                                             get_problem_set_grade_distrib, get_d3_problem_grade_distrib,
@@ -81,7 +82,7 @@ class TestGetProblemGradeDistribution(ModuleStoreTestCase):
                     max_grade=1 if i < j else 0.5,
                     student=user,
                     course_id=self.course.id,
-                    module_state_key=self.item.location,
+                    module_state_key=Location(self.item.location).url(),
                     state=json.dumps({'attempts': self.attempts}),
                 )
 
@@ -89,19 +90,16 @@ class TestGetProblemGradeDistribution(ModuleStoreTestCase):
                 StudentModuleFactory.create(
                     course_id=self.course.id,
                     module_type='sequential',
-                    module_state_key=self.item.location,
+                    module_state_key=Location(self.item.location).url(),
                 )
 
     def test_get_problem_grade_distribution(self):
 
-        prob_grade_distrib, total_student_count = get_problem_grade_distribution(self.course.id)
+        prob_grade_distrib = get_problem_grade_distribution(self.course.id)
 
         for problem in prob_grade_distrib:
             max_grade = prob_grade_distrib[problem]['max_grade']
             self.assertEquals(1, max_grade)
-
-        for val in total_student_count.values():
-            self.assertEquals(USER_COUNT, val)
 
     def test_get_sequential_open_distibution(self):
 
@@ -113,7 +111,7 @@ class TestGetProblemGradeDistribution(ModuleStoreTestCase):
 
     def test_get_problemset_grade_distrib(self):
 
-        prob_grade_distrib, __ = get_problem_grade_distribution(self.course.id)
+        prob_grade_distrib = get_problem_grade_distribution(self.course.id)
         probset_grade_distrib = get_problem_set_grade_distrib(self.course.id, prob_grade_distrib)
 
         for problem in probset_grade_distrib:
@@ -158,7 +156,7 @@ class TestGetProblemGradeDistribution(ModuleStoreTestCase):
 
     def test_get_students_problem_grades(self):
 
-        attributes = '?module_id=' + self.item.location.to_deprecated_string()
+        attributes = '?module_id=' + self.item.location.url()
         request = self.request_factory.get(reverse('get_students_problem_grades') + attributes)
 
         response = get_students_problem_grades(request)
@@ -176,7 +174,7 @@ class TestGetProblemGradeDistribution(ModuleStoreTestCase):
     def test_get_students_problem_grades_max(self):
 
         with patch('class_dashboard.dashboard_data.MAX_SCREEN_LIST_LENGTH', 2):
-            attributes = '?module_id=' + self.item.location.to_deprecated_string()
+            attributes = '?module_id=' + self.item.location.url()
             request = self.request_factory.get(reverse('get_students_problem_grades') + attributes)
 
             response = get_students_problem_grades(request)
@@ -190,7 +188,7 @@ class TestGetProblemGradeDistribution(ModuleStoreTestCase):
     def test_get_students_problem_grades_csv(self):
 
         tooltip = 'P1.2.1 Q1 - 3382 Students (100%: 1/1 questions)'
-        attributes = '?module_id=' + self.item.location.to_deprecated_string() + '&tooltip=' + tooltip + '&csv=true'
+        attributes = '?module_id=' + self.item.location.url() + '&tooltip=' + tooltip + '&csv=true'
         request = self.request_factory.get(reverse('get_students_problem_grades') + attributes)
 
         response = get_students_problem_grades(request)
@@ -210,7 +208,7 @@ class TestGetProblemGradeDistribution(ModuleStoreTestCase):
 
     def test_get_students_opened_subsection(self):
 
-        attributes = '?module_id=' + self.item.location.to_deprecated_string()
+        attributes = '?module_id=' + self.item.location.url()
         request = self.request_factory.get(reverse('get_students_opened_subsection') + attributes)
 
         response = get_students_opened_subsection(request)
@@ -223,7 +221,7 @@ class TestGetProblemGradeDistribution(ModuleStoreTestCase):
 
         with patch('class_dashboard.dashboard_data.MAX_SCREEN_LIST_LENGTH', 2):
 
-            attributes = '?module_id=' + self.item.location.to_deprecated_string()
+            attributes = '?module_id=' + self.item.location.url()
             request = self.request_factory.get(reverse('get_students_opened_subsection') + attributes)
 
             response = get_students_opened_subsection(request)
@@ -237,68 +235,13 @@ class TestGetProblemGradeDistribution(ModuleStoreTestCase):
     def test_get_students_opened_subsection_csv(self):
 
         tooltip = '4162 student(s) opened Subsection 5: Relational Algebra Exercises'
-        attributes = '?module_id=' + self.item.location.to_deprecated_string() + '&tooltip=' + tooltip + '&csv=true'
+        attributes = '?module_id=' + self.item.location.url() + '&tooltip=' + tooltip + '&csv=true'
         request = self.request_factory.get(reverse('get_students_opened_subsection') + attributes)
 
         response = get_students_opened_subsection(request)
         self.assertContains(response, '"Name","Username"')
         # Check response contains 1 line for each user +1 for the header
         self.assertEquals(USER_COUNT + 1, len(response.content.splitlines()))
-
-    def test_post_metrics_data_subsections_csv(self):
-
-        url = reverse('post_metrics_data_csv')
-
-        sections = json.dumps(["Introduction"])
-        tooltips = json.dumps([[{"subsection_name": "Pre-Course Survey", "subsection_num": 1, "type": "subsection", "num_students": 18963}]])
-        course_id = self.course.id
-        data_type = 'subsection'
-
-        data = json.dumps({'sections': sections,
-                           'tooltips': tooltips,
-                           'course_id': course_id.to_deprecated_string(),
-                           'data_type': data_type,
-                           })
-
-        response = self.client.post(url, {'data': data})
-        # Check response contains 1 line for header, 1 line for Section and 1 line for Subsection
-        self.assertEquals(3, len(response.content.splitlines()))
-
-    def test_post_metrics_data_problems_csv(self):
-
-        url = reverse('post_metrics_data_csv')
-
-        sections = json.dumps(["Introduction"])
-        tooltips = json.dumps([[[
-            {'student_count_percent': 0,
-             'problem_name': 'Q1',
-             'grade': 0,
-             'percent': 0,
-             'label': 'P1.2.1',
-             'max_grade': 1,
-             'count_grade': 26,
-             'type': u'problem'},
-            {'student_count_percent': 99,
-             'problem_name': 'Q1',
-             'grade': 1,
-             'percent': 100,
-             'label': 'P1.2.1',
-             'max_grade': 1,
-             'count_grade': 4763,
-             'type': 'problem'},
-        ]]])
-        course_id = self.course.id
-        data_type = 'problem'
-
-        data = json.dumps({'sections': sections,
-                           'tooltips': tooltips,
-                           'course_id': course_id.to_deprecated_string(),
-                           'data_type': data_type,
-                           })
-
-        response = self.client.post(url, {'data': data})
-        # Check response contains 1 line for header, 1 line for Sections and 2 lines for problems
-        self.assertEquals(4, len(response.content.splitlines()))
 
     def test_get_section_display_name(self):
 

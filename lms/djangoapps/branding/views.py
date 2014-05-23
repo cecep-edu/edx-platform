@@ -46,7 +46,10 @@ def index(request):
     # keep specialized logic for Edge until we can migrate over Edge to fully use
     # microsite definitions
     if domain and 'edge.edx.org' in domain:
-        return redirect(reverse("signin_user"))
+        context = {
+            'suppress_toplevel_navigation': True
+        }
+        return render_to_response('university_profile/edge.html', context)
 
     #  we do not expect this case to be reached in cases where
     #  marketing and edge are enabled

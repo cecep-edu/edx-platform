@@ -10,27 +10,11 @@ You can designate a team of people to help you run your course. Two roles are av
 
 * Instructors
 
-<<<<<<< HEAD
 .. **Question**: how does this team, set up on the Instructor Dashboard, differ from the "Course Team Members" that you add in Studio (Settings > Course Team)?
 
 You can also designate people to help you beta test a course and to moderate and manage discussions. Beta testers and discussion administrators must be enrolled in your course, but you do not need to give them a staff role. For more information, see :ref:`Assigning_discussion_roles`. 
 
 .. insert ":ref:`Beta_Testing` and " above after "see"
-=======
-You can assign these privileged roles when you work in either the LMS or in
-Studio, and the users who have these roles can work on your course in both the
-LMS and Studio. For more information on setting up a team in Studio, see
-:ref:`Add Course Team Members`.
-
-.. note:: The LMS "Course Staff" role is the same as the Studio "Staff" role, and the LMS "Instructors" role is the same as the Studio "Admin" role.
-
-You can also designate teams of people to beta test your course and to
-moderate and manage its discussions by assigning other LMS roles. The beta
-testers and discussion administrators must be enrolled in your course, but
-they do not need to have the Course Staff or Instructors role or a Studio
-role. For more information, see :ref:`Beta_Testing` and
-:ref:`Assigning_discussion_roles`.
->>>>>>> 50e05eb6a0f6c5690985fdc3bbcadf5967c609c9
 
 You use these roles to define the team that helps you run your course. To help you develop a course in Studio, you set up a team in Studio. For more information, see :ref:`Add Course Team Members`.
 
@@ -78,7 +62,9 @@ To assign a staff role:
 
 #. View the live version of your course.
 
-#. Click **Instructor**, then click **Membership**.
+#. Click **Instructor** then **Try New Beta Dashboard**.
+
+#. Click **Membership**.
 
 #. In the Administration List Management section, use the drop-down list to select **Course Staff** or **Instructors**.
 

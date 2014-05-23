@@ -11,7 +11,6 @@ from courseware.tests.tests import TEST_DATA_MIXED_MODULESTORE
 from capa.tests.response_xml_factory import StringResponseXMLFactory
 from courseware.tests.factories import StudentModuleFactory
 from xmodule.modulestore import Location
-from xmodule.modulestore.locations import SlashSeparatedCourseKey
 from xmodule.modulestore.django import modulestore
 
 
@@ -65,13 +64,10 @@ class TestGradebook(ModuleStoreTestCase):
                     max_grade=1,
                     student=user,
                     course_id=self.course.id,
-                    module_state_key=item.location
+                    module_state_key=Location(item.location).url()
                 )
 
-        self.response = self.client.get(reverse(
-            'gradebook_legacy',
-            args=(self.course.id.to_deprecated_string(),)
-        ))
+        self.response = self.client.get(reverse('gradebook_legacy', args=(self.course.id,)))
 
     def test_response_code(self):
         self.assertEquals(self.response.status_code, 200)

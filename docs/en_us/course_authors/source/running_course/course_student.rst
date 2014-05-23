@@ -81,7 +81,9 @@ To download or view student data:
 
 #. View the live version of your course.
 
-#. Click **Instructor**, then click **Data Download**.
+#. Click **Instructor** then **Try New Beta Dashboard**.
+
+#. Click **Data Download**.
 
 #. To download data about enrolled students in a CSV file, click **Download profile information as a CSV**.
 
@@ -106,7 +108,9 @@ To display demographic data for your students:
 
 #. View the live version of your course.
 
-#. Click **Instructor**, then click **Analytics**. 
+#. Click **Instructor** then **Try New Beta Dashboard**.
+
+#. Click **Analytics**. 
 
    * The Year of Birth section displays a chart of enrolled students plotted by year of birth.
 
@@ -135,8 +139,9 @@ To download a file of assigned user IDs and anonymized user IDs:
 
 #. View the live version of your course.
 
-#. Click **Instructor**, then click **Data Download**.
-#. Click **Get Student Anonymized IDs CSV**.
+#. Click **Instructor** > **Try New Beta Dashboard**.
+
+#. Click **Data Download** > **Get Student Anonymized IDs CSV**.
 
 You are prompted to open or save the (course-id)-anon-id.csv file for your course. This file contains the user ID that is assigned to each student at registration and its corresponding anonymized ID. Values are included for every student who ever enrolled for your course. 
 
