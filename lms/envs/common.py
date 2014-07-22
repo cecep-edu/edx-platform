@@ -532,6 +532,10 @@ ALLOWED_HOSTS = [
     'iaen.edu.ec',
     '192.168.5.230',
     '23.253.164.73',
+    'beta.upex.edu.ec',
+    'beta.cms.upex.edu.ec',
+    'upex.edu.ec',
+    'cms.upex.edu.ec'
     ]
 
 # Platform Email
