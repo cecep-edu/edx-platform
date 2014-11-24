@@ -159,4 +159,5 @@ urlpatterns += (
 
 urlpatterns += (
     url(r'^city_lookup/$', 'cities.views.lookup_handler', name='lookup_handler'),
+    url(r'^reports/', include('upex_reports.urls')),
 )
