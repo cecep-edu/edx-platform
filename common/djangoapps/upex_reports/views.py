@@ -8,8 +8,15 @@ from xmodule.error_module import ErrorDescriptor
 from contentstore.views.item import create_xblock_info
 
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
+from opaque_keys.edx.keys import CourseKey
 
 from course_action_state.models import CourseRerunState, CourseRerunUIStateManager
+
+from instructor.access import list_with_level
+
+from courseware.courses import get_course_with_access, get_course_by_id
+
+import instructor_analytics.basic
 
 # GET /reports
 def index(request):
@@ -40,6 +47,84 @@ def course(request):
     resp = course_outline_json(request, course_module)
 
     return JsonResponse(resp)
+
+
+# GET /reports/api/subscribers
+def subscribers(request):  # pylint: disable=W0613, W0621
+    org = request.GET.get('org')
+    course = request.GET.get('course')
+    name = request.GET.get('name')
+    course_id = SlashSeparatedCourseKey(org, course, name)
+
+    course = get_course_by_id(course_id)
+
+    query_features = [
+        'id', 'username', 'name', 'email', 'language', 'location',
+        'year_of_birth', 'gender', 'level_of_education', 'mailing_address',
+        'goals'
+    ]
+
+    student_data = instructor_analytics.basic.enrolled_students_features(course_id, query_features)
+    response_payload = {
+        'course_id': unicode(course_id),
+        'students': student_data,
+        'students_count': len(student_data)
+    }
+    return JsonResponse(response_payload)
+
+
+# GET /reports/api/subs
+def course_role_members(request):
+    """
+    List instructors and staff.
+    Requires instructor access.
+
+    rolename is one of ['instructor', 'staff', 'beta']
+
+    Returns JSON of the form {
+        "course_id": "some/course/id",
+        "staff": [
+            {
+                "username": "staff1",
+                "email": "staff1@example.org",
+                "first_name": "Joe",
+                "last_name": "Shmoe",
+            }
+        ]
+    }
+    """
+    org = request.GET.get('org')
+    course = request.GET.get('course')
+    name = request.GET.get('name')
+    course_id = SlashSeparatedCourseKey(org, course, name)
+
+    #course = get_course_with_access(
+    #    request.user, 'instructor', course_id, depth=None
+    #)
+
+    course = get_course_with_access(
+        request.user, 'instructor', course_id, depth=None
+    )
+
+    rolename = 'instructor'
+
+    def extract_user_info(user):
+        """ convert user into dicts for json view """
+        return {
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+        }
+
+    response_payload = {
+        'course_id': course_id.to_deprecated_string(),
+        rolename: map(extract_user_info, list_with_level(
+            course, rolename
+        )),
+    }
+    return JsonResponse(response_payload)
+
 
 
 def courses_list():
@@ -86,3 +171,4 @@ def course_outline_json(request, course_module):
 def get_course_module(course_key, depth=0):
     course_module = modulestore().get_course(course_key, depth=depth)
     return course_module
+

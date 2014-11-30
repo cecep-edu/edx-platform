@@ -4,4 +4,5 @@ urlpatterns = patterns('',
                url(r'^$', 'upex_reports.views.index', name="index_reports"),
                url(r'^api/courses$', 'upex_reports.views.courses', name="courses"),
                url(r'^api/course$', 'upex_reports.views.course', name="course"),
+               url(r'^api/subscribers$', 'upex_reports.views.subscribers', name="subscribers"),
 )
