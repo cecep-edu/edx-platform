@@ -13,8 +13,25 @@ angular.module('rUPEx.controllers', [])
 
   })
 
-  .controller('CourseShowCtrl', function($scope) {
-  	console.log("MUESTRA CURSO");
+  .controller('CourseShowCtrl', function($scope, $routeParams, $http) {
+  	var _course = $routeParams.course_id.split("/");
+
+    var data = {
+      org: _course[0],
+      course: _course[1],
+      name: _course[2]
+    };
+
+    $http({
+      url: "/reports/api/course",
+      params: data,
+      method: 'GET'
+    }).success(function(response) {
+      console.log(response);
+      $scope.course = response;
+      //$scope.$apply();
+    });
+
   })
 
   .controller('StudentIndexCtrl', function($scope) {

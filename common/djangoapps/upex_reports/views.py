@@ -7,14 +7,16 @@ from xmodule.error_module import ErrorDescriptor
 #from contentstore.views.course import *
 from contentstore.views.item import create_xblock_info
 
+from opaque_keys.edx.locations import SlashSeparatedCourseKey
+
 from course_action_state.models import CourseRerunState, CourseRerunUIStateManager
 
-
+# GET /reports
 def index(request):
 	return render_to_response('upex_reports/base.html')
 
-
-def get_courses(request):
+# GET /reports/api/courses
+def courses(request):
 	courses, in_proccess = courses_list()
 	
 	resp = []
@@ -25,8 +27,20 @@ def get_courses(request):
 
 	return JsonResponse(resp)
 
-def get_course(request):
-	params = request.GET.get('course_id')
+
+# GET /reports/api/course
+def course(request):
+    org = request.GET.get('org')
+    course = request.GET.get('course')
+    name = request.GET.get('name')
+
+    course_key = SlashSeparatedCourseKey(org, course, name)
+
+    course_module = get_course_module(course_key)
+    resp = course_outline_json(request, course_module)
+
+    return JsonResponse(resp)
+
 
 def courses_list():
     """
