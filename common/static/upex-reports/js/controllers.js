@@ -9,6 +9,18 @@ angular.module('rUPEx.controllers', [])
     		console.log(response);
     		$scope.courses = response;
     	});
+
+    $scope.downloadCSV = function(courses) {
+      var csv = Papa.unparse(courses);
+      console.log(csv);
+
+      var data = "text/csv;charset=utf-8," + encodeURIComponent(csv);
+      $('<p><a href="data:' + data + '" download="upex-list-courses.csv">Descargar el listado de cursos en formato CSV</a></p>')
+        .appendTo('#link-download-csv-list-courses');
+
+      $("#downloadCSVListCourses").modal('show');
+    };
+
   })
 
   .controller('CourseShowCtrl', function($scope, $routeParams, $http) {
@@ -48,7 +60,26 @@ angular.module('rUPEx.controllers', [])
       $scope.subscribers = response;
       $scope.students = response.students;
       $scope.students_count = response.students_count;
-    })
+    });
+
+    $scope.downloadCSV = function(course, students) {
+      var csvCourse = Papa.unparse(course);
+      console.log(csvCourse);
+
+      var csvSubscribers = Papa.unparse(students);
+      console.log(csvSubscribers);
+
+      var dataCourse = "text/csv;charset=utf-8," + encodeURIComponent(csvCourse);
+      $('<p><a href="data:' + dataCourse + '" download="upex-data-course.csv">Descargar la información del curso en formato CSV</a></p>')
+        .appendTo('#link-download-csv-info-course');
+
+      var dataSubscribers = "text/csv;charset=utf-8," + encodeURIComponent(csvSubscribers);
+      $('<p><a href="data:' + dataSubscribers + '" download="upex-data-subscribers.csv">Descargar la información de subscritos en formato CSV</a></p>')
+        .appendTo('#link-download-csv-info-course');
+
+      $("#downloadCSVInfoCourse").modal('show');
+    };
+
 
   })
 
@@ -56,11 +87,26 @@ angular.module('rUPEx.controllers', [])
     $("#courses-link").removeClass("active");
     $("#students-link").addClass("active");
 
-    $http.get("/reports/api/students")
-      .success(function(response) {
+    $http({
+      url: "/reports/api/students",
+      method: 'GET'
+    }).success(function(response) {
         console.log(response);
         $scope.students = response;
-      });
+    });
+
+    // está función no recoge $scope.students
+    $scope.downloadCSV = function(students) {
+      var csv = Papa.unparse(students);
+      console.log(csv);
+
+      var data = "text/csv;charset=utf-8," + encodeURIComponent(csv);
+      $('<p><a href="data:' + data + '" download="upex-list-students.csv">Descargar el listado de alumnos en formato CSV</a></p>')
+        .appendTo('#link-download-csv-list-students');
+
+      $("#downloadCSVListStudents").modal('show');
+    };
+
   })
 
   .controller('StudentShowCtrl', function($scope, $http, $routeParams) {
@@ -76,5 +122,24 @@ angular.module('rUPEx.controllers', [])
       $scope.student = response;
       $scope.courses = response.courses;
     });
+
+    $scope.downloadCSV = function(student, courses) {
+      var csvStudent = Papa.unparse(student);
+      console.log(csvStudent);
+
+      var csvCourses = Papa.unparse(courses);
+      console.log(csvCourses);
+
+      var dataStudent = "text/csv;charset=utf-8," + encodeURIComponent(csvStudent);
+      $('<p><a href="data:' + dataStudent + '" download="upex-data-student.csv">Descargar la información del alumno en formato CSV</a></p>')
+        .appendTo('#link-download-csv-info-student');
+
+      var dataCourses = "text/csv;charset=utf-8," + encodeURIComponent(csvCourses);
+      $('<p><a href="data:' + dataCourses + '" download="upex-data-student-courses.csv">Descargar la información de cursos en formato CSV</a></p>')
+        .appendTo('#link-download-csv-info-student');
+
+      $("#downloadCSVInfoStudent").modal('show');
+    };
+
 
   }); 
