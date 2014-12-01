@@ -61,4 +61,20 @@ angular.module('rUPEx.controllers', [])
         console.log(response);
         $scope.students = response;
       });
+  })
+
+  .controller('StudentShowCtrl', function($scope, $http, $routeParams) {
+    $("#courses-link").removeClass("active");
+    $("#students-link").addClass("active");
+
+    $http({
+      url: "/reports/api/student",
+      params: { id: $routeParams.id },
+      method: 'GET'
+    }).success(function(response) {
+      console.log(response);
+      $scope.student = response;
+      $scope.courses = response.courses;
+    });
+
   }); 

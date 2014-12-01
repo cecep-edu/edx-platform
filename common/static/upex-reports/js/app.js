@@ -19,6 +19,11 @@ angular.module('rUPEx', ['ngRoute', 'rUPEx.controllers'])
 	      	templateUrl: 'student_index.html',
 	      	controller: 'StudentIndexCtrl'
 	      }).
+
+	      when('/student/:id', {
+	      	templateUrl: 'student_show.html',
+	      	controller: 'StudentShowCtrl'
+	      }).
 	    
 	      otherwise({
 	        redirectTo: '/courses'
@@ -28,3 +33,4 @@ angular.module('rUPEx', ['ngRoute', 'rUPEx.controllers'])
     	$interpolateProvider.startSymbol('{$');
     	$interpolateProvider.endSymbol('$}');
 }]);
+

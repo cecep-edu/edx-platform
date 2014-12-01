@@ -21,6 +21,8 @@ import instructor_analytics.basic
 from django.contrib.auth.models import User
 #from student.models import UserProfile
 
+from student.views import get_course_enrollment_pairs
+
 # GET /reports
 def index(request):
 	return render_to_response('upex_reports/base.html')
@@ -93,13 +95,46 @@ def students(request):
                 'education': user.profile.level_of_education
             }
             if hasattr(user.profile, 'city') and user.profile.city is not None:
-                obj["city"] = user.profile.city.name
+                obj["city"] = user.profile.city.name.capitalize()
 
             data[i] = obj
         i = i +1
 
+    data["count"] = len(data)
+
     return JsonResponse(data)
 
+
+# GET /reports/api/student
+def student(request):
+    user = User.objects.get(pk=request.GET.get('id'))
+
+    data = {}
+    courses_obj = {}
+
+    courses = list(get_course_enrollment_pairs(user, '', ''))
+    i = 0
+    for course in courses:
+        c = {}
+        c["name"] = course[0].display_name
+        
+        package_id = course[0].id.package_id
+        ar = package_id.split("+")
+        c["course_url"] = "/course/"+"/".join(ar)
+
+        courses_obj[i] = c
+        i = i +1
+
+    data["courses"] = courses_obj
+
+    if hasattr(user, 'profile'):
+        data['name'] = user.profile.name
+        data['email'] = user.email
+        data['education'] = user.profile.level_of_education
+        if hasattr(user.profile, 'city') and user.profile.city is not None:
+            data["city"] = user.profile.city.name.capitalize()
+
+    return JsonResponse(data)
 
 
 def courses_list():
