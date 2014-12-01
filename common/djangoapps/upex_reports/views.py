@@ -18,6 +18,9 @@ from courseware.courses import get_course_with_access, get_course_by_id
 
 import instructor_analytics.basic
 
+from django.contrib.auth.models import User
+#from student.models import UserProfile
+
 # GET /reports
 def index(request):
 	return render_to_response('upex_reports/base.html')
@@ -58,6 +61,8 @@ def subscribers(request):  # pylint: disable=W0613, W0621
 
     course = get_course_by_id(course_id)
 
+    #print get_student_grade_summary_data(request, course)
+
     query_features = [
         'id', 'username', 'name', 'email', 'language', 'location',
         'year_of_birth', 'gender', 'level_of_education', 'mailing_address',
@@ -73,57 +78,27 @@ def subscribers(request):  # pylint: disable=W0613, W0621
     return JsonResponse(response_payload)
 
 
-# GET /reports/api/subs
-def course_role_members(request):
-    """
-    List instructors and staff.
-    Requires instructor access.
+# GET /reports/api/students
+def students(request):
+    data = {}
 
-    rolename is one of ['instructor', 'staff', 'beta']
-
-    Returns JSON of the form {
-        "course_id": "some/course/id",
-        "staff": [
-            {
-                "username": "staff1",
-                "email": "staff1@example.org",
-                "first_name": "Joe",
-                "last_name": "Shmoe",
+    users = User.objects.all()
+    i = 0
+    for user in users:
+        if hasattr(user, 'profile'):
+            obj = {
+                'id': user.id,
+                'name': user.profile.name,
+                'email': user.email,
+                'education': user.profile.level_of_education
             }
-        ]
-    }
-    """
-    org = request.GET.get('org')
-    course = request.GET.get('course')
-    name = request.GET.get('name')
-    course_id = SlashSeparatedCourseKey(org, course, name)
+            if hasattr(user.profile, 'city') and user.profile.city is not None:
+                obj["city"] = user.profile.city.name
 
-    #course = get_course_with_access(
-    #    request.user, 'instructor', course_id, depth=None
-    #)
+            data[i] = obj
+        i = i +1
 
-    course = get_course_with_access(
-        request.user, 'instructor', course_id, depth=None
-    )
-
-    rolename = 'instructor'
-
-    def extract_user_info(user):
-        """ convert user into dicts for json view """
-        return {
-            'username': user.username,
-            'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-        }
-
-    response_payload = {
-        'course_id': course_id.to_deprecated_string(),
-        rolename: map(extract_user_info, list_with_level(
-            course, rolename
-        )),
-    }
-    return JsonResponse(response_payload)
+    return JsonResponse(data)
 
 
 

@@ -1,19 +1,20 @@
 angular.module('rUPEx.controllers', [])
 
-  .controller('CoursesIndexCtrl', function($scope, $http) {   
+  .controller('CoursesIndexCtrl', function($scope, $http) {
+    $("#courses-link").addClass("active");
+    $("#students-link").removeClass("active");
+
     $http.get("/reports/api/courses")
     	.success(function(response) {
-
     		console.log(response);
     		$scope.courses = response;
-
-
     	});
-
-
   })
 
   .controller('CourseShowCtrl', function($scope, $routeParams, $http) {
+    $("#courses-link").addClass("active");
+    $("#students-link").removeClass("active");
+
   	var _course = $routeParams.course_id.split("/");
 
     var data = {
@@ -46,12 +47,18 @@ angular.module('rUPEx.controllers', [])
       console.log(response);
       $scope.subscribers = response;
       $scope.students = response.students;
+      $scope.students_count = response.students_count;
     })
 
   })
 
-  .controller('StudentIndexCtrl', function($scope) {
-  	console.log("HOLA HOLA");
+  .controller('StudentIndexCtrl', function($scope, $http) {
+    $("#courses-link").removeClass("active");
+    $("#students-link").addClass("active");
+
+    $http.get("/reports/api/students")
+      .success(function(response) {
+        console.log(response);
+        $scope.students = response;
+      });
   }); 
-
-

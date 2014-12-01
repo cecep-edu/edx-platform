@@ -38,9 +38,9 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
-        <ul class="nav nav-sidebar">
-          <li class="active"><a href="#/courses">Cursos <span class="sr-only">(current)</span></a></li>
-          <li><a href="#/students">Alumnos</a></li>
+        <ul class="nav nav-sidebar" style="font-size: 1.8em;">
+          <li id="courses-link"><a href="#/courses">Cursos</a></li>
+          <li id="students-link"><a href="#/students">Alumnos</a></li>
         </ul>
       </div>
 
@@ -128,12 +128,13 @@
           <h1 class="page-header">
             {$ course.display_name $}
             <div style="float:right;">
+              <span style="font-size: .4em; color:#cfcfcf;margin-right:30px;">Nota para certificado: 65%</span>
               <button disabled type="button" class="btn btn-xs btn-{$ state.class $}">{$ state.text $}</button>
             </div>
           </h1>
 
           <h2 class="sub-header">
-            Alumnos subscritos
+            {$ students_count $} alumnos subscritos
             <div style="float:right;">
               <button type="button" class="btn btn-primary btn-xs">Descargar CSV</button>
               <button type="button" class="btn btn-warning btn-xs">Descargar PDF</button>
@@ -143,19 +144,26 @@
 
 
           <div class="table-responsive">
+
+            <input type="text" class="form-control"
+              ng-model="search.name" style="width:30%"
+              placeholder="Filtrar por nombre..." />
+
             <table class="table table-striped">
               <thead>
                 <tr>
                   <th>Nombre</th>
                   <th>Email</th>
+                  <th>Nota final</th>
                   <th>Localización</th>
                   <th>Nivel de estudios</th>
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="student in students">
+                <tr ng-repeat="student in students | filter:{name:search.name}">
                   <td><a href="#">{$ student.name $}</a></td>
                   <td><a href="mailto:{$ student.email $}">{$ student.email $}</a></td>
+                  <td>null</td>
                   <td>{$ student.location $}</td>
                   <td>{$ student.level_of_education $}</td>
                 </tr>
@@ -166,6 +174,47 @@
 
         </script>
 
+        <script type="text/ng-template" id="student_index.html">
+          <div ng-controller="StudentIndexCtrl" class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1 class="page-header">Alumnos en UPEx</h1>
+
+
+            <h2 class="sub-header">
+              {$ students_count $} alumnos registrados
+              <div style="float:right;">
+                <button type="button" class="btn btn-primary btn-xs">Descargar CSV</button>
+                <button type="button" class="btn btn-warning btn-xs">Descargar PDF</button>
+              </div>
+            </h2>
+
+            <div class="table-responsive">
+
+              <input type="text" class="form-control"
+                ng-model="search.name" style="width:30%"
+                placeholder="Filtrar por nombre..." />
+
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Localización</th>
+                    <th>Nivel de estudios</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="student in students | filter:{name:search.name}">
+                    <td><a href="#">{$ student.name $}</a></td>
+                    <td><a href="mailto:{$ student.email $}">{$ student.email $}</a></td>
+                    <td>{$ student.city $}</td>
+                    <td>{$ student.education $}</td>
+                  </tr>
+              </table>
+            </div>
+
+
+          </div>
+        </script>
 
       </div>
 
