@@ -23,11 +23,15 @@ from django.contrib.auth.models import User
 
 from student.views import get_course_enrollment_pairs
 
+from django.contrib.auth.decorators import login_required
+
 # GET /reports
+@login_required(login_url="/signin")
 def index(request):
 	return render_to_response('upex_reports/base.html')
 
 # GET /reports/api/courses
+@login_required(login_url="/signin")
 def courses(request):
 	courses, in_proccess = courses_list()
 	
@@ -41,6 +45,7 @@ def courses(request):
 
 
 # GET /reports/api/course
+@login_required(login_url="/signin")
 def course(request):
     org = request.GET.get('org')
     course = request.GET.get('course')
@@ -55,6 +60,7 @@ def course(request):
 
 
 # GET /reports/api/subscribers
+@login_required(login_url="/signin")
 def subscribers(request):  # pylint: disable=W0613, W0621
     org = request.GET.get('org')
     course = request.GET.get('course')
@@ -81,6 +87,7 @@ def subscribers(request):  # pylint: disable=W0613, W0621
 
 
 # GET /reports/api/students
+@login_required(login_url="/signin")
 def students(request):
     data = {}
 
@@ -106,6 +113,7 @@ def students(request):
 
 
 # GET /reports/api/student
+@login_required(login_url="/signin")
 def student(request):
     user = User.objects.get(pk=request.GET.get('id'))
 
