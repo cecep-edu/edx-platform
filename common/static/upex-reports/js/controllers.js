@@ -188,7 +188,10 @@ angular.module('rUPEx.controllers', [])
         .success(function(response) {
             $scope.courses = _.filter(response, function(course) {
               if (typeof course.id != 'undefined') {
-                return course.id.split("/")[2].toUpperCase() == $scope.orgName;
+                var orgName = course.id.split("/")[2];
+                if (typeof orgName != 'undefined') {
+                  return orgName.toUpperCase() == $scope.orgName;
+                }
               }
             });
             console.log($scope.courses);
