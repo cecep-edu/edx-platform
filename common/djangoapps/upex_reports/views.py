@@ -180,9 +180,11 @@ def course_outline_json(request, course_module):
     """
     return create_xblock_info(
         course_module,
+        include_ancestor_info=True,
         include_child_info=True,
         course_outline=True,
-        include_children_predicate=lambda xblock: not xblock.category == 'vertical'
+        include_children_predicate=lambda xblock: not xblock.category == 'vertical',
+        parent_xblock=True
     )
 
 

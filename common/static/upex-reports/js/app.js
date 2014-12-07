@@ -24,6 +24,16 @@ angular.module('rUPEx', ['ngRoute', 'rUPEx.controllers'])
 	      	templateUrl: 'student_show.html',
 	      	controller: 'StudentShowCtrl'
 	      }).
+
+	      when('/orgs', {
+	      	templateUrl: 'orgs_index.html',
+	      	controller: 'OrgsIndexCtrl'
+	      }).
+
+	      when('/org/:org_name', {
+	      	templateUrl: 'org_show.html',
+	      	controller: 'OrgShowCtrl'
+		  }).
 	    
 	      otherwise({
 	        redirectTo: '/courses'

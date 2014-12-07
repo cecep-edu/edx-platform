@@ -1,8 +1,9 @@
 angular.module('rUPEx.controllers', [])
 
   .controller('CoursesIndexCtrl', function($scope, $http) {
-    $("#courses-link").addClass("active");
     $("#students-link").removeClass("active");
+    $("#orgs-link").removeClass("active");
+    $("#courses-link").addClass("active");
 
     $http.get("/reports/api/courses")
     	.success(function(response) {
@@ -24,8 +25,10 @@ angular.module('rUPEx.controllers', [])
   })
 
   .controller('CourseShowCtrl', function($scope, $routeParams, $http) {
-    $("#courses-link").addClass("active");
     $("#students-link").removeClass("active");
+    $("#orgs-link").removeClass("active");
+    $("#courses-link").addClass("active");
+
 
   	var _course = $routeParams.course_id.split("/");
 
@@ -85,6 +88,7 @@ angular.module('rUPEx.controllers', [])
 
   .controller('StudentIndexCtrl', function($scope, $http) {
     $("#courses-link").removeClass("active");
+    $("#orgs-link").removeClass("active");
     $("#students-link").addClass("active");
 
     $http({
@@ -111,6 +115,7 @@ angular.module('rUPEx.controllers', [])
 
   .controller('StudentShowCtrl', function($scope, $http, $routeParams) {
     $("#courses-link").removeClass("active");
+    $("#orgs-link").removeClass("active");
     $("#students-link").addClass("active");
 
     $http({
@@ -142,4 +147,48 @@ angular.module('rUPEx.controllers', [])
     };
 
 
+  })
+
+  .controller('OrgsIndexCtrl', function($scope, $http) {
+        $("#courses-link").removeClass("active");
+        $("#students-link").removeClass("active");
+        $("#orgs-link").addClass("active");
+        
+        function get_organization(courseId) {
+            return courseId.split("/")[2];
+        }
+
+        function get_all_orgs(data) {      
+            var orgs = [];
+
+            for (i = 0; i < data.length; i++) {
+                var organization = get_organization(data[i]['id']);
+                orgs.push(organization);
+            }
+
+            return _.uniq(orgs);
+        }
+
+        $http.get("/reports/api/courses")
+          .success(function(response) {
+            $scope.orgs = get_all_orgs(response);
+            console.log($scope.orgs);
+          });
+
+  })
+
+  .controller('OrgShowCtrl', function($scope, $http, $routeParams) {
+    $("#courses-link").removeClass("active");
+    $("#students-link").removeClass("active");
+    $("#orgs-link").addClass("active");
+
+    $scope.orgName = $routeParams.org_name.toUpperCase();
+
+    $http.get("/reports/api/courses")
+        .success(function(response) {
+            $scope.courses = _.filter(response, function(course) {
+                return course.id.split("/")[2].toUpperCase() == $scope.orgName;
+            });
+            console.log($scope.courses);
+        });
   }); 

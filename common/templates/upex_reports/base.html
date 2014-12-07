@@ -41,6 +41,7 @@
         <ul class="nav nav-sidebar" style="font-size: 1.8em;">
           <li id="courses-link"><a href="#/courses">Cursos</a></li>
           <li id="students-link"><a href="#/students">Alumnos</a></li>
+          <li id="orgs-link"><a href="#/orgs">Instituciones</a></li>
         </ul>
       </div>
 
@@ -332,6 +333,148 @@
           </div>
         </script>
 
+
+        <script type="text/ng-template" id="orgs_index.html">
+
+
+              <div ng-controller="OrgsIndexCtrl" class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <h1 class="page-header">
+                  Instituciones
+                  <div style="float:right;">
+                    <button ng-click="downloadCSV(courses)" type="button" class="btn btn-primary btn-xs">Descargar CSV</button>
+                    <button type="button" class="btn btn-warning btn-xs">Descargar PDF</button>
+                  </div>
+                </h1>
+
+                <div id="downloadCSVListCourses" class="modal fade" style="display:none;">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title">Listado de cursos</h4>
+                      </div>
+                      <div class="modal-body" id="link-download-csv-list-courses">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                      </div>
+                    </div><!-- /.modal-content -->
+                  </div><!-- /.modal-dialog -->
+                </div><!-- /.modal -->
+
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Nombre de la institución</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="org in orgs">
+                        <td><a href="#/org/{$ org.toLowerCase() $}">{$ org $}</a></td>
+                      </tr>
+                  </table>
+                </div>
+
+              </div>
+
+        </script>
+
+
+        <script type="text/ng-template" id="org_show.html">
+
+
+              <div ng-controller="OrgShowCtrl" class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <h1 class="page-header">
+                  {$ orgName $}
+                  <div style="float:right;">
+                    <button ng-click="downloadCSV(courses)" type="button" class="btn btn-primary btn-xs">Descargar CSV</button>
+                    <button type="button" class="btn btn-warning btn-xs">Descargar PDF</button>
+                  </div>
+                </h1>
+
+                <div id="downloadCSVListCourses" class="modal fade" style="display:none;">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title">Listado de cursos</h4>
+                      </div>
+                      <div class="modal-body" id="link-download-csv-list-courses">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                      </div>
+                    </div><!-- /.modal-content -->
+                  </div><!-- /.modal-dialog -->
+                </div><!-- /.modal -->
+
+                <h2 class="sub-header">Activos</h2>
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th style="width: 60%;">Nombre</th>
+                        <th style="width: 20%;">Fecha de inicio</th>
+                        <th style="width: 20%;">Fecha de fin</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="course in courses | filter: { released_to_students: true }">
+                        <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
+                        <td>{$ course.release_date || 'Sin definir' $}</td>
+                        <td>{$ course.due_date || 'Sin definir' $}</td>
+                      </tr>
+                  </table>
+                </div>
+
+
+                <h2 class="sub-header">Planificados</h2>
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th style="width: 60%;">Nombre</th>
+                        <th style="width: 20%;">Fecha de inicio</th>
+                        <th style="width: 20%;">Fecha de fin</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="course in courses | filter: { released_to_students: false }">
+                        <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
+                        <td>{$ course.release_date || 'Sin definir' $}</td>
+                        <td>{$ course.due_date || 'Sin definir' $}</td>
+                      </tr>
+                  </table>
+                </div>
+
+
+                <h2 class="sub-header">Terminados</h2>
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th style="width: 60%;">Nombre</th>
+                        <th style="width: 20%;">Fecha de inicio</th>
+                        <th style="width: 20%;">Fecha de fin</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="course in courses | filter: { due: true }">
+                        <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
+                        <td>{$ course.release_date || 'Sin definir' $}</td>
+                        <td>{$ course.due_date || 'Sin definir' $}</td>
+                      </tr>
+                  </table>
+                </div>
+
+              </div>
+
+        </script>
+
+
+
+
       </div>
 
 
@@ -349,6 +492,8 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+    <script src="//underscorejs.org/underscore-min.js"></script>
 
     <script src="{% static 'upex-reports/js/vendor/papaparse.min.js' %}"></script>
 
