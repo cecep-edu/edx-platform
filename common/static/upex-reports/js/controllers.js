@@ -187,7 +187,7 @@ angular.module('rUPEx.controllers', [])
     $http.get("/reports/api/courses")
         .success(function(response) {
             $scope.courses = _.filter(response, function(course) {
-              if (course.id != null) {
+              if (typeof course.id != 'undefined') {
                 return course.id.split("/")[2].toUpperCase() == $scope.orgName;
               }
             });
