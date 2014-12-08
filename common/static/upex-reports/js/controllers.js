@@ -205,26 +205,66 @@ angular.module('rUPEx.controllers', [])
         });
   })
 
-  .controller('StatsIndexCtrl', function($scope) {
+  .controller('StatsIndexCtrl', function($scope, $http) {
     $("#courses-link").removeClass("active");
     $("#students-link").removeClass("active");
     $("#orgs-link").removeClass("active");
     $("#stats-link").addClass("active");
 
-    var data = {
-        labels: ["IAEN", "CEC", "MIT"],
+
+    function get_organization(courseId) {
+        return courseId.split("/")[2];
+    }
+
+    function get_all_orgs(data) {      
+        var orgs = [];
+
+        for (i = 0; i < data.length; i++) {
+            var organization = get_organization(data[i]['id']);
+            orgs.push(organization);
+        }
+
+        return _.uniq(orgs);
+    }
+
+    $http.get("/reports/api/courses")
+      .success(function(response) {
+        $scope.orgs = get_all_orgs(response);
+        console.log($scope.orgs);
+      });
+
+    var courseInstitutionData = {
+        labels: ['IAEN', 'CEC', 'MIT', 'SENESCYT', 'IAEN', 'CEC', 'MIT', 'SENESCYT'],
         datasets: [
                 {
-                    label: "My First dataset",
+                    label: "Cursos por institución",
                     fillColor: "rgba(220,220,220,0.5)",
                     strokeColor: "rgba(220,220,220,0.8)",
                     highlightFill: "rgba(220,220,220,0.75)",
                     highlightStroke: "rgba(220,220,220,1)",
-                    data: [65, 59, 101]
+                    data: [65, 59, 101, 150, 54, 24, 41, 35]
                 }
         ]
     };
 
-    var ctx = document.getElementById("chart-org-more-courses").getContext("2d");
-    var myBarChart = new Chart(ctx).Bar(data);
+    var courseInstitutionCtx = document.getElementById("chart-org-more-courses").getContext("2d");
+    var courseInstitutionChart = new Chart(courseInstitutionCtx).Bar(courseInstitutionData);
+
+    var courseSubscribersData = {
+        labels: ['IAEN/CC101/2014_T4', 'IAEN/CC10/2014_T3', 'IAEN/CC105/2014_T3', 'IAEN/CC101/2014_T4', 'IAEN/CC84/2013_T4', 'IAEN/CC80/2014_T2'],
+        datasets: [
+                {
+                    label: "Alumnos por curso",
+                    fillColor: "rgba(220,220,220,0.5)",
+                    strokeColor: "rgba(220,220,220,0.8)",
+                    highlightFill: "rgba(220,220,220,0.75)",
+                    highlightStroke: "rgba(220,220,220,1)",
+                    data: [65, 59, 101, 150, 54, 24]
+                }
+        ]
+    };
+
+    var courseSubscribersCtx = document.getElementById("chart-courses-subscribers").getContext("2d");
+    var courseSubscribersChart = new Chart(courseSubscribersCtx).Bar(courseSubscribersData);
+
   }); 
