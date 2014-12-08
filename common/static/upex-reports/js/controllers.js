@@ -193,6 +193,7 @@ angular.module('rUPEx.controllers', [])
                   return orgName.toUpperCase() == $scope.orgName;
                 }
               }
+              return false;
             });
             console.log($scope.courses);
         });
