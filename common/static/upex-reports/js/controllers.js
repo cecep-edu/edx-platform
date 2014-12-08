@@ -3,6 +3,7 @@ angular.module('rUPEx.controllers', [])
   .controller('CoursesIndexCtrl', function($scope, $http) {
     $("#students-link").removeClass("active");
     $("#orgs-link").removeClass("active");
+    $("#stats-link").removeClass("active");
     $("#courses-link").addClass("active");
 
     $http.get("/reports/api/courses")
@@ -27,6 +28,7 @@ angular.module('rUPEx.controllers', [])
   .controller('CourseShowCtrl', function($scope, $routeParams, $http) {
     $("#students-link").removeClass("active");
     $("#orgs-link").removeClass("active");
+    $("#stats-link").removeClass("active");
     $("#courses-link").addClass("active");
 
 
@@ -89,6 +91,7 @@ angular.module('rUPEx.controllers', [])
   .controller('StudentIndexCtrl', function($scope, $http) {
     $("#courses-link").removeClass("active");
     $("#orgs-link").removeClass("active");
+    $("#stats-link").removeClass("active");
     $("#students-link").addClass("active");
 
     $http({
@@ -116,6 +119,7 @@ angular.module('rUPEx.controllers', [])
   .controller('StudentShowCtrl', function($scope, $http, $routeParams) {
     $("#courses-link").removeClass("active");
     $("#orgs-link").removeClass("active");
+    $("#stats-link").removeClass("active");
     $("#students-link").addClass("active");
 
     $http({
@@ -152,6 +156,7 @@ angular.module('rUPEx.controllers', [])
   .controller('OrgsIndexCtrl', function($scope, $http) {
         $("#courses-link").removeClass("active");
         $("#students-link").removeClass("active");
+        $("#stats-link").removeClass("active");
         $("#orgs-link").addClass("active");
         
         function get_organization(courseId) {
@@ -180,6 +185,7 @@ angular.module('rUPEx.controllers', [])
   .controller('OrgShowCtrl', function($scope, $http, $routeParams) {
     $("#courses-link").removeClass("active");
     $("#students-link").removeClass("active");
+    $("#stats-link").removeClass("active");
     $("#orgs-link").addClass("active");
 
     $scope.orgName = $routeParams.org_name.toUpperCase();
@@ -197,4 +203,28 @@ angular.module('rUPEx.controllers', [])
             });
             console.log($scope.courses);
         });
+  })
+
+  .controller('StatsIndexCtrl', function($scope) {
+    $("#courses-link").removeClass("active");
+    $("#students-link").removeClass("active");
+    $("#orgs-link").removeClass("active");
+    $("#stats-link").addClass("active");
+
+    var data = {
+        labels: ["IAEN", "CEC", "MIT"],
+        datasets: [
+                {
+                    label: "My First dataset",
+                    fillColor: "rgba(220,220,220,0.5)",
+                    strokeColor: "rgba(220,220,220,0.8)",
+                    highlightFill: "rgba(220,220,220,0.75)",
+                    highlightStroke: "rgba(220,220,220,1)",
+                    data: [65, 59, 101]
+                }
+        ]
+    };
+
+    var ctx = document.getElementById("chart-org-more-courses").getContext("2d");
+    var myBarChart = new Chart(ctx).Bar(data);
   }); 
