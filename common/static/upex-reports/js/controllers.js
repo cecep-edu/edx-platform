@@ -312,26 +312,56 @@ angular.module('rUPEx.controllers', [])
 
     $http.get("/reports/api/courses")
       .success(function(response) {
+        var response = response;
         $scope.orgs = get_all_orgs(response);
         console.log($scope.orgs);
-      });
 
-    var courseInstitutionData = {
-        labels: ['IAEN', 'CEC', 'MIT', 'SENESCYT', 'IAEN', 'CEC', 'MIT', 'SENESCYT'],
-        datasets: [
-                {
-                    label: "Cursos por institución",
-                    fillColor: "rgba(220,220,220,0.5)",
-                    strokeColor: "rgba(220,220,220,0.8)",
-                    highlightFill: "rgba(220,220,220,0.75)",
-                    highlightStroke: "rgba(220,220,220,1)",
-                    data: [65, 59, 101, 150, 54, 24, 41, 35]
+        function getTheData() {
+            //console.log(response);
+
+            var courses = response;
+            var data = [];
+            var orgs = $scope.orgs;
+
+            function countCourses(org) {
+                var count = 0;
+
+                for (var i = 0; i < courses.length; i++) {
+                    if (courses[i].id.split("/")[2] == org)
+                        count++
                 }
-        ]
-    };
 
-    var courseInstitutionCtx = document.getElementById("chart-org-more-courses").getContext("2d");
-    var courseInstitutionChart = new Chart(courseInstitutionCtx).Bar(courseInstitutionData);
+                return count
+            }
+
+            for (var i = 0; i < orgs.length; i++) {
+                var counts = countCourses(orgs[i]);
+                data.push(counts);
+            }
+
+            console.log(data);
+
+            return data
+        }
+
+        var courseInstitutionData = {
+            labels: $scope.orgs,
+            datasets: [
+                    {
+                        label: "Cursos por institución",
+                        fillColor: "rgba(220,220,220,0.5)",
+                        strokeColor: "rgba(220,220,220,0.8)",
+                        highlightFill: "rgba(220,220,220,0.75)",
+                        highlightStroke: "rgba(220,220,220,1)",
+                        data: getTheData()
+                    }
+            ]
+        };
+
+        var courseInstitutionCtx = document.getElementById("chart-org-more-courses").getContext("2d");
+        var courseInstitutionChart = new Chart(courseInstitutionCtx).Bar(courseInstitutionData);
+
+      });
 
     var courseSubscribersData = {
         labels: ['IAEN/CC101/2014_T4', 'IAEN/CC10/2014_T3', 'IAEN/CC105/2014_T3', 'IAEN/CC101/2014_T4', 'IAEN/CC84/2013_T4', 'IAEN/CC80/2014_T2'],
@@ -349,5 +379,9 @@ angular.module('rUPEx.controllers', [])
 
     var courseSubscribersCtx = document.getElementById("chart-courses-subscribers").getContext("2d");
     var courseSubscribersChart = new Chart(courseSubscribersCtx).Bar(courseSubscribersData);
+
+
+
+
 
   }); 
