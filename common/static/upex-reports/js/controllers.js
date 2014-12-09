@@ -23,6 +23,30 @@ angular.module('rUPEx.controllers', [])
       $("#downloadCSVListCourses").modal('show');
     };
 
+    $scope.downloadPDF = function(courses) {
+
+      var data = []
+          ,fontSize = 10
+          ,height = 0
+          ,doc
+          ;
+        
+        doc = new jsPDF('p', 'pt', 'a4', true);
+        doc.setFont("courier", "normal");
+        doc.setFontSize(fontSize);
+
+        for (i=0; i < courses.length; i++) {
+          data.push({
+            "Nombre" : courses[i].display_name,
+            "Fecha de inicio" : courses[i].release_date || 'Sin definir',
+            "Fecha de fin" : courses[i].due_date || 'Sin definir'
+          });
+        }
+
+        height = doc.drawTable(data, {xstart:10,ystart:10,tablestart:70,marginleft:50});
+        doc.save("upex-listado-cursos.pdf");
+    };
+
   })
 
   .controller('CourseShowCtrl', function($scope, $routeParams, $http) {
@@ -85,6 +109,33 @@ angular.module('rUPEx.controllers', [])
       $("#downloadCSVInfoCourse").modal('show');
     };
 
+    $scope.downloadPDF = function(students) {
+
+        console.log(students);
+
+      var data = []
+          ,fontSize = 10
+          ,height = 0
+          ,doc
+          ;
+        
+        doc = new jsPDF('p', 'pt', 'a4', true);
+        doc.setFont("courier", "normal");
+        doc.setFontSize(fontSize);
+
+        for (i=0; i < students.length; i++) {
+          data.push({
+            "Nombre" : students[i].name,
+            "Email" : students[i].email,
+            "Nota final" : null,
+            "Localización": students[i].location,
+            "Nivel de estudios": students[i].level_of_education
+          });
+        }
+
+        height = doc.drawTable(data, {xstart:10,ystart:10,tablestart:70,marginleft:50});
+        doc.save("upex-listado-alumnos.pdf");
+    };
 
   })
 
@@ -113,6 +164,38 @@ angular.module('rUPEx.controllers', [])
 
       $("#downloadCSVListStudents").modal('show');
     };
+
+    $scope.downloadPDF = function(students) {
+
+        //console.log(students);
+
+      var data = []
+          ,fontSize = 10
+          ,height = 0
+          ,doc
+          ;
+        
+        doc = new jsPDF('p', 'pt', 'a4', true);
+        doc.setFont("courier", "normal");
+        doc.setFontSize(fontSize);
+
+	_.each(students, function(value, key) {
+		//console.log(key, value);
+
+		data.push({
+            "Nombre" : value.name,
+            "Email" : value.email,
+            "Localización" : value.city || 'Sin definir',
+            "Nivel de estudios" : value.education || 'Sin definir'
+        });
+	});
+
+        console.log(data);
+
+        height = doc.drawTable(data, {xstart:10,ystart:10,tablestart:70,marginleft:50});
+        doc.save("upex-listado-alumnos.pdf");
+    };
+
 
   })
 
