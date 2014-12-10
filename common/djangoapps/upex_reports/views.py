@@ -167,7 +167,9 @@ def staff(request):
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
-                'name': user.profile.name
+                'name': user.profile.name,
+                'city': user.profile.city.name.capitalize(),
+                'education': user.profile.level_of_education
             }
 
         response_payload = {

@@ -563,12 +563,16 @@
                       <tr>
                         <th>Nombre</th>
                         <th>Email</th>
+                        <th>Localización</th>
+                        <th>Nivel de estudios</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr ng-repeat="student in students | filter:{name:search.name}">
                         <td><a href="#/student/{$ student.id $}">{$ student.name $}</a></td>
                         <td><a href="mailto:{$ student.email $}">{$ student.email $}</a></td>
+                        <td>{$ student.city $}</td>
+                        <td>{$ student.education $}</td>
                       </tr>
                   </table>
                 </div>
