@@ -120,13 +120,12 @@ def student(request):
     data = {}
     courses = []
 
-    courses = list(get_course_enrollment_pairs(user, '', ''))
-    i = 0
-    for course in courses:
+    _courses = list(get_course_enrollment_pairs(user, '', ''))
+    for course in _courses:
         course_module = get_course_module(course[0].id)
         course_data = course_outline_json(request, course_module)
-        courses[i] = course_data
-        i = i +1
+        course_data["period"] = course_data["studio_url"].split("/")[-1]
+        courses.append(course_data)
 
     data["courses"] = courses
 

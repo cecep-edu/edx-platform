@@ -44,10 +44,17 @@
             <a href="#/courses">Cursos</a>
             <ul class="background:red;" style="list-style-type:none; font-size:.8em;">
               <li style="" class=""><a href="#/students">Cursos por usuario</a></li>
+              <li style="" class=""><a href="#/courses">Nivel de avance</a></li>
             </ul>
           </li>
-
-          <li id="students-link"><a href="#/students">Alumnos</a></li>
+          <li id="students-link">
+            <a href="#/students">Usuarios</a>
+            <ul class="background:red;" style="list-style-type:none; font-size:.8em;">
+              <li style="" class=""><a href="#/students">Usuarios por localidad</a></li>
+              <li style="" class=""><a href="#/students">Historial académico</a></li>
+              <li style="" class=""><a href="#/students">Calificaciones por periodo</a></li>
+            </ul>
+          </li>
           <li id="stats-link"><a href="#/stats">Estadísticas</a></li>
         </ul>
       </div>
@@ -62,7 +69,7 @@
 
               <div ng-controller="CoursesIndexCtrl" class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
                 <h1 class="page-header">
-                  Cursos
+                  Cursos por estado
                   <div style="float:right;">
                     <button ng-click="downloadCSV(courses)" type="button" class="btn btn-primary btn-xs">Descargar CSV</button>
                     <button ng-click="downloadPDF(courses)" type="button" class="btn btn-warning btn-xs">Descargar PDF</button>
@@ -164,7 +171,7 @@
           </h1>
 
           <h2 class="sub-header">
-            {$ students_count $} alumnos subscritos
+            {$ students_count $} usuarios subscritos
             <div style="float:right;">
               <button ng-click="downloadCSV(course, students)" type="button" class="btn btn-primary btn-xs">Descargar CSV</button>
               <button ng-click="downloadPDF(students)" type="button" class="btn btn-warning btn-xs">Descargar PDF</button>
@@ -321,7 +328,8 @@
                     <thead>
                       <tr>
                         <th style="width: 40%;">Nombre</th>
-                        <th style="width: 20%;">Nota final</th>
+                        <th style="width: 10%">Período</th>
+                        <th style="width: 10%;">Nota final</th>
                         <th style="width: 20%;">Fecha de inicio</th>
                         <th style="width: 20%;">Fecha de fin</th>
                       </tr>
@@ -329,6 +337,7 @@
                     <tbody>
                       <tr ng-repeat="course in courses | filter: { released_to_students: true }">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
+                        <td>{$ course.period $}</td>
                         <td>null</td>
                         <td>{$ course.release_date || 'Sin definir' $}</td>
                         <td>{$ course.due_date || 'Sin definir' $}</td>
@@ -342,7 +351,8 @@
                     <thead>
                       <tr>
                         <th style="width: 40%;">Nombre</th>
-                        <th style="width: 20%;">Nota final</th>
+                        <th style="width: 10%;">Período</th>
+                        <th style="width: 10%;">Nota final</th>
                         <th style="width: 20%;">Fecha de inicio</th>
                         <th style="width: 20%;">Fecha de fin</th>
                       </tr>
@@ -350,6 +360,7 @@
                     <tbody>
                       <tr ng-repeat="course in courses | filter: { due: true }">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
+                        <td>{$ course.period $}</td>
                         <td>null</td>
                         <td>{$ course.release_date || 'Sin definir' $}</td>
                         <td>{$ course.due_date || 'Sin definir' $}</td>
