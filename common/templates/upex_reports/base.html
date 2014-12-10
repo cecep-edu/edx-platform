@@ -567,7 +567,7 @@
                     </thead>
                     <tbody>
                       <tr ng-repeat="student in students | filter:{name:search.name}">
-                        <td><a href="#/student/{$ student.id $}">{$ student.first_name $} {$ student.last_name $}</a></td>
+                        <td><a href="#/student/{$ student.id $}">{$ student.name $}</a></td>
                         <td><a href="mailto:{$ student.email $}">{$ student.email $}</a></td>
                       </tr>
                   </table>
