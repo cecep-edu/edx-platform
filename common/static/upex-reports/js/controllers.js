@@ -327,6 +327,31 @@ angular.module('rUPEx.controllers', [])
         });
   })
 
+  .controller('StaffIndexCtrl', function($scope, $http) {
+    $http({
+          url: "/reports/api/staff",
+          method: 'GET'
+        }).success(function(response) {
+            console.log(response);
+            var courses = response;
+
+            var instructors = [];
+
+            for (var course in courses) {
+              var _course = courses[course];
+              for (var instructor in _course.instructors) {
+                instructors.push(_course.instructors[instructor]);
+              }
+            }
+
+            console.log(instructors);
+
+            
+            $scope.students = _.uniq(instructors, 'email');
+            console.log($scope.students);
+      });
+  })
+
   .controller('StatsIndexCtrl', function($scope, $http) {
     $("#courses-link").removeClass("active");
     $("#students-link").removeClass("active");

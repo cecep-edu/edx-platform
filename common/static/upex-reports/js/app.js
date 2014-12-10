@@ -35,6 +35,11 @@ angular.module('rUPEx', ['ngRoute', 'rUPEx.controllers'])
 	      	controller: 'OrgShowCtrl'
 		  }).
 
+		  when('/staff', {
+		  	templateUrl: 'staff_index.html',
+		  	controller: 'StaffIndexCtrl'
+		  }).
+
 		  when('/stats', {
 		  	templateUrl: 'stats_index.html',
 		  	controller: 'StatsIndexCtrl'
