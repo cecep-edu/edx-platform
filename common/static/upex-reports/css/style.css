@@ -103,3 +103,8 @@ body {
   display: inline-block;
   border-radius: 50%;
 }
+
+
+.sidebar ul li {
+  margin-top: 20px;
+}

@@ -118,22 +118,17 @@ def student(request):
     user = User.objects.get(pk=request.GET.get('id'))
 
     data = {}
-    courses_obj = {}
+    courses = []
 
     courses = list(get_course_enrollment_pairs(user, '', ''))
     i = 0
     for course in courses:
-        c = {}
-        c["name"] = course[0].display_name
-        
-        package_id = course[0].id.package_id
-        ar = package_id.split("+")
-        c["course_url"] = "/course/"+"/".join(ar)
-
-        courses_obj[i] = c
+        course_module = get_course_module(course[0].id)
+        course_data = course_outline_json(request, course_module)
+        courses[i] = course_data
         i = i +1
 
-    data["courses"] = courses_obj
+    data["courses"] = courses
 
     if hasattr(user, 'profile'):
         data['name'] = user.profile.name

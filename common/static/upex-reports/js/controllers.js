@@ -211,6 +211,7 @@ angular.module('rUPEx.controllers', [])
       method: 'GET'
     }).success(function(response) {
       console.log(response);
+      console.log(response.courses);
       $scope.student = response;
       $scope.courses = response.courses;
     });
@@ -232,6 +233,44 @@ angular.module('rUPEx.controllers', [])
 
       $("#downloadCSVInfoStudent").modal('show');
     };
+
+
+        $scope.downloadPDF = function(student, courses) {
+
+
+          var studentData = []
+              , coursesData = []
+              ,fontSize = 10
+              ,height = 0
+              ,doc
+              ;
+            
+            doc = new jsPDF('p', 'pt', 'a4', true);
+            doc.setFont("courier", "normal");
+            doc.setFontSize(fontSize);
+
+            studentData.push({
+              "Usuario": student.name,
+              "Email": student.email,
+              "Nivel de estudios": student.education,
+              "Ciudad": student.city
+            });
+            doc.drawTable(studentData, {xstart:10,ystart:10,tablestart:70,marginleft:50});
+
+
+
+            for (i = 0; i < courses.length; i++) {
+              coursesData.push({
+                "Curso": courses[i].display_name,
+                "Nota final": null,
+                "Fecha de inicio": courses[i].release_date,
+                "Fecha de fin": courses[i].due_date
+              });
+            }
+            doc.drawTable(coursesData, {xstart:10,ystart:10,tablestart:140,marginleft:50});
+          
+            doc.save("upex-cursos-alumno.pdf");
+        };
 
 
   })

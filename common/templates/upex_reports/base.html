@@ -38,9 +38,15 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
-        <ul class="nav nav-sidebar" style="font-size: 1.8em;">
+        <ul class="nav nav-sidebar" style="font-size: 1.6em;">
           <li id="orgs-link"><a href="#/orgs">Instituciones</a></li>
-          <li id="courses-link"><a href="#/courses">Cursos</a></li>
+          <li id="courses-link">
+            <a href="#/courses">Cursos</a>
+            <ul class="background:red;" style="list-style-type:none; font-size:.8em;">
+              <li style="" class=""><a href="#/students">Cursos por usuario</a></li>
+            </ul>
+          </li>
+
           <li id="students-link"><a href="#/students">Alumnos</a></li>
           <li id="stats-link"><a href="#/stats">Estadísticas</a></li>
         </ul>
@@ -282,7 +288,7 @@
               {$ student.name $}
               <div style="float:right;">
                 <button ng-click="downloadCSV(student, courses)" type="button" class="btn btn-primary btn-xs">Descargar CSV</button>
-                <button type="button" class="btn btn-warning btn-xs">Descargar PDF</button>
+                <button ng-click="downloadPDF(student, courses)" type="button" class="btn btn-warning btn-xs">Descargar PDF</button>
               </div>
             </h1>
 
@@ -309,28 +315,48 @@
               <li class="list-group-item">Ciudad: {$ student.city $}</li>
             </ul>
 
-            <h2 class="sub-header">Cursos</h2>
+                <h2 class="sub-header">Cursos activos</h2>
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th style="width: 40%;">Nombre</th>
+                        <th style="width: 20%;">Nota final</th>
+                        <th style="width: 20%;">Fecha de inicio</th>
+                        <th style="width: 20%;">Fecha de fin</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="course in courses | filter: { released_to_students: true }">
+                        <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
+                        <td>null</td>
+                        <td>{$ course.release_date || 'Sin definir' $}</td>
+                        <td>{$ course.due_date || 'Sin definir' $}</td>
+                      </tr>
+                  </table>
+                </div>
 
-            <div class="table-responsive">
+                <h2 class="sub-header">Cursos terminados</h2>
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th style="width: 40%;">Nombre</th>
+                        <th style="width: 20%;">Nota final</th>
+                        <th style="width: 20%;">Fecha de inicio</th>
+                        <th style="width: 20%;">Fecha de fin</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="course in courses | filter: { due: true }">
+                        <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
+                        <td>null</td>
+                        <td>{$ course.release_date || 'Sin definir' $}</td>
+                        <td>{$ course.due_date || 'Sin definir' $}</td>
+                      </tr>
+                  </table>
+                </div>
 
-              <input type="text" class="form-control"
-                ng-model="search.name" style="width:30%"
-                placeholder="Filtrar por nombre..." />
-
-              <table class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Nota final</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr ng-repeat="course in courses | filter:{name:search.name}">
-                    <td><a href="#{$ course.course_url $}">{$ course.name $}</a></td>
-                    <td>null</td>
-                  </tr>
-              </table>
-            </div>
           </div>
         </script>
 
