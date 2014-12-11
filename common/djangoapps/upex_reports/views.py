@@ -40,8 +40,7 @@ def courses(request):
 		resp.append(course_outline_json(request, course))
 	for course in in_proccess:
 		resp.append(course_outline_json(request, course))
-
-	print resp
+		
     
 	return JsonResponse(resp)
 

@@ -329,6 +329,8 @@ angular.module('rUPEx.controllers', [])
           .success(function(response) {
             $scope.orgs = get_all_orgs(response);
             console.log($scope.orgs);
+
+            $scope.predicate = "-";
           });
 
   })

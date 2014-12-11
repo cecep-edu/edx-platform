@@ -442,11 +442,14 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th>Nombre de la institución</th>
+                        <th>
+                          <a href="" ng-click="predicate = ''; reverse=false">Nombre de la institución</a>
+                          (<a href="" ng-click="predicate = '-'; reverse=false">^</a>)
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="org in orgs">
+                      <tr ng-repeat="org in orgs | orderBy:predicate:reverse">
                         <td><a href="#/org/{$ org.toLowerCase() $}">{$ org $}</a></td>
                       </tr>
                   </table>
