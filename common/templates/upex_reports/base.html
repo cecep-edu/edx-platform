@@ -66,6 +66,7 @@
       <div ng-view>
 
 
+
         <script type="text/ng-template" id="course_index.html">
 
 
@@ -100,14 +101,23 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 40%;">Nombre</th>
-                        <th style="width: 20%">Progreso</th>
-                        <th style="width: 20%;">Fecha de inicio</th>
-                        <th style="width: 20%;">Fecha de fin</th>
+                        <th style="width: 40%;">
+                          <a href="" ng-click="apredicate = 'display_name'; reverse=false">Nombre</a>
+                          (<a href="" ng-click="apredicate = '-display_name'; reverse=false">^</a>)
+                        </th>
+                        <th style="width: 20%">
+                          <a href="" ng-click="apredicate = 'progress'; reverse=!reverse">Progreso</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="apredicate = 'release_date'; reverse=!reverse">Fecha de inicio</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="apredicate = 'due_date'; reverse=!reverse">Fecha de fin</a>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="course in courses | filter: { released_to_students: true }">
+                      <tr ng-repeat="course in courses | filter: { released_to_students: true } | orderBy:apredicate:reverse">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
                         <td>
                           <div class="progress">
@@ -128,14 +138,23 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 40%;">Nombre</th>
-                        <th style="width: 20%">Progreso</th>
-                        <th style="width: 20%;">Fecha de inicio</th>
-                        <th style="width: 20%;">Fecha de fin</th>
+                        <th style="width: 40%;">
+                          <a href="" ng-click="ppredicate = 'display_name'; reverse=false">Nombre</a>
+                          (<a href="" ng-click="ppredicate = '-display_name'; reverse=false">^</a>)
+                        </th>
+                        <th style="width: 20%">
+                          <a href="" ng-click="ppredicate = 'progress'; reverse=!reverse">Progreso</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="ppredicate = 'release_date'; reverse=!reverse">Fecha de inicio</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="ppredicate = 'due_date'; reverse=!reverse">Fecha de fin</a>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="course in courses | filter: { released_to_students: false }">
+                      <tr ng-repeat="course in courses | filter: { released_to_students: false } | orderBy:ppredicate:reverse">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
                         <td>
                           <div class="progress">
@@ -144,7 +163,6 @@
                             </div>
                           </div>
                         </td>
-
                         <td>{$ course.release_date || 'Sin definir' $}</td>
                         <td>{$ course.due_date || 'Sin definir' $}</td>
                       </tr>
@@ -157,14 +175,23 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 40%;">Nombre</th>
-                        <th style="width: 20%;">Progreso</th>
-                        <th style="width: 20%;">Fecha de inicio</th>
-                        <th style="width: 20%;">Fecha de fin</th>
+                        <th style="width: 40%;">
+                          <a href="" ng-click="tpredicate = 'display_name'; reverse=false">Nombre</a>
+                          (<a href="" ng-click="tpredicate = '-display_name'; reverse=false">^</a>)
+                        </th>
+                        <th style="width: 20%">
+                          <a href="" ng-click="tpredicate = 'progress'; reverse=!reverse">Progreso</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="tpredicate = 'release_date'; reverse=!reverse">Fecha de inicio</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="tpredicate = 'due_date'; reverse=!reverse">Fecha de fin</a>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="course in courses | filter: { due: true }">
+                      <tr ng-repeat="course in courses | filter: { due: true } | orderBy:tpredicate:reverse">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
                         <td>
                           <div class="progress">
@@ -183,6 +210,9 @@
               </div>
 
         </script>
+
+
+
 
 
         <script type="text/ng-template" id="course_show.html">

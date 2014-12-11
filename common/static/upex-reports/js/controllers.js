@@ -35,6 +35,9 @@ angular.module('rUPEx.controllers', [])
         }
 
     		$scope.courses = courses;
+        $scope.apredicate = "display_name";
+        $scope.ppredicate = "display_name";
+        $scope.tpredicate = "display_name";
 
     	});
 
