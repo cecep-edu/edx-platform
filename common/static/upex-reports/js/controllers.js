@@ -182,6 +182,8 @@ angular.module('rUPEx.controllers', [])
     }).success(function(response) {
         console.log(response);
         $scope.students = response;
+
+        $scope.predicate = 'name';
     });
 
     // está función no recoge $scope.students

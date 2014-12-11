@@ -269,16 +269,16 @@
                     (<a href="" ng-click="predicate = '-name'; reverse=false">^</a>)
                   </th>
                   <th>
-                    <a href="" ng-click="predicate = 'email'; reverse=false">Email</a>
+                    <a href="" ng-click="predicate = 'email'; reverse=!reverse">Email</a>
                   </th>
                   <th>
-                    <a href="" ng-click="predicate = null; reverse=false">Nota final</a>
+                    <a href="" ng-click="predicate = null; reverse=!reverse">Nota final</a>
                   </th>
                   <th>
-                    <a href="" ng-click="predicate = 'location'; reverse=false">Localización</a>
+                    <a href="" ng-click="predicate = 'location'; reverse=!reverse">Localización</a>
                   </th>
                   <th>
-                    <a href="" ng-click="predicate = 'level_of_education'; reverse=false">Nivel de estudios</a>
+                    <a href="" ng-click="predicate = 'level_of_education'; reverse=!reverse">Nivel de estudios</a>
                   </th>
                 </tr>
               </thead>
@@ -337,14 +337,23 @@
               <table class="table table-striped">
                 <thead>
                   <tr>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Localización</th>
-                    <th>Nivel de estudios</th>
+                    <th>
+                      <a href="" ng-click="predicate = 'name'; reverse=false">Nombre</a>
+                      (<a href="" ng-click="predicate = '-name'; reverse=false">^</a>)
+                    </th>
+                    <th>
+                      <a href="" ng-click="predicate = 'email'; reverse=!reverse">Email</a>
+                    </th>
+                    <th>
+                      <a href="" ng-click="predicate = 'city'; reverse=!reverse">Localización</a>
+                    </th>
+                    <th>
+                      <a href="" ng-click="predicate = 'education'; reverse=!reverse">Nivel de estudios</a>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr ng-repeat="student in students | filter:{name:search.name}">
+                  <tr ng-repeat="student in students | filter:{name:search.name} | orderBy:predicate:reverse">
                     <td><a href="#/student/{$ student.id $}">{$ student.name $}</a></td>
                     <td><a href="mailto:{$ student.email $}">{$ student.email $}</a></td>
                     <td>{$ student.city $}</td>
@@ -397,19 +406,19 @@
                       <tr>
                         <th style="width: 40%;">
                           <a href="" ng-click="predicate = 'display_name'; reverse=false">Nombre</a>
-                           (<a href="" ng-click="predicate = '-name'; reverse=false">^</a>)
+                           (<a href="" ng-click="predicate = '-display_name'; reverse=false">^</a>)
                         </th>
                         <th style="width: 10%">
-                          <a href="" ng-click="predicate = 'period'; reverse=false">Período</a>
+                          <a href="" ng-click="predicate = 'period'; reverse=!reverse">Período</a>
                         </th>
                         <th style="width: 10%;">
-                          <a href="" ng-click="predicate = null; reverse=false">Nota final</a>
+                          <a href="" ng-click="predicate = null; reverse=!reverse">Nota final</a>
                         </th>
                         <th style="width: 20%;">
-                          <a href="" ng-click="predicate = 'release_date'; reverse=false">Fecha de inicio</a>
+                          <a href="" ng-click="predicate = 'release_date'; reverse=!reverse">Fecha de inicio</a>
                         </th>
                         <th style="width: 20%;">
-                          <a href="" ng-click="predicate = 'due_date'; reverse=false">Fecha de fin</a>
+                          <a href="" ng-click="predicate = 'due_date'; reverse=!reverse">Fecha de fin</a>
                         </th>
                       </tr>
                     </thead>
@@ -431,19 +440,19 @@
                       <tr>
                         <th style="width: 40%;">
                           <a href="" ng-click="predicate = 'display_name'; reverse=false">Nombre</a>
-                           (<a href="" ng-click="predicate = '-name'; reverse=false">^</a>)
+                           (<a href="" ng-click="predicate = '-display_name'; reverse=false">^</a>)
                         </th>
                         <th style="width: 10%">
-                          <a href="" ng-click="predicate = 'period'; reverse=false">Período</a>
+                          <a href="" ng-click="predicate = 'period'; reverse=!reverse">Período</a>
                         </th>
                         <th style="width: 10%;">
-                          <a href="" ng-click="predicate = null; reverse=false">Nota final</a>
+                          <a href="" ng-click="predicate = null; reverse=!reverse">Nota final</a>
                         </th>
                         <th style="width: 20%;">
-                          <a href="" ng-click="predicate = 'release_date'; reverse=false">Fecha de inicio</a>
+                          <a href="" ng-click="predicate = 'release_date'; reverse=!reverse">Fecha de inicio</a>
                         </th>
                         <th style="width: 20%;">
-                          <a href="" ng-click="predicate = 'due_date'; reverse=false">Fecha de fin</a>
+                          <a href="" ng-click="predicate = 'due_date'; reverse=!reverse">Fecha de fin</a>
                         </th>
                       </tr>
                     </thead>
