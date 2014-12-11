@@ -264,15 +264,26 @@
             <table class="table table-striped">
               <thead>
                 <tr>
-                  <th>Nombre</th>
-                  <th>Email</th>
-                  <th>Nota final</th>
-                  <th>Localización</th>
-                  <th>Nivel de estudios</th>
+                  <th>
+                    <a href="" ng-click="predicate = 'name'; reverse=false">Nombre</a>
+                    (<a href="" ng-click="predicate = '-name'; reverse=false">^</a>)
+                  </th>
+                  <th>
+                    <a href="" ng-click="predicate = 'email'; reverse=false">Email</a>
+                  </th>
+                  <th>
+                    <a href="" ng-click="predicate = null; reverse=false">Nota final</a>
+                  </th>
+                  <th>
+                    <a href="" ng-click="predicate = 'location'; reverse=false">Localización</a>
+                  </th>
+                  <th>
+                    <a href="" ng-click="predicate = 'level_of_education'; reverse=false">Nivel de estudios</a>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="student in students | filter:{name:search.name}">
+                <tr ng-repeat="student in students | filter:{name:search.name} | orderBy:predicate:reverse">
                   <td><a href="#/student/{$ student.id $}">{$ student.name $}</a></td>
                   <td><a href="mailto:{$ student.email $}">{$ student.email $}</a></td>
                   <td>null</td>
@@ -384,15 +395,26 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 40%;">Nombre</th>
-                        <th style="width: 10%">Período</th>
-                        <th style="width: 10%;">Nota final</th>
-                        <th style="width: 20%;">Fecha de inicio</th>
-                        <th style="width: 20%;">Fecha de fin</th>
+                        <th style="width: 40%;">
+                          <a href="" ng-click="predicate = 'display_name'; reverse=false">Nombre</a>
+                           (<a href="" ng-click="predicate = '-name'; reverse=false">^</a>)
+                        </th>
+                        <th style="width: 10%">
+                          <a href="" ng-click="predicate = 'period'; reverse=false">Período</a>
+                        </th>
+                        <th style="width: 10%;">
+                          <a href="" ng-click="predicate = null; reverse=false">Nota final</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="predicate = 'release_date'; reverse=false">Fecha de inicio</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="predicate = 'due_date'; reverse=false">Fecha de fin</a>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="course in courses | filter: { released_to_students: true }">
+                      <tr ng-repeat="course in courses | filter: { released_to_students: true } | orderBy:predicate:reverse">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
                         <td>{$ course.period $}</td>
                         <td>null</td>
@@ -407,15 +429,26 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 40%;">Nombre</th>
-                        <th style="width: 10%;">Período</th>
-                        <th style="width: 10%;">Nota final</th>
-                        <th style="width: 20%;">Fecha de inicio</th>
-                        <th style="width: 20%;">Fecha de fin</th>
+                        <th style="width: 40%;">
+                          <a href="" ng-click="predicate = 'display_name'; reverse=false">Nombre</a>
+                           (<a href="" ng-click="predicate = '-name'; reverse=false">^</a>)
+                        </th>
+                        <th style="width: 10%">
+                          <a href="" ng-click="predicate = 'period'; reverse=false">Período</a>
+                        </th>
+                        <th style="width: 10%;">
+                          <a href="" ng-click="predicate = null; reverse=false">Nota final</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="predicate = 'release_date'; reverse=false">Fecha de inicio</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="predicate = 'due_date'; reverse=false">Fecha de fin</a>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="course in courses | filter: { due: true }">
+                      <tr ng-repeat="course in courses | filter: { due: true } | orderBy:predicate:reverse">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
                         <td>{$ course.period $}</td>
                         <td>null</td>
@@ -493,13 +526,20 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 60%;">Nombre</th>
-                        <th style="width: 20%;">Fecha de inicio</th>
-                        <th style="width: 20%;">Fecha de fin</th>
+                        <th style="width: 40%;">
+                          <a href="" ng-click="apredicate = 'display_name'; reverse=false">Nombre</a>
+                          (<a href="" ng-click="apredicate = '-display_name'; reverse=false">^</a>)
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="apredicate = 'release_date'; reverse=!reverse">Fecha de inicio</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="apredicate = 'due_date'; reverse=!reverse">Fecha de fin</a>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="course in courses | filter: { released_to_students: true }">
+                      <tr ng-repeat="course in courses | filter: { released_to_students: true } | orderBy:apredicate:reverse">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
                         <td>{$ course.release_date || 'Sin definir' $}</td>
                         <td>{$ course.due_date || 'Sin definir' $}</td>
@@ -513,13 +553,20 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 60%;">Nombre</th>
-                        <th style="width: 20%;">Fecha de inicio</th>
-                        <th style="width: 20%;">Fecha de fin</th>
+                        <th style="width: 40%;">
+                          <a href="" ng-click="ppredicate = 'display_name'; reverse=false">Nombre</a>
+                          (<a href="" ng-click="ppredicate = '-display_name'; reverse=false">^</a>)
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="ppredicate = 'release_date'; reverse=!reverse">Fecha de inicio</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="ppredicate = 'due_date'; reverse=!reverse">Fecha de fin</a>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="course in courses | filter: { released_to_students: false }">
+                      <tr ng-repeat="course in courses | filter: { released_to_students: false } | orderBy:ppredicate:reverse">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
                         <td>{$ course.release_date || 'Sin definir' $}</td>
                         <td>{$ course.due_date || 'Sin definir' $}</td>
@@ -533,19 +580,28 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 60%;">Nombre</th>
-                        <th style="width: 20%;">Fecha de inicio</th>
-                        <th style="width: 20%;">Fecha de fin</th>
+                        <th style="width: 40%;">
+                          <a href="" ng-click="tpredicate = 'display_name'; reverse=false">Nombre</a>
+                          (<a href="" ng-click="tpredicate = '-display_name'; reverse=false">^</a>)
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="tpredicate = 'release_date'; reverse=!reverse">Fecha de inicio</a>
+                        </th>
+                        <th style="width: 20%;">
+                          <a href="" ng-click="tpredicate = 'due_date'; reverse=!reverse">Fecha de fin</a>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="course in courses | filter: { due: true }">
+                      <tr ng-repeat="course in courses | filter: { due: true } | orderBy:tpredicate:reverse">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
                         <td>{$ course.release_date || 'Sin definir' $}</td>
                         <td>{$ course.due_date || 'Sin definir' $}</td>
                       </tr>
                   </table>
                 </div>
+
+
 
               </div>
 

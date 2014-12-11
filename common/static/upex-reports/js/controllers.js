@@ -118,6 +118,8 @@ angular.module('rUPEx.controllers', [])
       $scope.subscribers = response;
       $scope.students = response.students;
       $scope.students_count = response.students_count;
+
+      $scope.predicate = 'name'
     });
 
     $scope.downloadCSV = function(course, students) {
@@ -243,6 +245,9 @@ angular.module('rUPEx.controllers', [])
       console.log(response.courses);
       $scope.student = response;
       $scope.courses = response.courses;
+
+      $scope.apredicate = 'display_name';
+      $scope.tpredicate = 'display_name';
     });
 
     $scope.downloadCSV = function(student, courses) {
@@ -355,6 +360,10 @@ angular.module('rUPEx.controllers', [])
               return false;
             });
             console.log($scope.courses);
+
+            $scope.apredicate = "display_name";
+            $scope.ppredicate = "display_name";
+            $scope.tpredicate = "display_name";
         });
   })
 
