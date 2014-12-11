@@ -11,6 +11,7 @@
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
 
     <link href="{% static 'upex-reports/css/style.css' %}" rel="stylesheet">
+    <link href="{% static 'upex-reports/css/ng-table.css' %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -99,7 +100,8 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 60%;">Nombre</th>
+                        <th style="width: 40%;">Nombre</th>
+                        <th style="width: 20%">Progreso</th>
                         <th style="width: 20%;">Fecha de inicio</th>
                         <th style="width: 20%;">Fecha de fin</th>
                       </tr>
@@ -107,6 +109,13 @@
                     <tbody>
                       <tr ng-repeat="course in courses | filter: { released_to_students: true }">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
+                        <td>
+                          <div class="progress">
+                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{$ course.progress $}" aria-valuemin="0" aria-valuemax="100" style="width: {$ course.progress $}%;">
+                              <span style="color:black;">{$ course.progress $}%</span>
+                            </div>
+                          </div>
+                        </td>
                         <td>{$ course.release_date || 'Sin definir' $}</td>
                         <td>{$ course.due_date || 'Sin definir' $}</td>
                       </tr>
@@ -119,7 +128,8 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 60%;">Nombre</th>
+                        <th style="width: 40%;">Nombre</th>
+                        <th style="width: 20%">Progreso</th>
                         <th style="width: 20%;">Fecha de inicio</th>
                         <th style="width: 20%;">Fecha de fin</th>
                       </tr>
@@ -127,6 +137,14 @@
                     <tbody>
                       <tr ng-repeat="course in courses | filter: { released_to_students: false }">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
+                        <td>
+                          <div class="progress">
+                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{$ course.progress $}" aria-valuemin="0" aria-valuemax="100" style="width: {$ course.progress $}%;">
+                              <span style="color:black;">{$ course.progress $}%</span>
+                            </div>
+                          </div>
+                        </td>
+
                         <td>{$ course.release_date || 'Sin definir' $}</td>
                         <td>{$ course.due_date || 'Sin definir' $}</td>
                       </tr>
@@ -139,7 +157,8 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 60%;">Nombre</th>
+                        <th style="width: 40%;">Nombre</th>
+                        <th style="width: 20%;">Progreso</th>
                         <th style="width: 20%;">Fecha de inicio</th>
                         <th style="width: 20%;">Fecha de fin</th>
                       </tr>
@@ -147,6 +166,13 @@
                     <tbody>
                       <tr ng-repeat="course in courses | filter: { due: true }">
                         <td><a href="/reports/#{$ course.studio_url $}">{$ course.display_name $}</a></td>
+                        <td>
+                          <div class="progress">
+                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{$ course.progress $}" aria-valuemin="0" aria-valuemax="100" style="width: {$ course.progress $}%;">
+                              <span style="color:black;">{$ course.progress $}%</span>
+                            </div>
+                          </div>
+                        </td>
                         <td>{$ course.release_date || 'Sin definir' $}</td>
                         <td>{$ course.due_date || 'Sin definir' $}</td>
                       </tr>
@@ -620,8 +646,9 @@
     <script type="text/javascript" src="{% static 'upex-reports/js/vendor/jspdf.plugin.standard_fonts_metrics.js' %}"></script>
     <script type="text/javascript" src="{% static 'upex-reports/js/vendor/jspdf.plugin.split_text_to_size.js' %}"></script>
     <script type="text/javascript" src="{% static 'upex-reports/js/vendor/jspdf.plugin.from_html.js' %}"></script>
-
     <script type="text/javascript" src="{% static 'upex-reports/js/vendor/jspdf.plugin.table.js' %}"></script>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
 
     <script src="//code.angularjs.org/1.3.3/angular.min.js"></script>
     <script src="//code.angularjs.org/1.3.3/angular-route.min.js"></script>

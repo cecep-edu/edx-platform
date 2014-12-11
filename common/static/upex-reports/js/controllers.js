@@ -1,3 +1,21 @@
+function getProgressOfACourse(releaseDate, dueDate) {
+
+  if (releaseDate && !dueDate) {
+    return 15
+  } else if (releaseDate && dueDate) {
+    var releaseDate = moment(releaseDate);
+    var dueDate = moment(dueDate);
+
+    console.log(releaseDate);
+    console.log(dueDate);
+
+    var diff = releaseDate.diff(dueDate, "days")
+    console.log("DIFF: " + diff);    
+  } else {
+    return 0
+  }
+}
+
 angular.module('rUPEx.controllers', [])
 
   .controller('CoursesIndexCtrl', function($scope, $http) {
@@ -9,7 +27,15 @@ angular.module('rUPEx.controllers', [])
     $http.get("/reports/api/courses")
     	.success(function(response) {
     		console.log(response);
-    		$scope.courses = response;
+
+        var courses = response;
+        for (var c in courses) {
+          var course = courses[c];
+          course["progress"] = getProgressOfACourse(course.release_date, courses.due_date);
+        }
+
+    		$scope.courses = courses;
+
     	});
 
     $scope.downloadCSV = function(courses) {
