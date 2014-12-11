@@ -22,6 +22,7 @@ angular.module('rUPEx.controllers', [])
     $("#students-link").removeClass("active");
     $("#orgs-link").removeClass("active");
     $("#stats-link").removeClass("active");
+    $("#staff-link").removeClass("active");
     $("#courses-link").addClass("active");
 
     $http.get("/reports/api/courses")
@@ -82,6 +83,7 @@ angular.module('rUPEx.controllers', [])
     $("#students-link").removeClass("active");
     $("#orgs-link").removeClass("active");
     $("#stats-link").removeClass("active");
+    $("#staff-link").removeClass("active");
     $("#courses-link").addClass("active");
 
 
@@ -174,6 +176,7 @@ angular.module('rUPEx.controllers', [])
     $("#courses-link").removeClass("active");
     $("#orgs-link").removeClass("active");
     $("#stats-link").removeClass("active");
+    $("#staff-link").removeClass("active");
     $("#students-link").addClass("active");
 
     $http({
@@ -236,6 +239,7 @@ angular.module('rUPEx.controllers', [])
     $("#courses-link").removeClass("active");
     $("#orgs-link").removeClass("active");
     $("#stats-link").removeClass("active");
+    $("#staff-link").removeClass("active");
     $("#students-link").addClass("active");
 
     $http({
@@ -315,6 +319,7 @@ angular.module('rUPEx.controllers', [])
         $("#courses-link").removeClass("active");
         $("#students-link").removeClass("active");
         $("#stats-link").removeClass("active");
+        $("#staff-link").removeClass("active");
         $("#orgs-link").addClass("active");
         
         function get_organization(courseId) {
@@ -346,6 +351,7 @@ angular.module('rUPEx.controllers', [])
     $("#courses-link").removeClass("active");
     $("#students-link").removeClass("active");
     $("#stats-link").removeClass("active");
+    $("#staff-link").removeClass("active");
     $("#orgs-link").addClass("active");
 
     $scope.orgName = $routeParams.org_name.toUpperCase();
@@ -370,6 +376,12 @@ angular.module('rUPEx.controllers', [])
   })
 
   .controller('StaffIndexCtrl', function($scope, $http) {
+    $("#courses-link").removeClass("active");
+    $("#students-link").removeClass("active");
+    $("#orgs-link").removeClass("active");
+    $("#stats-link").removeClass("active");
+    $("#staff-link").addClass("active");
+
     $http({
           url: "/reports/api/staff",
           method: 'GET'
@@ -391,13 +403,57 @@ angular.module('rUPEx.controllers', [])
             
             $scope.students = _.uniq(instructors, 'email');
             console.log($scope.students);
+
+            $scope.predicate = "name";
       });
+  })
+
+  .controller('StaffShowCtrl', function($scope, $http, $routeParams) {
+    $("#courses-link").removeClass("active");
+    $("#students-link").removeClass("active");
+    $("#orgs-link").removeClass("active");
+    $("#stats-link").removeClass("active");
+    $("#staff-link").addClass("active");
+    
+    $http({
+      url: "/reports/api/student",
+      params: { id: $routeParams.id },
+      method: 'GET'
+    }).success(function(response) {
+      console.log(response);
+      console.log(response.courses);
+      $scope.student = response;
+      var courses = response.courses;
+
+      for (var c in courses) {
+        var course = courses[c];
+        course["progress"] = getProgressOfACourse(course.release_date, courses.due_date);
+      }
+
+      $scope.courses = courses;
+
+      $scope.apredicate = 'display_name';
+      $scope.tpredicate = 'display_name';
+    });
+
+    $http({
+      url: "/reports/api/staff-courses",
+      params: { id: $routeParams.id },
+      method: 'GET'
+    }).success(function(response) {
+      console.log(response);
+      //$scope.course = response;
+    });
+
+
+    console.log("hola");
   })
 
   .controller('StatsIndexCtrl', function($scope, $http) {
     $("#courses-link").removeClass("active");
     $("#students-link").removeClass("active");
     $("#orgs-link").removeClass("active");
+    $("#staff-link").removeClass("active");
     $("#stats-link").addClass("active");
 
 

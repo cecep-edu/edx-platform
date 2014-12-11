@@ -40,6 +40,11 @@ angular.module('rUPEx', ['ngRoute', 'rUPEx.controllers'])
 		  	controller: 'StaffIndexCtrl'
 		  }).
 
+		  when('/staff/:id', {
+		  	templateUrl: 'staff_show.html',
+		  	controller: 'StaffShowCtrl'
+		  }).
+
 		  when('/stats', {
 		  	templateUrl: 'stats_index.html',
 		  	controller: 'StatsIndexCtrl'

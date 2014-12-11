@@ -186,6 +186,54 @@ def staff(request):
     return JsonResponse(courses)
 
 
+@login_required(login_url="/signin")
+def staff_courses(request):
+	user = User.objects.get(pk=request.GET.get('id'))
+
+	_courses, in_proccess = courses_list()
+	
+	courses = []
+
+	for course in _courses:
+	    courses.append(course_outline_json(request, course))
+	for course in in_proccess:
+	    courses.append(course_outline_json(request, course))
+
+	for c in courses:
+
+	    ar = c["studio_url"].split("/")[2:]
+	    course_id = "/".join(ar)
+
+	    course_id = SlashSeparatedCourseKey.from_deprecated_string(course_id)
+	    course = get_course_with_access(
+	        request.user, 'instructor', course_id, depth=None
+	    )
+
+	    def extract_user_info(user):
+	        """ convert user into dicts for json view """
+	        return {
+	            'id': user.id,
+	            'username': user.username,
+	            'email': user.email,
+	            'name': user.profile.name,
+	            'city': user.profile.city.name.capitalize(),
+	            'education': user.profile.level_of_education
+	        }
+
+	    response_payload = {
+	        'course_id': course_id.to_deprecated_string(),
+	        'instructors': map(extract_user_info, list_with_level(
+	            course, 'instructor'
+	        )),
+	    }
+
+	    c["instructors"] = response_payload["instructors"]
+
+
+	return JsonResponse(courses)
+
+
+
 def courses_list():
     """
     List all courses available to the logged in user by iterating through all the courses

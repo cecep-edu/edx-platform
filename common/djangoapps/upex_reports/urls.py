@@ -8,4 +8,5 @@ urlpatterns = patterns('',
                url(r'^api/students$', 'upex_reports.views.students', name="students"),
                url(r'^api/student$', 'upex_reports.views.student', name="student"),
                url(r'^api/staff$', 'upex_reports.views.staff', name="staff"),
+               url(r'^api/staff-courses$', 'upex_reports.views.staff_courses', name="staff_courses"),
 )
