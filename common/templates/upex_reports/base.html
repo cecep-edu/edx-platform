@@ -338,22 +338,22 @@
                 <thead>
                   <tr>
                     <th>
-                      <a href="" ng-click="predicate = 'name'; reverse=false">Nombre</a>
-                      (<a href="" ng-click="predicate = '-name'; reverse=false">^</a>)
+                      <a href="" ng-click="thePredicate = 'name'; reverse=false">Nombre</a>
+                      (<a href="" ng-click="thePredicate = '-name'; reverse=false">^</a>)
                     </th>
                     <th>
-                      <a href="" ng-click="predicate = 'email'; reverse=!reverse">Email</a>
+                      <a href="" ng-click="thePredicate = 'email'; reverse=!reverse">Email</a>
                     </th>
                     <th>
-                      <a href="" ng-click="predicate = 'city'; reverse=!reverse">Localización</a>
+                      <a href="" ng-click="thePredicate = 'city'; reverse=!reverse">Localización</a>
                     </th>
                     <th>
-                      <a href="" ng-click="predicate = 'education'; reverse=!reverse">Nivel de estudios</a>
+                      <a href="" ng-click="thePredicate = 'education'; reverse=!reverse">Nivel de estudios</a>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr ng-repeat="student in students | filter:{name:search.name} | orderBy:predicate:reverse">
+                  <tr ng-repeat="student in students | filter:{name:search.name} | orderBy:thePredicate:reverse">
                     <td><a href="#/student/{$ student.id $}">{$ student.name $}</a></td>
                     <td><a href="mailto:{$ student.email $}">{$ student.email $}</a></td>
                     <td>{$ student.city $}</td>
