@@ -185,6 +185,8 @@ angular.module('rUPEx.controllers', [])
         console.log(response);
 
         $scope.students = response;
+        $scope.studentsCount = $scope.students.length
+
         $scope.zpredicate = 'name'; 
       });
 
@@ -215,16 +217,14 @@ angular.module('rUPEx.controllers', [])
         doc.setFont("courier", "normal");
         doc.setFontSize(fontSize);
 
-	_.each(students, function(value, key) {
-		//console.log(key, value);
-
-		data.push({
-            "Nombre" : value.name,
-            "Email" : value.email,
-            "Localización" : value.city || 'Sin definir',
-            "Nivel de estudios" : value.education || 'Sin definir'
-        });
-	});
+        for (i=0; i < students.length; i++) {
+          data.push({
+            "Nombre" : students[i].name,
+            "Email" : students[i].email,
+            "Localización" : students[i[.city || 'Sin definir',
+            "Nivel de estudios" : students[i].education || 'Sin definir'
+          });
+        }
 
         console.log(data);
 
