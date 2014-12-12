@@ -104,7 +104,7 @@ def students(request):
             if hasattr(user.profile, 'city') and user.profile.city is not None:
                 obj["city"] = user.profile.city.name.capitalize()
 
-            data.append = obj
+            data.append(obj)
 
     return JsonResponse(data)
 
