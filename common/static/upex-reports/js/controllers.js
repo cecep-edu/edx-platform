@@ -232,7 +232,7 @@ angular.module('rUPEx.controllers', [])
           j++;
           if (j==30) {
             height = doc.drawTable(data, {xstart:10,ystart:10,tablestart:70,marginleft:50});
-            doc.addPage():
+            doc.addPage();
             j = 0 ;
           }
         }
