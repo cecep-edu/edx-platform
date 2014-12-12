@@ -185,7 +185,7 @@ angular.module('rUPEx.controllers', [])
         console.log(response);
 
         $scope.students = response;
-        $scope.thePredicate = 'name'; 
+        $scope.zpredicate = 'name'; 
       });
 
 

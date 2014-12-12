@@ -329,38 +329,40 @@
             <div class="table-responsive">
 
               <input type="text" class="form-control"
-                ng-model="search.theName" style="width:30%"
+                ng-model="theSearch.name" style="width:30%"
                 placeholder="Filtrar por nombre..." />
-
 
               <table class="table table-striped">
                 <thead>
                   <tr>
                     <th>
-                      <a href="" ng-click="thePredicate = 'name'; reverse=false">Nombre</a>
-                      (<a href="" ng-click="thePredicate = '-name'; reverse=false">^</a>)
+                      <a href="" ng-click="zpredicate = 'name'; reverse=false">Nombre</a>
+                      (<a href="" ng-click="zpredicate = '-name'; reverse=false">^</a>)
                     </th>
                     <th>
-                      <a href="" ng-click="thePredicate = 'email'; reverse=!reverse">Email</a>
+                      <a href="" ng-click="zpredicate = 'email'; reverse=!reverse">Email</a>
                     </th>
                     <th>
-                      <a href="" ng-click="thePredicate = 'city'; reverse=!reverse">Localización</a>
+                      <a href="" ng-click="zpredicate = null; reverse=!reverse">Nota final</a>
                     </th>
                     <th>
-                      <a href="" ng-click="thePredicate = 'education'; reverse=!reverse">Nivel de estudios</a>
+                      <a href="" ng-click="zpredicate = 'city'; reverse=!reverse">Localización</a>
+                    </th>
+                    <th>
+                      <a href="" ng-click="zpredicate = 'education'; reverse=!reverse">Nivel de estudios</a>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr ng-repeat="student in students | filter:{name:search.theName} | orderBy:thePredicate:reverse">
+                  <tr ng-repeat="student in students | filter:{name:theSearch.name} | orderBy:zpredicate:reverse">
                     <td><a href="#/student/{$ student.id $}">{$ student.name $}</a></td>
                     <td><a href="mailto:{$ student.email $}">{$ student.email $}</a></td>
+                    <td>null</td>
                     <td>{$ student.city $}</td>
                     <td>{$ student.education $}</td>
                   </tr>
               </table>
             </div>
-
 
           </div>
         </script>
