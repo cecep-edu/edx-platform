@@ -179,15 +179,15 @@ angular.module('rUPEx.controllers', [])
     $("#staff-link").removeClass("active");
     $("#students-link").addClass("active");
 
-    $http({
-      url: "/reports/api/students",
-      method: 'GET'
-    }).success(function(response) {
-        console.log(response);
-        $scope.students = response;
 
-        $scope.thePredicate = 'name';
-    });
+    $http.get("/reports/api/students")
+      .success(function(response) {
+        console.log(response);
+
+        $scope.students = response;
+        $scope.thePredicate = 'name'; 
+      });
+
 
     // está función no recoge $scope.students
     $scope.downloadCSV = function(students) {

@@ -11,7 +11,6 @@
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
 
     <link href="{% static 'upex-reports/css/style.css' %}" rel="stylesheet">
-    <link href="{% static 'upex-reports/css/ng-table.css' %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -330,7 +329,7 @@
             <div class="table-responsive">
 
               <input type="text" class="form-control"
-                ng-model="search.name" style="width:30%"
+                ng-model="search.theName" style="width:30%"
                 placeholder="Filtrar por nombre..." />
 
 
@@ -353,7 +352,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr ng-repeat="student in students | filter:{name:search.name} | orderBy:thePredicate:reverse">
+                  <tr ng-repeat="student in students | filter:{name:search.theName} | orderBy:thePredicate:reverse">
                     <td><a href="#/student/{$ student.id $}">{$ student.name $}</a></td>
                     <td><a href="mailto:{$ student.email $}">{$ student.email $}</a></td>
                     <td>{$ student.city $}</td>
