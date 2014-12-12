@@ -160,7 +160,6 @@ angular.module('rUPEx.controllers', [])
           data.push({
             "Nombre" : students[i].name,
             "Email" : students[i].email,
-            "Nota final" : null,
             "Localización": students[i].location,
             "Nivel de estudios": students[i].level_of_education
           });
