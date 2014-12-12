@@ -185,6 +185,8 @@ angular.module('rUPEx.controllers', [])
     }).success(function(response) {
         console.log(response);
         $scope.students = response;
+
+        $scope.predicate = 'name';
     });
 
     // está función no recoge $scope.students
@@ -229,8 +231,6 @@ angular.module('rUPEx.controllers', [])
         height = doc.drawTable(data, {xstart:10,ystart:10,tablestart:70,marginleft:50});
         doc.save("upex-listado-alumnos.pdf");
     };
-
-    $scope.predicate = 'name';
 
   })
 
