@@ -329,7 +329,7 @@
             <div class="table-responsive">
 
               <input type="text" class="form-control"
-                ng-model="search.name" style="width:30%"
+                ng-model="theSearch.name" style="width:30%"
                 placeholder="Filtrar por nombre..." />
 
               <table class="table table-striped">
@@ -354,7 +354,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr ng-repeat="student in students | filter:search | orderBy:zpredicate:reverse">
+                  <tr ng-repeat="student in students | filter:{name:theSearch.name} | orderBy:zpredicate:reverse">
                     <td><a href="#/student/{$ student.id $}">{$ student.name $}</a></td>
                     <td><a href="mailto:{$ student.email $}">{$ student.email $}</a></td>
                     <td>null</td>
