@@ -90,10 +90,9 @@ def subscribers(request):  # pylint: disable=W0613, W0621
 # GET /reports/api/students
 @login_required(login_url="/signin")
 def students(request):
-    data = {}
+    data = []
 
     users = User.objects.all()
-    i = 0
     for user in users:
         if hasattr(user, 'profile'):
             obj = {
@@ -105,10 +104,7 @@ def students(request):
             if hasattr(user.profile, 'city') and user.profile.city is not None:
                 obj["city"] = user.profile.city.name.capitalize()
 
-            data[i] = obj
-        i = i +1
-
-    data["count"] = len(data)
+            data.append = obj
 
     return JsonResponse(data)
 
