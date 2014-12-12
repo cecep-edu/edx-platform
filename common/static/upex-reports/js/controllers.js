@@ -221,7 +221,7 @@ angular.module('rUPEx.controllers', [])
           data.push({
             "Nombre" : students[i].name,
             "Email" : students[i].email,
-            "Localización" : students[i[.city || 'Sin definir',
+            "Localización" : students[i].city || 'Sin definir',
             "Nivel de estudios" : students[i].education || 'Sin definir'
           });
         }
