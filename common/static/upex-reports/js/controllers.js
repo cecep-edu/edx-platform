@@ -227,10 +227,14 @@ angular.module('rUPEx.controllers', [])
 
         console.log(data);
 
-        for (i = 0; i < data.length; i ++) {
-          if (i % 30 == 0)
-            doc.addPage();
-          height = doc.drawTable(data, {xstart:10,ystart:10,tablestart:70,marginleft:50});  
+        j = 0;
+        for (i=0; i<data.length;i++) {
+          j++;
+          if (j==30) {
+            height = doc.drawTable(data, {xstart:10,ystart:10,tablestart:70,marginleft:50});
+            doc.addPage():
+            j = 0 ;
+          }
         }
         
         doc.save("upex-listado-alumnos.pdf");
