@@ -180,8 +180,9 @@ class ReportDownloads
         url = dataContext['url']
         str = url.split('/')
         console.log("DEBUG: " + str)
-        theData = str[str.length - 2]
-        '<a href="' + '/grades/' + theData + '">' + dataContext['name'] + '</a>'
+        course = str[str.length - 2]
+        data = str[str.length - 1]
+        '<a href="' + '/grades/' + course + '/' + data + '">' + dataContext['name'] + '</a>'
     ]
 
     $table_placeholder = $ '<div/>', class: 'slickgrid'
