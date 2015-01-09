@@ -180,7 +180,7 @@ class ReportDownloads
         url = dataContext['url']
         str = url.split('/')
         console.log("DEBUG: " + str)
-        theData = str[str.length - 3]
+        theData = str[str.length - 2]
         '<a href="' + '/grades/' + theData + '">' + dataContext['name'] + '</a>'
     ]
 
