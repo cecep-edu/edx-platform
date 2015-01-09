@@ -179,6 +179,7 @@ class ReportDownloads
       formatter: (row, cell, value, columnDef, dataContext) ->
         url = dataContext['url']
         str = url.split('/')
+        console.log("DEBUG: " + str)
         theData = str[str.length - 3]
         '<a href="' + '/grades/' + theData + '">' + dataContext['name'] + '</a>'
     ]
