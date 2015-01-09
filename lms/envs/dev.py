@@ -18,7 +18,7 @@ from logsettings import get_logger_config
 DEBUG = True
 USE_I18N = True
 TEMPLATE_DEBUG = True
-SITE_NAME = "beta.iaen.edu.ec"
+SITE_NAME = "www.upex.edu.ec"
 
 HTTPS = 'off'
 FEATURES['DISABLE_START_DATES'] = False

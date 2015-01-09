@@ -40,12 +40,18 @@ def import_user(u):
 #               'level_of_education', 'city', 'country']
 
     u = User()
+    user = False
     for key in user_keys:
+        if key == 'email':
+            user = User.objects.get(email=user_info[key])
+            user.set_password(user.email)
+            print "password cambiado", user.id
+            user.save()
         u.__setattr__(key, user_info[key])
     # need to be explicit ?
-    u.is_staff = False
-    u.is_superuser = False
-    u.save()
+#    u.is_staff = False
+#    u.is_superuser = False
+#    u.save()
 
     up = UserProfile()
     up.user = u
@@ -55,8 +61,9 @@ def import_user(u):
             city = City.objects.get(name__iexact=up_info[key])
             valor = city
         up.__setattr__(key, valor)
+ 
     up.year_of_birth = False
-    up.save()
+#    up.save()
 
 
 class Command(BaseCommand):
