@@ -9,10 +9,13 @@ import logging
 from contextlib import contextmanager
 import itertools
 import functools
+from contracts import contract, new_contract
 
 from opaque_keys import InvalidKeyError
-from opaque_keys.edx.keys import CourseKey
+from opaque_keys.edx.keys import CourseKey, AssetKey
+from opaque_keys.edx.locator import LibraryLocator
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
+from xmodule.assetstore import AssetMetadata
 
 from . import ModuleStoreWriteBase
 from . import ModuleStoreEnum
@@ -20,6 +23,11 @@ from .exceptions import ItemNotFoundError, DuplicateCourseError
 from .draft_and_published import ModuleStoreDraftAndPublished
 from .split_migrator import SplitMigrator
 
+new_contract('CourseKey', CourseKey)
+new_contract('AssetKey', AssetKey)
+new_contract('AssetMetadata', AssetMetadata)
+new_contract('LibraryLocator', LibraryLocator)
+new_contract('long', long)
 
 log = logging.getLogger(__name__)
 
@@ -254,6 +262,23 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
                     courses[course_id] = course
         return courses.values()
 
+    @strip_key
+    def get_libraries(self, **kwargs):
+        """
+        Returns a list containing the top level XBlock of the libraries (LibraryRoot) in this modulestore.
+        """
+        libraries = {}
+        for store in self.modulestores:
+            if not hasattr(store, 'get_libraries'):
+                continue
+            # filter out ones which were fetched from earlier stores but locations may not be ==
+            for course in store.get_libraries(**kwargs):
+                course_id = self._clean_course_id_for_mapping(course.location)
+                if course_id not in libraries:
+                    # course is indeed unique. save it in result
+                    libraries[course_id] = course
+        return libraries.values()
+
     def make_course_key(self, org, course, run):
         """
         Return a valid :class:`~opaque_keys.edx.keys.CourseKey` for this modulestore
@@ -286,6 +311,24 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
             return None
 
     @strip_key
+    @contract(library_key='LibraryLocator')
+    def get_library(self, library_key, depth=0, **kwargs):
+        """
+        returns the library block associated with the given key. If no such library exists,
+        it returns None
+
+        :param library_key: must be a LibraryLocator
+        """
+        try:
+            store = self._verify_modulestore_support(library_key, 'get_library')
+            return store.get_library(library_key, depth=depth, **kwargs)
+        except NotImplementedError:
+            log.exception("Modulestore configured for %s does not have get_library method", library_key)
+            return None
+        except ItemNotFoundError:
+            return None
+
+    @strip_key
     def has_course(self, course_id, ignore_case=False, **kwargs):
         """
         returns the course_id of the course if it was found, else None
@@ -308,6 +351,155 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
         assert(isinstance(course_key, CourseKey))
         store = self._get_modulestore_for_courseid(course_key)
         return store.delete_course(course_key, user_id)
+
+    @contract(asset_metadata='AssetMetadata', user_id='int|long', import_only=bool)
+    def save_asset_metadata(self, asset_metadata, user_id, import_only=False):
+        """
+        Saves the asset metadata for a particular course's asset.
+
+        Args:
+        asset_metadata (AssetMetadata): data about the course asset data
+        user_id (int|long): user ID saving the asset metadata
+        import_only (bool): True if importing without editing, False if editing
+
+        Returns:
+            True if info save was successful, else False
+        """
+        store = self._get_modulestore_for_courseid(asset_metadata.asset_id.course_key)
+        return store.save_asset_metadata(asset_metadata, user_id, import_only)
+
+    @contract(asset_metadata_list='list(AssetMetadata)', user_id='int|long', import_only=bool)
+    def save_asset_metadata_list(self, asset_metadata_list, user_id, import_only=False):
+        """
+        Saves the asset metadata for each asset in a list of asset metadata.
+        Optimizes the saving of many assets.
+
+        Args:
+        asset_metadata_list (list(AssetMetadata)): list of data about several course assets
+        user_id (int|long): user ID saving the asset metadata
+        import_only (bool): True if importing without editing, False if editing
+
+        Returns:
+            True if info save was successful, else False
+        """
+        if len(asset_metadata_list) == 0:
+            return True
+        store = self._get_modulestore_for_courseid(asset_metadata_list[0].asset_id.course_key)
+        return store.save_asset_metadata_list(asset_metadata_list, user_id, import_only)
+
+    @strip_key
+    @contract(asset_key='AssetKey')
+    def find_asset_metadata(self, asset_key, **kwargs):
+        """
+        Find the metadata for a particular course asset.
+
+        Args:
+            asset_key (AssetKey): locator containing original asset filename
+
+        Returns:
+            asset metadata (AssetMetadata) -or- None if not found
+        """
+        store = self._get_modulestore_for_courseid(asset_key.course_key)
+        return store.find_asset_metadata(asset_key, **kwargs)
+
+    @strip_key
+    @contract(course_key='CourseKey', asset_type='None | basestring', start=int, maxresults=int, sort='tuple|None')
+    def get_all_asset_metadata(self, course_key, asset_type, start=0, maxresults=-1, sort=None, **kwargs):
+        """
+        Returns a list of static assets for a course.
+        By default all assets are returned, but start and maxresults can be provided to limit the query.
+
+        Args:
+            course_key (CourseKey): course identifier
+            asset_type (str): type of asset, such as 'asset', 'video', etc. If None, return assets of all types.
+            start (int): optional - start at this asset number
+            maxresults (int): optional - return at most this many, -1 means no limit
+            sort (array): optional - None means no sort
+                (sort_by (str), sort_order (str))
+                sort_by - one of 'uploadDate' or 'displayname'
+                sort_order - one of 'ascending' or 'descending'
+
+        Returns:
+            List of AssetMetadata objects.
+        """
+        store = self._get_modulestore_for_courseid(course_key)
+        return store.get_all_asset_metadata(course_key, asset_type, start, maxresults, sort, **kwargs)
+
+    @contract(asset_key='AssetKey', user_id='int|long')
+    def delete_asset_metadata(self, asset_key, user_id):
+        """
+        Deletes a single asset's metadata.
+
+        Arguments:
+            asset_id (AssetKey): locator containing original asset filename
+            user_id (int_long): user deleting the metadata
+
+        Returns:
+            Number of asset metadata entries deleted (0 or 1)
+        """
+        store = self._get_modulestore_for_courseid(asset_key.course_key)
+        return store.delete_asset_metadata(asset_key, user_id)
+
+    @contract(source_course_key='CourseKey', dest_course_key='CourseKey', user_id='int|long')
+    def copy_all_asset_metadata(self, source_course_key, dest_course_key, user_id):
+        """
+        Copy all the course assets from source_course_key to dest_course_key.
+
+        Arguments:
+            source_course_key (CourseKey): identifier of course to copy from
+            dest_course_key (CourseKey): identifier of course to copy to
+            user_id (int|long): user copying the asset metadata
+        """
+        source_store = self._get_modulestore_for_courseid(source_course_key)
+        dest_store = self._get_modulestore_for_courseid(dest_course_key)
+        if source_store != dest_store:
+            with self.bulk_operations(dest_course_key):
+                # Get all the asset metadata in the source course.
+                all_assets = source_store.get_all_asset_metadata(source_course_key, 'asset')
+                # Store it all in the dest course.
+                for asset in all_assets:
+                    new_asset_key = dest_course_key.make_asset_key('asset', asset.asset_id.path)
+                    copied_asset = AssetMetadata(new_asset_key)
+                    copied_asset.from_storable(asset.to_storable())
+                    dest_store.save_asset_metadata(copied_asset, user_id)
+        else:
+            # Courses in the same modulestore can be handled by the modulestore itself.
+            source_store.copy_all_asset_metadata(source_course_key, dest_course_key, user_id)
+
+    @contract(asset_key='AssetKey', attr=str, user_id='int|long')
+    def set_asset_metadata_attr(self, asset_key, attr, value, user_id):
+        """
+        Add/set the given attr on the asset at the given location. Value can be any type which pymongo accepts.
+
+        Arguments:
+            asset_key (AssetKey): asset identifier
+            attr (str): which attribute to set
+            value: the value to set it to (any type pymongo accepts such as datetime, number, string)
+            user_id: (int|long): user setting the attribute
+
+        Raises:
+            NotFoundError if no such item exists
+            AttributeError is attr is one of the build in attrs.
+        """
+        store = self._get_modulestore_for_courseid(asset_key.course_key)
+        return store.set_asset_metadata_attrs(asset_key, {attr: value}, user_id)
+
+    @contract(asset_key='AssetKey', attr_dict=dict, user_id='int|long')
+    def set_asset_metadata_attrs(self, asset_key, attr_dict, user_id):
+        """
+        Add/set the given dict of attrs on the asset at the given location. Value can be any type which pymongo accepts.
+
+        Arguments:
+            asset_key (AssetKey): asset identifier
+            attr_dict (dict): attribute/value pairs to set
+            user_id: (int|long): user setting the attributes
+
+        Raises:
+            NotFoundError if no such item exists
+            AttributeError is attr is one of the build in attrs.
+        """
+        store = self._get_modulestore_for_courseid(asset_key.course_key)
+        return store.set_asset_metadata_attrs(asset_key, attr_dict, user_id)
 
     @strip_key
     def get_parent_location(self, location, **kwargs):
@@ -377,6 +569,34 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
         return course
 
     @strip_key
+    def create_library(self, org, library, user_id, fields, **kwargs):
+        """
+        Creates and returns a new library.
+
+        Args:
+            org (str): the organization that owns the course
+            library (str): the code/number/name of the library
+            user_id: id of the user creating the course
+            fields (dict): Fields to set on the course at initialization - e.g. display_name
+            kwargs: Any optional arguments understood by a subset of modulestores to customize instantiation
+
+        Returns: a LibraryRoot
+        """
+        # first make sure an existing course/lib doesn't already exist in the mapping
+        lib_key = LibraryLocator(org=org, library=library)
+        if lib_key in self.mappings:
+            raise DuplicateCourseError(lib_key, lib_key)
+
+        # create the library
+        store = self._verify_modulestore_support(None, 'create_library')
+        library = store.create_library(org, library, user_id, fields, **kwargs)
+
+        # add new library to the mapping
+        self.mappings[lib_key] = store
+
+        return library
+
+    @strip_key
     def clone_course(self, source_course_id, dest_course_id, user_id, fields=None, **kwargs):
         """
         See the superclass for the general documentation.
@@ -401,6 +621,10 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
             )
             # the super handles assets and any other necessities
             super(MixedModuleStore, self).clone_course(source_course_id, dest_course_id, user_id, fields, **kwargs)
+        else:
+            raise NotImplementedError("No code for cloning from {} to {}".format(
+                source_modulestore, dest_modulestore
+            ))
 
     @strip_key
     def create_item(self, user_id, course_key, block_type, block_id=None, fields=None, **kwargs):
@@ -472,7 +696,7 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
     def revert_to_published(self, location, user_id):
         """
         Reverts an item to its last published version (recursively traversing all of its descendants).
-        If no published version exists, a VersionConflictError is thrown.
+        If no published version exists, an InvalidVersionError is thrown.
 
         If a published version exists but there is no draft version of this item or any of its descendants, this
         method is a no-op.
@@ -540,7 +764,7 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
             )
         )
 
-    def compute_publish_state(self, xblock):
+    def has_published_version(self, xblock):
         """
         Returns whether this xblock is draft, public, or private.
 
@@ -552,7 +776,7 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
         """
         course_id = xblock.scope_ids.usage_id.course_key
         store = self._get_modulestore_for_courseid(course_id)
-        return store.compute_publish_state(xblock)
+        return store.has_published_version(xblock)
 
     @strip_key
     def publish(self, location, user_id, **kwargs):
@@ -645,11 +869,22 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
             yield
 
     @contextmanager
-    def bulk_write_operations(self, course_id):
+    def bulk_operations(self, course_id):
         """
-        A context manager for notifying the store of bulk write events.
+        A context manager for notifying the store of bulk operations.
         If course_id is None, the default store is used.
         """
         store = self._get_modulestore_for_courseid(course_id)
-        with store.bulk_write_operations(course_id):
+        with store.bulk_operations(course_id):
             yield
+
+    def ensure_indexes(self):
+        """
+        Ensure that all appropriate indexes are created that are needed by this modulestore, or raise
+        an exception if unable to.
+
+        This method is intended for use by tests and administrative commands, and not
+        to be run during server startup.
+        """
+        for store in self.modulestores:
+            store.ensure_indexes()

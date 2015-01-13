@@ -6,9 +6,7 @@ from bok_choy.page_object import PageObject
 from bok_choy.promise import Promise, EmptyPromise
 from . import BASE_URL
 
-from selenium.webdriver.common.action_chains import ActionChains
-
-from utils import click_css, wait_for_notification, confirm_prompt
+from utils import click_css, confirm_prompt
 
 
 class ContainerPage(PageObject):
@@ -18,6 +16,7 @@ class ContainerPage(PageObject):
     NAME_SELECTOR = '.page-header-title'
     NAME_INPUT_SELECTOR = '.page-header .xblock-field-input'
     NAME_FIELD_WRAPPER_SELECTOR = '.page-header .wrapper-xblock-field'
+    ADD_MISSING_GROUPS_SELECTOR = '.notification-action-button[data-notification-action="add-missing-groups"]'
 
     def __init__(self, browser, locator):
         super(ContainerPage, self).__init__(browser)
@@ -52,7 +51,7 @@ class ContainerPage(PageObject):
                 num_wrappers = len(self.q(css='{} [data-request-token="{}"]'.format(XBlockWrapper.BODY_SELECTOR, request_token)).results)
                 # Wait until all components have been loaded and marked as either initialized or failed.
                 # See:
-                #   - common/static/coffee/src/xblock/core.coffee which adds the class "xblock-initialized"
+                #   - common/static/js/xblock/core.js which adds the class "xblock-initialized"
                 #     at the end of initializeBlock.
                 #   - common/static/js/views/xblock.js which adds the class "xblock-initialization-failed"
                 #     if the xblock threw an error while initializing.
@@ -220,26 +219,6 @@ class ContainerPage(PageObject):
         return self.q(css=prefix + XBlockWrapper.BODY_SELECTOR).map(
             lambda el: XBlockWrapper(self.browser, el.get_attribute('data-locator'))).results
 
-    def drag(self, source_index, target_index):
-        """
-        Gets the drag handle with index source_index (relative to the vertical layout of the page)
-        and drags it to the location of the drag handle with target_index.
-
-        This should drag the element with the source_index drag handle BEFORE the
-        one with the target_index drag handle.
-        """
-        draggables = self.q(css='.drag-handle')
-        source = draggables[source_index]
-        target = draggables[target_index]
-        action = ActionChains(self.browser)
-        # When dragging before the target element, must take into account that the placeholder
-        # will appear in the place where the target used to be.
-        placeholder_height = 40
-        action.click_and_hold(source).move_to_element_with_offset(
-            target, 0, placeholder_height
-        ).release().perform()
-        wait_for_notification(self)
-
     def duplicate(self, source_index):
         """
         Duplicate the item with index source_index (based on vertical placement in page).
@@ -268,14 +247,17 @@ class ContainerPage(PageObject):
         Click the "add missing groups" link.
         Note that this does an ajax call.
         """
-        self.q(css='.add-missing-groups-button').first.click()
+        self.q(css=self.ADD_MISSING_GROUPS_SELECTOR).first.click()
+        self.wait_for_ajax()
+
+        # Wait until all xblocks rendered.
         self.wait_for_page()
 
     def missing_groups_button_present(self):
         """
         Returns True if the "add missing groups" button is present.
         """
-        return self.q(css='.add-missing-groups-button').present
+        return self.q(css=self.ADD_MISSING_GROUPS_SELECTOR).present
 
     def get_xblock_information_message(self):
         """
@@ -349,7 +331,7 @@ class XBlockWrapper(PageObject):
             grandkids.extend(descendant.children)
 
         grand_locators = [grandkid.locator for grandkid in grandkids]
-        return [descendant for descendant in descendants if not descendant.locator in grand_locators]
+        return [descendant for descendant in descendants if descendant.locator not in grand_locators]
 
     @property
     def preview_selector(self):

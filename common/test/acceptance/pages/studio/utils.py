@@ -4,6 +4,7 @@ Utility methods useful for Studio page tests.
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from bok_choy.promise import EmptyPromise
+from bok_choy.javascript import js_defined
 
 from ...tests.helpers import disable_animations
 
@@ -50,6 +51,7 @@ def wait_for_notification(page):
     EmptyPromise(_is_saving_done, 'Notification should have been hidden.', timeout=60).fulfill()
 
 
+@js_defined('window.jQuery')
 def press_the_notification_button(page, name):
     # Because the notification uses a CSS transition,
     # Selenium will always report it as being visible.
@@ -101,6 +103,7 @@ def add_advanced_component(page, menu_index, name):
     click_css(page, component_css, 0)
 
 
+@js_defined('window.jQuery')
 def type_in_codemirror(page, index, text, find_prefix="$"):
     script = """
     var cm = {find_prefix}('div.CodeMirror:eq({index})').get(0).CodeMirror;
@@ -110,6 +113,7 @@ def type_in_codemirror(page, index, text, find_prefix="$"):
     page.browser.execute_script(script, str(text))
 
 
+@js_defined('window.jQuery')
 def get_codemirror_value(page, index=0, find_prefix="$"):
     return page.browser.execute_script(
         """
@@ -148,3 +152,48 @@ def set_input_value_and_save(page, css, value):
     Sets the text field with given label (display name) to the specified value, and presses Save.
     """
     set_input_value(page, css, value).send_keys(Keys.ENTER)
+
+
+def drag(page, source_index, target_index, placeholder_height=0):
+    """
+    Gets the drag handle with index source_index (relative to the vertical layout of the page)
+    and drags it to the location of the drag handle with target_index.
+
+    This should drag the element with the source_index drag handle BEFORE the
+    one with the target_index drag handle.
+    """
+    draggables = page.q(css='.drag-handle')
+    source = draggables[source_index]
+    target = draggables[target_index]
+    action = ActionChains(page.browser)
+    action.click_and_hold(source).move_to_element_with_offset(
+        target, 0, placeholder_height
+    )
+    if placeholder_height == 0:
+        action.release(target).perform()
+    else:
+        action.release().perform()
+    wait_for_notification(page)
+
+
+def verify_ordering(test_class, page, expected_orderings):
+    """
+    Verifies the expected ordering of xblocks on the page.
+    """
+    xblocks = page.xblocks
+    blocks_checked = set()
+    for expected_ordering in expected_orderings:
+        for xblock in xblocks:
+            parent = expected_ordering.keys()[0]
+            if xblock.name == parent:
+                blocks_checked.add(parent)
+                children = xblock.children
+                expected_length = len(expected_ordering.get(parent))
+                test_class.assertEqual(
+                    expected_length, len(children),
+                    "Number of children incorrect for group {0}. Expected {1} but got {2}.".format(parent, expected_length, len(children)))
+                for idx, expected in enumerate(expected_ordering.get(parent)):
+                    test_class.assertEqual(expected, children[idx].name)
+                    blocks_checked.add(expected)
+                break
+    test_class.assertEqual(len(blocks_checked), len(xblocks))

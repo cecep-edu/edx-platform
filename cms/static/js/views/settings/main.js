@@ -1,6 +1,6 @@
-define(["js/views/validation", "codemirror", "underscore", "jquery", "jquery.ui", "tzAbbr", "js/models/uploads",
-    "js/views/uploads", "js/utils/change_on_enter", "jquery.timepicker", "date", "tinymce", "jquery.tinymce"],
-    function(ValidatingView, CodeMirror, _, $, ui, tzAbbr, FileUploadModel, FileUploadDialog, TriggerChangeEventOnEnter) {
+define(["js/views/validation", "codemirror", "tinymce", "underscore", "jquery", "jquery.ui", "js/utils/date_utils", "js/models/uploads",
+	"js/views/uploads", "js/utils/change_on_enter", "jquery.timepicker", "jquery.tinymce", "date"],
+       function(ValidatingView, CodeMirror, tinymce, _, $, ui, DateUtils, FileUploadModel, FileUploadDialog, TriggerChangeEventOnEnter) {
 
 var DetailsView = ValidatingView.extend({
     // Model class is CMS.Models.Settings.CourseDetails
@@ -12,7 +12,7 @@ var DetailsView = ValidatingView.extend({
         "change textarea" : "updateModel",
         'click .remove-course-introduction-video' : "removeVideo",
         'focus #course-overview' : "codeMirrorize",
-        'mouseover #timezone' : "updateTime",
+        'mouseover .timezone' : "updateTime",
         // would love to move to a general superclass, but event hashes don't inherit in backbone :-(
         'focus :input' : "inputFocus",
         'blur :input' : "inputUnfocus",
@@ -35,30 +35,34 @@ var DetailsView = ValidatingView.extend({
             $(this).show();
         });
 
-        this.$el.find('#timezone').html("(" + tzAbbr() + ")");
-
-        //tinymce
-        this.editor = new tinymce.Editor('course-overview', {
-            plugins: [
-                "link image",
-                "codemirror",
-                "table",
-                "paste textcolor"
-            ],
-            theme: "modern",
-            skin: 'studio-tmce4',
-            schema: "html5",
-            codemirror: {
-                path: "" + baseUrl + "/js/vendor"
-            },
-            toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
-            toolbar2: "print preview media | forecolor backcolor code",
-            image_advtab: true,
-        }, tinymce.EditorManager);
-
         this.listenTo(this.model, 'invalid', this.handleValidationError);
         this.listenTo(this.model, 'change', this.showNotificationBar);
         this.selectorToField = _.invert(this.fieldToSelectorMap);
+
+        cachethis = this;
+        tinymce.init({
+            selector: "#course-overview",
+            setup: function(editor) {
+                editor.on('change', function(e){
+                    var newVal = tinymce.activeEditor.getContent();
+                    if (cachethis.model.get('overview') != newVal){
+                        cachethis.setAndValidate('overview', newVal);
+                    }
+                });
+            },
+            plugins: ["table", "code"],
+            menu: {
+                file: {title: 'File', items: 'save'},
+                edit: {title: 'Edit', items: 'undo redo | cut copy paste | selectall'}, 
+                insert: {title: 'Insert', items: '|'}, 
+                view: {title: 'View', items: 'visualaid'}, 
+                format: {title: 'Format', items: 'bold italic underline strikethrough superscript subscript | formats | removeformat'}, 
+                table: {title: 'Table'}, 
+                tools: {title: 'Tools', items: 'inserttable'}
+            },
+            toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | table code",
+        });
+
     },
 
     render: function() {
@@ -69,16 +73,8 @@ var DetailsView = ValidatingView.extend({
         this.setupDatePicker('enrollment_end');
         // tinymce
         var cachethis = this;
-        this.editor.on('change', function(e) {
-            var newVal = tinymce.activeEditor.getContent();
-            if (cachethis.model.get('overview') != newVal) {
-                cachethis.setAndValidate('overview', newVal);
-            }
-        });
-        this.editor.render();
-
         this.$el.find('#' + this.fieldToSelectorMap['overview']).val(this.model.get('overview'));
-        this.codeMirrorize(null, $('#course-overview')[0]);
+	tinyMCE.activeEditor.setContent(this.model.get('overview')); 
 
         this.$el.find('#' + this.fieldToSelectorMap['short_description']).val(this.model.get('short_description'));
         this.$el.find('.current-course-introduction-video iframe').attr('src', this.model.videosourceSample());
@@ -109,11 +105,15 @@ var DetailsView = ValidatingView.extend({
     },
 
     updateTime : function(e) {
-        var now = new Date();
-        var hours = now.getHours();
-        var minutes = now.getMinutes();
-        $(e.currentTarget).attr('title', (hours % 12 === 0 ? 12 : hours % 12) + ":" + (minutes < 10 ? "0" : "")  +
-                now.getMinutes() + (hours < 12 ? "am" : "pm") + " (current local time)");
+        var now = new Date(),
+            hours = now.getUTCHours(),
+            minutes = now.getUTCMinutes(),
+            currentTimeText = gettext('%(hours)s:%(minutes)s (current UTC time)');
+
+        $(e.currentTarget).attr('title', interpolate(currentTimeText, {
+            'hours': hours,
+            'minutes': minutes
+        }, true));
     },
 
     setupDatePicker: function (fieldName) {
@@ -123,14 +123,10 @@ var DetailsView = ValidatingView.extend({
         var timefield = $(div).find("input:.time");
         var cachethis = this;
         var setfield = function () {
-            var date = datefield.datepicker('getDate');
-            if (date) {
-                var time = timefield.timepicker("getSecondsFromMidnight");
-                if (!time) {
-                    time = 0;
-                }
-                var newVal = new Date(date.getTime() + time * 1000);
-                if (!cacheModel.has(fieldName) || cacheModel.get(fieldName).getTime() !== newVal.getTime()) {
+            var newVal = DateUtils.getDate(datefield, timefield),
+                oldTime = new Date(cacheModel.get(fieldName)).getTime();
+            if (newVal) {
+                if (!cacheModel.has(fieldName) || oldTime !== newVal.getTime()) {
                     cachethis.clearValidationErrors();
                     cachethis.setAndValidate(fieldName, newVal);
                 }
@@ -154,13 +150,14 @@ var DetailsView = ValidatingView.extend({
         timefield.on('changeTime', setfield);
         timefield.on('input', setfield);
 
-        datefield.datepicker('setDate', this.model.get(fieldName));
+        date = this.model.get(fieldName)
         // timepicker doesn't let us set null, so check that we have a time
-        if (this.model.has(fieldName)) {
-            timefield.timepicker('setTime', this.model.get(fieldName));
-        } // but reset the field either way
+        if (date) {
+            DateUtils.setDate(datefield, timefield, date);
+        } // but reset fields either way
         else {
             timefield.val('');
+            datefield.val('');
         }
     },
 

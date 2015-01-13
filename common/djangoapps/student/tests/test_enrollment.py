@@ -1,10 +1,9 @@
 """
 Tests for student enrollment.
 """
-from datetime import datetime, timedelta
-import pytz
 import ddt
 import unittest
+from mock import patch
 
 from django.test.utils import override_settings
 from django.conf import settings
@@ -15,7 +14,6 @@ from xmodule.modulestore.tests.django_utils import (
 from xmodule.modulestore.tests.factories import CourseFactory
 from student.tests.factories import UserFactory, CourseModeFactory
 from student.models import CourseEnrollment
-
 
 # Since we don't need any XML course fixtures, use a modulestore configuration
 # that disables the XML modulestore.
@@ -29,52 +27,47 @@ class EnrollmentTest(ModuleStoreTestCase):
     """
     Test student enrollment, especially with different course modes.
     """
+    USERNAME = "Bob"
+    EMAIL = "bob@example.com"
+    PASSWORD = "edx"
+
     def setUp(self):
         """ Create a course and user, then log in. """
         super(EnrollmentTest, self).setUp()
         self.course = CourseFactory.create()
-        self.user = UserFactory.create(username="Bob", email="bob@example.com", password="edx")
-        self.client.login(username=self.user.username, password="edx")
+        self.user = UserFactory.create(username=self.USERNAME, email=self.EMAIL, password=self.PASSWORD)
+        self.client.login(username=self.USERNAME, password=self.PASSWORD)
 
         self.urls = [
             reverse('course_modes_choose', kwargs={'course_id': unicode(self.course.id)})
         ]
 
-    # TODO (ECOM-16): We need separate test cases for both conditions in the auto-registration
-    # AB-test.  Once we get the results of that test, we should
-    # remove the losing condition from this test.
     @ddt.data(
         # Default (no course modes in the database)
         # Expect that we're redirected to the dashboard
         # and automatically enrolled as "honor"
-        ([], '', 'honor', False),
-        ([], '', 'honor', True),
+        ([], '', 'honor'),
 
         # Audit / Verified / Honor
-        # We should always go to the "choose your course" page,
-        # If auto-registration is enabled, we should also be registered
-        # as "honor" by default.
-        (['honor', 'verified', 'audit'], 'course_modes_choose', None, False),
-        (['honor', 'verified', 'audit'], 'course_modes_choose', 'honor', True),
+        # We should always go to the "choose your course" page.
+        # We should also be enrolled as "honor" by default.
+        (['honor', 'verified', 'audit'], 'course_modes_choose', 'honor'),
 
         # Professional ed
         # Expect that we're sent to the "choose your track" page
         # (which will, in turn, redirect us to a page where we can verify/pay)
-        # Even if auto registration is enabled, we should NOT be auto-registered,
-        # because that would be giving away an expensive course for free :)
-        (['professional'], 'course_modes_choose', None, False),
-        (['professional'], 'course_modes_choose', None, True),
-
+        # We should NOT be auto-enrolled, because that would be giving
+        # away an expensive course for free :)
+        (['professional'], 'course_modes_choose', None),
     )
     @ddt.unpack
-    def test_enroll(self, course_modes, next_url, enrollment_mode, auto_reg):
+    def test_enroll(self, course_modes, next_url, enrollment_mode):
         # Create the course modes (if any) required for this test case
         for mode_slug in course_modes:
             CourseModeFactory.create(
                 course_id=self.course.id,
                 mode_slug=mode_slug,
                 mode_display_name=mode_slug,
-                expiration_datetime=datetime.now(pytz.UTC) + timedelta(days=1)
             )
 
         # Reverse the expected next URL, if one is provided
@@ -86,15 +79,9 @@ class EnrollmentTest(ModuleStoreTestCase):
         )
 
         # Enroll in the course and verify the URL we get sent to
-        resp = self._change_enrollment('enroll', auto_reg=auto_reg)
+        resp = self._change_enrollment('enroll')
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, full_url)
-
-        # TODO (ECOM-16): If auto-registration is enabled, check that we're
-        # storing the auto-reg flag in the user's session
-        if auto_reg:
-            self.assertIn('auto_register', self.client.session)
-            self.assertTrue(self.client.session['auto_register'])
 
         # If we're not expecting to be enrolled, verify that this is the case
         if enrollment_mode is None:
@@ -117,6 +104,39 @@ class EnrollmentTest(ModuleStoreTestCase):
 
         # Expect that we're no longer enrolled
         self.assertFalse(CourseEnrollment.is_enrolled(self.user, self.course.id))
+
+    @patch.dict(settings.FEATURES, {'ENABLE_MKTG_EMAIL_OPT_IN': True})
+    @patch('openedx.core.djangoapps.user_api.api.profile.update_email_opt_in')
+    @ddt.data(
+        ([], 'true'),
+        ([], 'false'),
+        ([], None),
+        (['honor', 'verified'], 'true'),
+        (['honor', 'verified'], 'false'),
+        (['honor', 'verified'], None),
+        (['professional'], 'true'),
+        (['professional'], 'false'),
+        (['professional'], None),
+    )
+    @ddt.unpack
+    def test_enroll_with_email_opt_in(self, course_modes, email_opt_in, mock_update_email_opt_in):
+        # Create the course modes (if any) required for this test case
+        for mode_slug in course_modes:
+            CourseModeFactory.create(
+                course_id=self.course.id,
+                mode_slug=mode_slug,
+                mode_display_name=mode_slug,
+            )
+
+        # Enroll in the course
+        self._change_enrollment('enroll', email_opt_in=email_opt_in)
+
+        # Verify that the profile API has been called as expected
+        if email_opt_in is not None:
+            opt_in = email_opt_in == 'true'
+            mock_update_email_opt_in.assert_called_once_with(self.USERNAME, self.course.org, opt_in)
+        else:
+            self.assertFalse(mock_update_email_opt_in.called)
 
     def test_user_not_authenticated(self):
         # Log out, so we're no longer authenticated
@@ -142,9 +162,13 @@ class EnrollmentTest(ModuleStoreTestCase):
         resp = self._change_enrollment('not_an_action')
         self.assertEqual(resp.status_code, 400)
 
-    def _change_enrollment(self, action, course_id=None, auto_reg=False):
-        """
-        Change the student's enrollment status in a course.
+    def test_with_invalid_course_id(self):
+        CourseEnrollment.enroll(self.user, self.course.id, mode="honor")
+        resp = self._change_enrollment('unenroll', course_id="edx/")
+        self.assertEqual(resp.status_code, 400)
+
+    def _change_enrollment(self, action, course_id=None, email_opt_in=None):
+        """Change the student's enrollment status in a course.
 
         Args:
             action (string): The action to perform (either "enroll" or "unenroll")
@@ -152,9 +176,8 @@ class EnrollmentTest(ModuleStoreTestCase):
         Keyword Args:
             course_id (unicode): If provided, use this course ID.  Otherwise, use the
                 course ID created in the setup for this test.
-
-            auto_reg (boolean): Whether to use the auto-registration hook.
-                TODO (ECOM-16): remove this once we complete the AB test for auto-registration.
+            email_opt_in (unicode): If provided, pass this value along as
+                an additional GET parameter.
 
         Returns:
             Response
@@ -163,13 +186,12 @@ class EnrollmentTest(ModuleStoreTestCase):
         if course_id is None:
             course_id = unicode(self.course.id)
 
-        url = (
-            reverse('change_enrollment')
-            if not auto_reg
-            else reverse('change_enrollment_autoreg')
-        )
         params = {
             'enrollment_action': action,
             'course_id': course_id
         }
-        return self.client.post(url, params)
+
+        if email_opt_in:
+            params['email_opt_in'] = email_opt_in
+
+        return self.client.post(reverse('change_enrollment'), params)

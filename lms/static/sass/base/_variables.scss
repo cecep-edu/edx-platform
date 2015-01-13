@@ -1,3 +1,5 @@
+// lms variables
+
 // base
 $baseline: 20px;
 
@@ -12,15 +14,6 @@ $fg-max-columns: 12;
 $fg-max-width: 1400px;
 $fg-min-width: 810px;
 
-// Card Sizes
-// breakpoints for course cards
-$bp-xl-min: 1180px;
-$bp-l-min: 980px;
-$bp-m-min: 768px;
-$bp-s-min: 320px;
-$bp-s-max: 320px;
-$bp-m-max: 768px;
-
 // ====================
 
 // FONTS
@@ -28,6 +21,12 @@ $sans-serif: 'Open Sans', $verdana, sans-serif;
 $monospace: Monaco, 'Bitstream Vera Sans Mono', 'Lucida Console', monospace;
 $body-font-family: $sans-serif;
 $serif: $georgia;
+
+// FONT-WEIGHTS
+$font-light: 300;
+$font-regular: 400;
+$font-semibold: 600;
+$font-bold: 700;
 
 // ====================
 
@@ -42,6 +41,20 @@ $very-light-text: #fff;
 
 // ====================
 
+// TIMING - used for animation/transition mixin syncing
+$tmg-s3: 3.0s;
+$tmg-s2: 2.0s;
+$tmg-s1: 1.0s;
+$tmg-avg: 0.75s;
+$tmg-f1: 0.50s;
+$tmg-f2: 0.25s;
+$tmg-f3: 0.125s;
+
+// ====================
+
+// COLORS - utility
+$transparent: rgba(0,0,0,0); // used when color value is needed for UI width/transitions but element is transparent
+
 // COLORS
 $black: rgb(0,0,0);
 $black-t0: rgba($black, 0.125);
@@ -55,18 +68,18 @@ $white-t1: rgba($white, 0.25);
 $white-t2: rgba($white, 0.5);
 $white-t3: rgba($white, 0.75);
 
-$gray: rgb(127,127,127);
-$gray-l1: tint($gray,20%);
-$gray-l2: tint($gray,40%);
-$gray-l3: tint($gray,60%); // #cbcbcb;
-$gray-l4: tint($gray,80%); // #e5e5e5;
-$gray-l5: tint($gray,90%); // #f2f2f2;
-$gray-l6: tint($gray,95%); // #f8f8f8;
-$gray-l7: tint($gray,99%);
-$gray-d1: shade($gray,20%);
-$gray-d2: shade($gray,40%);
-$gray-d3: shade($gray,60%);
-$gray-d4: shade($gray,80%);
+$gray: rgb(127,127,127);    // #7f7f7f
+$gray-l1: tint($gray,20%);  // #989898
+$gray-l2: tint($gray,40%);  // #b2b2b2
+$gray-l3: tint($gray,60%);  // #cbcbcb
+$gray-l4: tint($gray,80%);  // #e5e5e5
+$gray-l5: tint($gray,90%);  // #f2f2f2
+$gray-l6: tint($gray,95%);  // #f8f8f8
+$gray-l7: tint($gray,99%);  // #fdfdfd
+$gray-d1: shade($gray,20%); // #656565
+$gray-d2: shade($gray,40%); // #4c4c4c
+$gray-d3: shade($gray,60%); // #323232
+$gray-d4: shade($gray,80%); // #191919
 
 $pink: rgb(182,37,103);
 $pink-l1: tint($pink,20%);
@@ -136,6 +149,7 @@ $light-gray: #ddd;
 // used by descriptor css
 $lightGrey: #edf1f5;
 $darkGrey: #8891a1;
+$lightGrey1: #ccc;
 $blue-d1: shade($blue,20%);
 $blue-d2: shade($blue,40%);
 $blue-d4: shade($blue,80%);
@@ -161,10 +175,13 @@ $m-blue-l2: #42B5E9;
 $m-blue-l3: #59BEEC;
 $m-blue-l4: tint($m-blue,90%);
 $m-blue-l5: tint($m-blue,95%);
+$m-blue-l6: #4bb4fb;
 $m-blue-d1: #1790C7;
 $m-blue-d2: #1580B0;
 $m-blue-d3: #126F9A;
 $m-blue-d4: #0A4A67;
+$m-blue-d5: #009EE7;
+$m-blue-d6: #256A97;
 $m-blue-t0: rgba($m-blue,0.125);
 $m-blue-t1: rgba($m-blue,0.25);
 $m-blue-t2: rgba($m-blue,0.50);
@@ -393,11 +410,11 @@ $homepage__header--background: lighten($blue, 15%);
 // IMAGES: backgrounds
 $homepage-bg-image: none;
 
-$login-banner-image: url(../images/bg-banner-account.png);
-$register-banner-image: url(../images/bg-banner-account.png);
-$passwordreset-banner-image: url(../images/bg-banner-account.png);
+$login-banner-image: url(../images/edx-background-banner-account.png);
+$register-banner-image: url(../images/edx-background-banner-account.png);
+$passwordreset-banner-image: url(../images/edx-background-banner-account.png);
 
-$video-thumb-url: '../images/courses/video-thumb.jpg';
+$video-thumb-url: '../images/homepage-hero-video-thumb.jpg';
 
 // ====================
 
@@ -414,3 +431,15 @@ $header-sans-serif: 'Open Sans', Arial, Helvetica, sans-serif;
 // SPLINT: colors
 
 $msg-bg: $action-primary-bg;
+
+
+// New Shopping Cart
+
+$dark-gray1: #4a4a4a;
+$light-gray1: #f2f2f2;
+$light-gray2: #ababab;
+$dark-gray2: #979797;
+$blue1: #4A90E2;
+$blue2: #00A1E5;
+$green1: #61A12E;
+$red1: #D0021B;

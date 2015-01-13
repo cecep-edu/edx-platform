@@ -3,7 +3,7 @@ This config file runs the simplest dev environment"""
 
 # We intentionally define lots of variables that aren't used, and
 # want to import all variables from base settings files
-# pylint: disable=W0401, W0614
+# pylint: disable=wildcard-import, unused-wildcard-import
 
 from .common import *
 from logsettings import get_logger_config
@@ -139,7 +139,7 @@ CELERY_ALWAYS_EAGER = True
 
 ################################ DEBUG TOOLBAR #################################
 INSTALLED_APPS += ('debug_toolbar', 'debug_toolbar_mongo', 'djpyfs')
-MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware')
+MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 INTERNAL_IPS = ('127.0.0.1',)
 
 DEBUG_TOOLBAR_PANELS = (
@@ -193,7 +193,7 @@ XQUEUE_INTERFACE = {
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 try:
-    from .private import *  # pylint: disable=F0401
+    from .private import *  # pylint: disable=import-error
 except ImportError:
     pass
 CERT_QUEUE = "certificates"

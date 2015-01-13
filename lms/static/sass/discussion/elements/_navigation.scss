@@ -1,6 +1,9 @@
+// discussion - elements - navigation
+// ====================
+
 .forum-nav {
   @include box-sizing(border-box);
-  float: left;
+  @include float(left);
   position: relative;
   width: 31%;
   border: 1px solid #aaa;
@@ -14,6 +17,7 @@
   @include box-sizing(border-box);
   display: table;
   border-bottom: 1px solid $gray-l2;
+  width: 100%;
   background-color: $gray-l3;
 }
 
@@ -30,7 +34,7 @@
 
   .icon {
     @include font-size(14);
-    margin-right: ($baseline/4);
+    @include margin-right($baseline/4);
   }
 }
 
@@ -39,7 +43,7 @@
 }
 
 .forum-nav-browse-drop-arrow {
-  margin-left: ($baseline/4);
+  @include margin-left($baseline/4);
 }
 
 .forum-nav-search {
@@ -56,7 +60,7 @@
   position: absolute;
   margin-top: -6px;
   top: 50%;
-  right: ($baseline/4 + 1px + $baseline / 4); // Wrapper padding + border + input padding
+  @include right($baseline/4 + 1px + $baseline / 4); // Wrapper padding + border + input padding
 }
 
 .forum-nav-search-input {
@@ -111,7 +115,7 @@
 }
 
 .forum-nav-browse-title .icon {
-  margin-right: ($baseline/2);
+  @include margin-right($baseline/2);
 }
 
 // -------------------
@@ -124,21 +128,35 @@
   background-color: $gray-l5;
   padding: ($baseline/4) ($baseline/2);
   color: $black;
+  text-align: right;
+}
+
+.forum-nav-filter-main {
+  @include box-sizing(border-box);
+  display: inline-block;
+  width: 50%;
+  @include text-align(left);
+}
+
+.forum-nav-filter-cohort, .forum-nav-sort {
+  @include box-sizing(border-box);
+  display: inline-block;
+  width: 50%;
+  @include text-align(right);
 }
 
 %forum-nav-select {
   border: none;
   max-width: 100%;
   background-color: transparent;
-  font: inherit;
+}
+
+.forum-nav-filter-main-control {
+  @extend %forum-nav-select;
 }
 
 .forum-nav-filter-cohort-control {
   @extend %forum-nav-select;
-}
-
-.forum-nav-sort {
-  float: right;
 }
 
 .forum-nav-sort-control {
@@ -176,65 +194,48 @@
   vertical-align: middle;
 }
 
+.forum-nav-thread-wrapper-0 {
+  @extend %forum-nav-thread-wrapper;
+  width: 7%;
+
+  .icon {
+    @include font-size(14);
+
+    &:before {
+
+      @include rtl {
+        @include transform(scale(-1, 1)); // RTL for font awesome question mark
+      }
+    }
+  }
+
+  .icon-comments {
+    color: $gray-l2;
+  }
+
+  .icon-ok {
+    color: $forum-color-marked-answer;
+  }
+
+  .icon-question {
+    color: $pink;
+  }
+}
+
 .forum-nav-thread-wrapper-1 {
   @extend %forum-nav-thread-wrapper;
-  width: 70%;
+  width: 80%;
 }
 
 .forum-nav-thread-wrapper-2 {
   @extend %forum-nav-thread-wrapper;
-  width: 30%;
-  text-align: right;
+  width: 13%;
+  @include text-align(right);
 }
 
 .forum-nav-thread-title {
   @extend %t-title7;
   display: block;
-}
-
-%forum-nav-thread-label {
-  @extend %t-weight4;
-  @include font-size(9);
-  display: inline;
-  margin-top: ($baseline/4);
-  border: 1px solid;
-  border-radius: 3px;
-  padding: 1px 6px;
-  text-transform: uppercase;
-  white-space: nowrap;
-
-  &:last-child {
-    margin-right: 0;
-  }
-
-  .icon {
-    margin-right: ($baseline/5);
-  }
-
-}
-
-.forum-nav-thread-label-pinned {
-  @extend %forum-nav-thread-label;
-  border-color: $forum-color-pinned;
-  color: $forum-color-pinned;
-}
-
-.forum-nav-thread-label-following {
-  @extend %forum-nav-thread-label;
-  border-color: $forum-color-following;
-  color: $forum-color-following;
-}
-
-.forum-nav-thread-label-staff {
-  @extend %forum-nav-thread-label;
-  border-color: $forum-color-staff;
-  color: $forum-color-staff;
-}
-
-.forum-nav-thread-label-community-ta {
-  @extend %forum-nav-thread-label;
-  border-color: $forum-color-community-ta;
-  color: $forum-color-community-ta;
 }
 
 %forum-nav-thread-wrapper-2-content {
@@ -249,11 +250,6 @@
   }
 }
 
-.forum-nav-thread-endorsed {
-  @extend %forum-nav-thread-wrapper-2-content;
-  color: $green-d1;
-}
-
 .forum-nav-thread-votes-count {
   @extend %forum-nav-thread-wrapper-2-content;
 }
@@ -262,7 +258,7 @@
   @extend %forum-nav-thread-wrapper-2-content;
   @extend %t-weight4;
   position: relative;
-  margin-left: ($baseline/4);
+  @include margin-left($baseline/4);
   margin-bottom: ($baseline/4); // Because tail is position: absolute
   border-radius: 2px;
   padding: ($baseline/10) ($baseline/5);
@@ -275,12 +271,12 @@
     display: block;
     position: absolute;
     bottom: (-$baseline/4);
-    right: ($baseline/4);
+    @include right($baseline/4);
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 ($baseline/4) ($baseline/4) 0;
-    border-color: transparent $gray-l3 transparent transparent;
+    @include border-width(0, ($baseline/4), ($baseline/4), 0);
+    @include border-color(transparent, $gray-l3, transparent, transparent);
   }
 
   &.is-unread {

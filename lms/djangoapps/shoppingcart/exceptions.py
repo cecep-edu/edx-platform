@@ -2,7 +2,8 @@
 Exceptions for the shoppingcart app
 """
 # (Exception Class Names are sort of self-explanatory, so skipping docstring requirement)
-# pylint: disable=C0111
+# pylint: disable=missing-docstring
+
 
 class PaymentException(Exception):
     pass
@@ -32,19 +33,7 @@ class CouponDoesNotExistException(InvalidCartItem):
     pass
 
 
-class CouponAlreadyExistException(InvalidCartItem):
-    pass
-
-
-class ItemDoesNotExistAgainstCouponException(InvalidCartItem):
-    pass
-
-
-class RegCodeAlreadyExistException(InvalidCartItem):
-    pass
-
-
-class ItemDoesNotExistAgainstRegCodeException(InvalidCartItem):
+class MultipleCouponsNotAllowedException(InvalidCartItem):
     pass
 
 
@@ -53,4 +42,16 @@ class ReportException(Exception):
 
 
 class ReportTypeDoesNotExistException(ReportException):
+    pass
+
+
+class InvalidStatusToRetire(Exception):
+    pass
+
+
+class UnexpectedOrderItemStatus(Exception):
+    pass
+
+
+class ItemNotFoundInCartException(Exception):
     pass
