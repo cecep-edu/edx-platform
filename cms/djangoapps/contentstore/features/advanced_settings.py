@@ -1,8 +1,8 @@
-# pylint: disable=C0111
-# pylint: disable=W0621
+# pylint: disable=missing-docstring
+# pylint: disable=redefined-outer-name
 
 from lettuce import world, step
-from nose.tools import assert_false, assert_equal, assert_regexp_matches  # pylint: disable=E0611
+from nose.tools import assert_false, assert_equal, assert_regexp_matches  # pylint: disable=no-name-in-module
 from common import type_in_codemirror, press_the_notification_button, get_codemirror_value
 
 KEY_CSS = '.key h3.title'
@@ -82,8 +82,8 @@ def it_is_formatted(step):
 @step('I get an error on save$')
 def error_on_save(step):
     assert_regexp_matches(
-        world.css_text('#notification-error-description'),
-        "Incorrect format for field '{}'.".format(DISPLAY_NAME_KEY)
+        world.css_text('.error-item-message'),
+        "Value stored in a .* must be .*, found .*"
     )
 
 

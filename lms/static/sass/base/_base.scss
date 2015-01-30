@@ -3,12 +3,19 @@
 // }
 
 html, body {
-  background: $body-bg;
   font-family: $sans-serif;
   font-size: 1em;
   font-style: normal;
   line-height: 1em;
   //-webkit-font-smoothing: antialiased;
+}
+
+html{
+  background: white;
+}
+
+body {
+  background: $body-bg;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -53,6 +60,15 @@ span {
 /* Fix for CodeMirror: prevent top-level span from affecting deeply-embedded span in CodeMirror */
 .CodeMirror span {
   font: inherit;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-dark-grey {
+  color: $dark-gray1;
+  font-size: 24px;
 }
 
 p + p, ul + p, ol + p {
@@ -107,6 +123,7 @@ a:focus {
 
 .container {
   @include clearfix;
+  @include box-sizing(border-box);
   margin: 0 auto 0;
   padding: 0px 30px;
   max-width: grid-width(12);
@@ -298,6 +315,16 @@ mark {
 // UI - disabled state
 .is-disabled {
   @extend %ui-disabled;
+}
+
+// UI - is hidden
+.is-hidden {
+  display: none;
+}
+
+// UI - is deprecated
+.is-deprecated {
+  @extend %ui-deprecated;
 }
 
 // UI - semantically hide text

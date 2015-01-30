@@ -2,21 +2,20 @@
 Unit tests for Ecommerce feature flag in new instructor dashboard.
 """
 
-from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
+from django.test.utils import override_settings
+from mock import patch
 
-from courseware.tests.tests import TEST_DATA_MONGO_MODULESTORE
+from course_modes.models import CourseMode
+from xmodule.modulestore.tests.django_utils import TEST_DATA_MOCK_MODULESTORE
+from student.roles import CourseFinanceAdminRole
+from shoppingcart.models import Coupon, PaidCourseRegistration, CourseRegistrationCode
 from student.tests.factories import AdminFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory
 
-from course_modes.models import CourseMode
-from shoppingcart.models import Coupon, PaidCourseRegistration, CourseRegistrationCode
-from mock import patch
-from student.roles import CourseFinanceAdminRole
 
-
-@override_settings(MODULESTORE=TEST_DATA_MONGO_MODULESTORE)
+@override_settings(MODULESTORE=TEST_DATA_MOCK_MODULESTORE)
 class TestECommerceDashboardViews(ModuleStoreTestCase):
     """
     Check for E-commerce view on the new instructor dashboard
@@ -54,20 +53,21 @@ class TestECommerceDashboardViews(ModuleStoreTestCase):
         response = self.client.get(self.url)
         self.assertTrue(self.e_commerce_link in response.content)
 
-        # Total amount html should render in e-commerce page, total amount will be 0
-        total_amount = PaidCourseRegistration.get_total_amount_of_purchased_item(self.course.id)
-        self.assertTrue('<span>Total Amount: <span>$' + str(total_amount) + '</span></span>' in response.content)
-        self.assertTrue('Download All e-Commerce Purchase' in response.content)
+        # Order/Invoice sales csv button text should render in e-commerce page
+        self.assertTrue('Total CC Amount' in response.content)
+        self.assertTrue('Download All CC Sales' in response.content)
+        self.assertTrue('Download All Invoice Sales' in response.content)
+        self.assertTrue('Enter the invoice number to invalidate or re-validate sale' in response.content)
 
         # removing the course finance_admin role of login user
         CourseFinanceAdminRole(self.course.id).remove_users(self.instructor)
 
-        # total amount should not be visible in e-commerce page if the user is not finance admin
+        # Order/Invoice sales csv button text should not be visible in e-commerce page if the user is not finance admin
         url = reverse('instructor_dashboard', kwargs={'course_id': self.course.id.to_deprecated_string()})
         response = self.client.post(url)
-        total_amount = PaidCourseRegistration.get_total_amount_of_purchased_item(self.course.id)
-        self.assertFalse('Download All e-Commerce Purchase' in response.content)
-        self.assertFalse('<span>Total Amount: <span>$' + str(total_amount) + '</span></span>' in response.content)
+        self.assertFalse('Download All Order Sales' in response.content)
+        self.assertFalse('Download All Invoice Sales' in response.content)
+        self.assertFalse('Enter the invoice number to invalidate or re-validate sale' in response.content)
 
     def test_user_view_course_price(self):
         """
@@ -175,8 +175,7 @@ class TestECommerceDashboardViews(ModuleStoreTestCase):
         self.assertTrue('Please Enter the Integer Value for Coupon Discount' in response.content)
 
         course_registration = CourseRegistrationCode(
-            code='Vs23Ws4j', course_id=self.course.id.to_deprecated_string(),
-            transaction_group_name='Test Group', created_by=self.instructor
+            code='Vs23Ws4j', course_id=self.course.id.to_deprecated_string(), created_by=self.instructor
         )
         course_registration.save()
 
@@ -254,7 +253,7 @@ class TestECommerceDashboardViews(ModuleStoreTestCase):
         response = self.client.post(self.url)
         self.assertTrue('<td>AS452</td>' in response.content)
         data = {
-            'coupon_id': coupon.id, 'code': 'update_code', 'discount': '12',
+            'coupon_id': coupon.id, 'code': 'AS452', 'discount': '10', 'description': 'updated_description',  # pylint: disable=no-member
             'course_id': coupon.course_id.to_deprecated_string()
         }
         # URL for update_coupon
@@ -263,43 +262,12 @@ class TestECommerceDashboardViews(ModuleStoreTestCase):
         self.assertTrue('coupon with the coupon id ({coupon_id}) updated Successfully'.format(coupon_id=coupon.id)in response.content)
 
         response = self.client.post(self.url)
-        self.assertTrue('<td>update_code</td>' in response.content)
-        self.assertTrue('<td>12</td>' in response.content)
+        self.assertTrue('<td>updated_description</td>' in response.content)
 
         data['coupon_id'] = 1000  # Coupon Not Exist with this ID
         response = self.client.post(update_coupon_url, data=data)
         self.assertTrue('coupon with the coupon id ({coupon_id}) DoesNotExist'.format(coupon_id=1000) in response.content)
 
-        data['coupon_id'] = coupon.id
-        data['discount'] = 123
-        response = self.client.post(update_coupon_url, data=data)
-        self.assertTrue('Please Enter the Coupon Discount Value Less than or Equal to 100' in response.content)
-
-        data['discount'] = '25%'
-        response = self.client.post(update_coupon_url, data=data)
-        self.assertTrue('Please Enter the Integer Value for Coupon Discount' in response.content)
-
         data['coupon_id'] = ''  # Coupon id is not provided
         response = self.client.post(update_coupon_url, data=data)
         self.assertTrue('coupon id not found' in response.content)
-
-        coupon1 = Coupon(
-            code='11111', description='coupon', course_id=self.course.id.to_deprecated_string(),
-            percentage_discount=20, created_by=self.instructor
-        )
-        coupon1.save()
-        data = {'coupon_id': coupon.id, 'code': '11111', 'discount': '12'}  # pylint: disable=E1101
-        response = self.client.post(update_coupon_url, data=data)
-        self.assertTrue('coupon with the coupon id ({coupon_id}) already exist'.format(coupon_id=coupon.id) in response.content)  # pylint: disable=E1101
-
-        course_registration = CourseRegistrationCode(
-            code='Vs23Ws4j', course_id=self.course.id.to_deprecated_string(),
-            transaction_group_name='Test Group', created_by=self.instructor
-        )
-        course_registration.save()
-
-        data = {'coupon_id': coupon.id, 'code': 'Vs23Ws4j',  # pylint: disable=E1101
-                'discount': '6', 'course_id': coupon.course_id.to_deprecated_string()}  # pylint: disable=E1101
-        response = self.client.post(update_coupon_url, data=data)
-        self.assertTrue("The code ({code}) that you have tried to define is already in use as a registration code".
-                        format(code=data['code']) in response.content)

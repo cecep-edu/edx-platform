@@ -5,10 +5,12 @@ from time import time
 import json
 from uuid import uuid4
 import math
+import psutil
+from contextlib import contextmanager
 
 from celery.utils.log import get_task_logger
 from celery.states import SUCCESS, READY_STATES, RETRY
-from dogapi import dog_stats_api
+import dogstats_wrapper as dog_stats_api
 
 from django.db import transaction, DatabaseError
 from django.core.cache import cache
@@ -39,10 +41,43 @@ def _get_number_of_subtasks(total_num_items, items_per_task):
     The number of subtask_id values returned by this should match the number of chunks returned
     by the generate_items_for_subtask generator.
     """
-    return int(math.ceil(float(total_num_items) / float(items_per_task)))
+    num_subtasks, remainder = divmod(total_num_items, items_per_task)
+    if remainder:
+        num_subtasks += 1
+    return num_subtasks
 
 
-def _generate_items_for_subtask(item_queryset, item_fields, total_num_items, items_per_task, total_num_subtasks):
+@contextmanager
+def track_memory_usage(metric, course_id):
+    """
+    Context manager to track how much memory (in bytes) a given process uses.
+    Metrics will look like: 'course_email.subtask_generation.memory.rss'
+    or 'course_email.subtask_generation.memory.vms'.
+    """
+    memory_types = ['rss', 'vms']
+    process = psutil.Process()
+    baseline_memory_info = process.get_memory_info()
+    baseline_usages = [getattr(baseline_memory_info, memory_type) for memory_type in memory_types]
+    yield
+    for memory_type, baseline_usage in zip(memory_types, baseline_usages):
+        total_memory_info = process.get_memory_info()
+        total_usage = getattr(total_memory_info, memory_type)
+        memory_used = total_usage - baseline_usage
+        dog_stats_api.increment(
+            metric + "." + memory_type,
+            memory_used,
+            tags=["course_id:{}".format(course_id)],
+        )
+
+
+def _generate_items_for_subtask(
+    item_queryset,
+    item_fields,
+    total_num_items,
+    items_per_task,
+    total_num_subtasks,
+    course_id,
+):
     """
     Generates a chunk of "items" that should be passed into a subtask.
 
@@ -53,6 +88,7 @@ def _generate_items_for_subtask(item_queryset, item_fields, total_num_items, ite
         `total_num_items` : the result of item_queryset.count().
         `items_per_query` : size of chunks to break the query operation into.
         `items_per_task` : maximum size of chunks to break each query chunk into for use by a subtask.
+        `course_id` : course_id of the course. Only needed for the track_memory_usage context manager.
 
     Returns:  yields a list of dicts, where each dict contains the fields in `item_fields`, plus the 'pk' field.
 
@@ -64,18 +100,20 @@ def _generate_items_for_subtask(item_queryset, item_fields, total_num_items, ite
     num_subtasks = 0
 
     items_for_task = []
-    for item in item_queryset.values(*all_item_fields).iterator():
-        if len(items_for_task) == items_per_task and num_subtasks < total_num_subtasks - 1:
-            yield items_for_task
-            num_items_queued += items_per_task
-            items_for_task = []
-            num_subtasks += 1
-        items_for_task.append(item)
 
-    # yield remainder items for task, if any
-    if items_for_task:
-        yield items_for_task
-        num_items_queued += len(items_for_task)
+    with track_memory_usage('course_email.subtask_generation.memory', course_id):
+        for item in item_queryset.values(*all_item_fields).iterator():
+            if len(items_for_task) == items_per_task and num_subtasks < total_num_subtasks - 1:
+                yield items_for_task
+                num_items_queued += items_per_task
+                items_for_task = []
+                num_subtasks += 1
+            items_for_task.append(item)
+
+        # yield remainder items for task, if any
+        if items_for_task:
+            yield items_for_task
+            num_items_queued += len(items_for_task)
 
     # Note, depending on what kind of DB is used, it's possible for the queryset
     # we iterate over to change in the course of the query. Therefore it's
@@ -263,25 +301,35 @@ def queue_subtasks_for_query(entry, action_name, create_subtask_fcn, item_querys
     subtask_id_list = [str(uuid4()) for _ in range(total_num_subtasks)]
 
     # Update the InstructorTask  with information about the subtasks we've defined.
-    TASK_LOG.info("Task %s: updating InstructorTask %s with subtask info for %s subtasks to process %s items.",
-             task_id, entry.id, total_num_subtasks, total_num_items)  # pylint: disable=E1101
+    TASK_LOG.info(
+        "Task %s: updating InstructorTask %s with subtask info for %s subtasks to process %s items.",
+        task_id,
+        entry.id,
+        total_num_subtasks,
+        total_num_items,
+    )  # pylint: disable=no-member
     progress = initialize_subtask_info(entry, action_name, total_num_items, subtask_id_list)
 
     # Construct a generator that will return the recipients to use for each subtask.
     # Pass in the desired fields to fetch for each recipient.
-    item_generator = _generate_items_for_subtask(
+    item_list_generator = _generate_items_for_subtask(
         item_queryset,
         item_fields,
         total_num_items,
         items_per_task,
         total_num_subtasks,
+        entry.course_id,
     )
 
     # Now create the subtasks, and start them running.
-    TASK_LOG.info("Task %s: creating %s subtasks to process %s items.",
-             task_id, total_num_subtasks, total_num_items)
+    TASK_LOG.info(
+        "Task %s: creating %s subtasks to process %s items.",
+        task_id,
+        total_num_subtasks,
+        total_num_items,
+    )
     num_subtasks = 0
-    for item_list in item_generator:
+    for item_list in item_list_generator:
         subtask_id = subtask_id_list[num_subtasks]
         num_subtasks += 1
         subtask_status = SubtaskStatus.create(subtask_id)
@@ -354,7 +402,7 @@ def check_subtask_is_valid(entry_id, current_task_id, new_subtask_status):
         format_str = "Unexpected task_id '{}': unable to find subtasks of instructor task '{}': rejecting task {}"
         msg = format_str.format(current_task_id, entry, new_subtask_status)
         TASK_LOG.warning(msg)
-        dog_stats_api.increment('instructor_task.subtask.duplicate.nosubtasks', tags=[_statsd_tag(entry.course_id)])
+        dog_stats_api.increment('instructor_task.subtask.duplicate.nosubtasks', tags=[entry.course_id])
         raise DuplicateTaskException(msg)
 
     # Confirm that the InstructorTask knows about this particular subtask.
@@ -364,7 +412,7 @@ def check_subtask_is_valid(entry_id, current_task_id, new_subtask_status):
         format_str = "Unexpected task_id '{}': unable to find status for subtask of instructor task '{}': rejecting task {}"
         msg = format_str.format(current_task_id, entry, new_subtask_status)
         TASK_LOG.warning(msg)
-        dog_stats_api.increment('instructor_task.subtask.duplicate.unknown', tags=[_statsd_tag(entry.course_id)])
+        dog_stats_api.increment('instructor_task.subtask.duplicate.unknown', tags=[entry.course_id])
         raise DuplicateTaskException(msg)
 
     # Confirm that the InstructorTask doesn't think that this subtask has already been
@@ -375,7 +423,7 @@ def check_subtask_is_valid(entry_id, current_task_id, new_subtask_status):
         format_str = "Unexpected task_id '{}': already completed - status {} for subtask of instructor task '{}': rejecting task {}"
         msg = format_str.format(current_task_id, subtask_status, entry, new_subtask_status)
         TASK_LOG.warning(msg)
-        dog_stats_api.increment('instructor_task.subtask.duplicate.completed', tags=[_statsd_tag(entry.course_id)])
+        dog_stats_api.increment('instructor_task.subtask.duplicate.completed', tags=[entry.course_id])
         raise DuplicateTaskException(msg)
 
     # Confirm that the InstructorTask doesn't think that this subtask is already being
@@ -389,7 +437,7 @@ def check_subtask_is_valid(entry_id, current_task_id, new_subtask_status):
             format_str = "Unexpected task_id '{}': already retried - status {} for subtask of instructor task '{}': rejecting task {}"
             msg = format_str.format(current_task_id, subtask_status, entry, new_subtask_status)
             TASK_LOG.warning(msg)
-            dog_stats_api.increment('instructor_task.subtask.duplicate.retried', tags=[_statsd_tag(entry.course_id)])
+            dog_stats_api.increment('instructor_task.subtask.duplicate.retried', tags=[entry.course_id])
             raise DuplicateTaskException(msg)
 
     # Now we are ready to start working on this.  Try to lock it.
@@ -399,7 +447,7 @@ def check_subtask_is_valid(entry_id, current_task_id, new_subtask_status):
         format_str = "Unexpected task_id '{}': already being executed - for subtask of instructor task '{}'"
         msg = format_str.format(current_task_id, entry)
         TASK_LOG.warning(msg)
-        dog_stats_api.increment('instructor_task.subtask.duplicate.locked', tags=[_statsd_tag(entry.course_id)])
+        dog_stats_api.increment('instructor_task.subtask.duplicate.locked', tags=[entry.course_id])
         raise DuplicateTaskException(msg)
 
 
@@ -531,11 +579,3 @@ def _update_subtask_status(entry_id, current_task_id, new_subtask_status):
     else:
         TASK_LOG.debug("about to commit....")
         transaction.commit()
-
-
-def _statsd_tag(course_id):
-    """
-    Calculate the tag we will use for DataDog.
-    """
-    tag = unicode(course_id).encode('utf-8')
-    return tag[:200]

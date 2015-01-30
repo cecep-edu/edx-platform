@@ -7,7 +7,7 @@ import xblock.reference.plugins
 
 from functools import partial
 from requests.auth import HTTPBasicAuth
-from dogapi import dog_stats_api
+import dogstats_wrapper as dog_stats_api
 from opaque_keys import InvalidKeyError
 
 from django.conf import settings
@@ -21,8 +21,9 @@ from capa.xqueue_interface import XQueueInterface
 from courseware.access import has_access, get_user_role
 from courseware.masquerade import setup_masquerade
 from courseware.model_data import FieldDataCache, DjangoKeyValueStore
-from lms.lib.xblock.field_data import LmsFieldData
-from lms.lib.xblock.runtime import LmsModuleSystem, unquote_slashes, quote_slashes
+from lms.djangoapps.lms_xblock.field_data import LmsFieldData
+from lms.djangoapps.lms_xblock.runtime import LmsModuleSystem, unquote_slashes, quote_slashes
+from lms.djangoapps.lms_xblock.models import XBlockAsidesConfig
 from edxmako.shortcuts import render_to_string
 from eventtracking import tracker
 from psychometrics.psychoanalyze import make_psychometrics_data_update_handler
@@ -35,6 +36,7 @@ from xblock.django.request import django_to_webob_request, webob_to_django_respo
 from xmodule.error_module import ErrorDescriptor, NonStaffErrorDescriptor
 from xmodule.exceptions import NotFoundError, ProcessingError
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
+from xmodule.contentstore.django import contentstore
 from xmodule.modulestore.django import modulestore, ModuleI18nService
 from xmodule.modulestore.exceptions import ItemNotFoundError
 from xmodule.util.duedate import get_extended_due_date
@@ -50,7 +52,7 @@ from xmodule.lti_module import LTIModule
 from xmodule.x_module import XModuleDescriptor
 
 from util.json_request import JsonResponse
-from util.sandboxing import can_execute_unsafe_code
+from util.sandboxing import can_execute_unsafe_code, get_python_lib_zip
 
 
 log = logging.getLogger(__name__)
@@ -71,6 +73,7 @@ XQUEUE_INTERFACE = XQueueInterface(
 # Some brave person should make the variable names consistently someday, but the code's
 # coupled enough that it's kind of tricky--you've been warned!
 
+
 class LmsModuleRenderError(Exception):
     """
     An exception class for exceptions thrown by module_render that don't fit well elsewhere
@@ -90,7 +93,7 @@ def make_track_function(request):
     return function
 
 
-def toc_for_course(user, request, course, active_chapter, active_section, field_data_cache):
+def toc_for_course(request, course, active_chapter, active_section, field_data_cache):
     '''
     Create a table of contents from the module store
 
@@ -114,35 +117,36 @@ def toc_for_course(user, request, course, active_chapter, active_section, field_
     field_data_cache must include data from the course module and 2 levels of its descendents
     '''
 
-    course_module = get_module_for_descriptor(user, request, course, field_data_cache, course.id)
-    if course_module is None:
-        return None
+    with modulestore().bulk_operations(course.id):
+        course_module = get_module_for_descriptor(request.user, request, course, field_data_cache, course.id)
+        if course_module is None:
+            return None
 
-    chapters = list()
-    for chapter in course_module.get_display_items():
-        if chapter.hide_from_toc:
-            continue
+        chapters = list()
+        for chapter in course_module.get_display_items():
+            if chapter.hide_from_toc:
+                continue
 
-        sections = list()
-        for section in chapter.get_display_items():
+            sections = list()
+            for section in chapter.get_display_items():
 
-            active = (chapter.url_name == active_chapter and
-                      section.url_name == active_section)
+                active = (chapter.url_name == active_chapter and
+                          section.url_name == active_section)
 
-            if not section.hide_from_toc:
-                sections.append({'display_name': section.display_name_with_default,
-                                 'url_name': section.url_name,
-                                 'format': section.format if section.format is not None else '',
-                                 'due': get_extended_due_date(section),
-                                 'active': active,
-                                 'graded': section.graded,
-                                 })
+                if not section.hide_from_toc:
+                    sections.append({'display_name': section.display_name_with_default,
+                                     'url_name': section.url_name,
+                                     'format': section.format if section.format is not None else '',
+                                     'due': get_extended_due_date(section),
+                                     'active': active,
+                                     'graded': section.graded,
+                                     })
 
-        chapters.append({'display_name': chapter.display_name_with_default,
-                         'url_name': chapter.url_name,
-                         'sections': sections,
-                         'active': chapter.url_name == active_chapter})
-    return chapters
+            chapters.append({'display_name': chapter.display_name_with_default,
+                             'url_name': chapter.url_name,
+                             'sections': sections,
+                             'active': chapter.url_name == active_chapter})
+        return chapters
 
 
 def get_module(user, request, usage_key, field_data_cache,
@@ -402,7 +406,8 @@ def get_module_system_for_user(user, field_data_cache,
         field_data_cache_real_user = FieldDataCache.cache_for_descriptor_descendents(
             course_id,
             real_user,
-            module.descriptor
+            module.descriptor,
+            asides=XBlockAsidesConfig.possible_asides(),
         )
 
         (inner_system, inner_student_data) = get_module_system_for_user(
@@ -493,6 +498,8 @@ def get_module_system_for_user(user, field_data_cache,
     else:
         anonymous_student_id = anonymous_id_for_user(user, None)
 
+    field_data = LmsFieldData(descriptor._field_data, student_data)  # pylint: disable=protected-access
+
     system = LmsModuleSystem(
         track_function=track_function,
         render_template=render_to_string,
@@ -530,6 +537,7 @@ def get_module_system_for_user(user, field_data_cache,
         s3_interface=s3_interface,
         cache=cache,
         can_execute_unsafe_code=(lambda: can_execute_unsafe_code(course_id)),
+        get_python_lib_zip=(lambda: get_python_lib_zip(contentstore, course_id)),
         # TODO: When we merge the descriptor and module systems, we can stop reaching into the mixologist (cpennington)
         mixins=descriptor.runtime.mixologist._mixins,  # pylint: disable=protected-access
         wrappers=block_wrappers,
@@ -537,11 +545,13 @@ def get_module_system_for_user(user, field_data_cache,
         services={
             'i18n': ModuleI18nService(),
             'fs': xblock.reference.plugins.FSService(),
+            'field-data': field_data,
         },
         get_user_role=lambda: get_user_role(user, course_id),
         descriptor_runtime=descriptor.runtime,
         rebind_noauth_module_to_user=rebind_noauth_module_to_user,
         user_location=user_location,
+        request_token=request_token,
     )
 
     # pass position specified in URL to module through ModuleSystem
@@ -568,7 +578,7 @@ def get_module_system_for_user(user, field_data_cache,
     else:
         system.error_descriptor_class = NonStaffErrorDescriptor
 
-    return system, student_data
+    return system, field_data
 
 
 def get_module_for_descriptor_internal(user, descriptor, field_data_cache, course_id,  # pylint: disable=invalid-name
@@ -590,7 +600,7 @@ def get_module_for_descriptor_internal(user, descriptor, field_data_cache, cours
         if not has_access(user, 'load', descriptor, course_id):
             return None
 
-    (system, student_data) = get_module_system_for_user(
+    (system, field_data) = get_module_system_for_user(
         user=user,
         field_data_cache=field_data_cache,  # These have implicit user bindings, the rest of args are considered not to
         descriptor=descriptor,
@@ -605,7 +615,7 @@ def get_module_for_descriptor_internal(user, descriptor, field_data_cache, cours
         request_token=request_token
     )
 
-    descriptor.bind_for_student(system, LmsFieldData(descriptor._field_data, student_data))  # pylint: disable=protected-access
+    descriptor.bind_for_student(system, field_data)  # pylint: disable=protected-access
     descriptor.scope_ids = descriptor.scope_ids._replace(user_id=user.id)  # pylint: disable=protected-access
     return descriptor
 

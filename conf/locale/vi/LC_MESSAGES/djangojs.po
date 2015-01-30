@@ -1,6 +1,6 @@
 # #-#-#-#-#  djangojs-partial.po (edx-platform)  #-#-#-#-#
-# edX community translations have been downloaded from Vietnamese (http://www.transifex.com/projects/p/edx-platform/language/vi/).
-# Copyright (C) 2014 EdX
+# edX translation file.
+# Copyright (C) 2015 EdX
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
@@ -10,17 +10,18 @@
 # Ha Ngoc Chung <ngocchung75@gmail.com>, 2013
 # Nguyen Quang Huy <huynq23091@gmail.com>, 2013-2014
 # hoad, 2013
-# HoaD, 2013
+# HoaD, 2013-2014
 # Hoang Ha <halink0803@gmail.com>, 2014
 # Minh Tue Vo <mvo@edx.org>, 2014
 # Ha Ngoc Chung <ngocchung75@gmail.com>, 2013
 # NGUYEN CONG NAM <congnam0409@gmail.com>, 2014
+# Nguyen Don Binh <donbinhvn@gmail.com>, 2014
 # NGUYEN HOANG AN <neyugn2909@gmail.com>, 2014
 # Nguyen Quang Huy <huynq23091@gmail.com>, 2013-2014
 # Anh Phan <vietnamesel10n@gmail.com>, 2013
 # #-#-#-#-#  djangojs-studio.po (edx-platform)  #-#-#-#-#
 # edX translation file.
-# Copyright (C) 2014 EdX
+# Copyright (C) 2015 EdX
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
@@ -32,32 +33,36 @@
 # Hoang Ha <halink0803@gmail.com>, 2014
 # Minh Tue Vo <mvo@edx.org>, 2014
 # Ha Ngoc Chung <ngocchung75@gmail.com>, 2013
+# Nguyen Don Binh <donbinhvn@gmail.com>, 2014
 # NGUYEN HOANG AN <neyugn2909@gmail.com>, 2014
 # NGUYEN HOANG AN <neyugn2909@gmail.com>, 2014
 # Nguyen Quang Huy <huynq23091@gmail.com>, 2014
 # Anh Phan <vietnamesel10n@gmail.com>, 2013
 # #-#-#-#-#  underscore.po (edx-platform)  #-#-#-#-#
 # edX translation file
-# Copyright (C) 2014 edX
+# Copyright (C) 2015 edX
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
 # Hoang Ha <halink0803@gmail.com>, 2014
+# Nguyen Don Binh <donbinhvn@gmail.com>, 2014
 # NGUYEN HOANG AN <neyugn2909@gmail.com>, 2014
 # #-#-#-#-#  underscore-studio.po (edx-platform)  #-#-#-#-#
 # edX translation file
-# Copyright (C) 2014 edX
+# Copyright (C) 2015 edX
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
 # dangitdang <dangpham@mit.edu>, 2014
+# Doan Viet Hung <viethung.doan@gmail.com>, 2014
 # Hoang Ha <halink0803@gmail.com>, 2014
+# NGUYEN HOANG AN <neyugn2909@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2014-08-22 11:23-0400\n"
-"PO-Revision-Date: 2014-08-19 15:50+0000\n"
+"POT-Creation-Date: 2015-01-05 14:57+0000\n"
+"PO-Revision-Date: 2014-12-30 16:00+0000\n"
 "Last-Translator: Sarina Canelake <sarina@edx.org>\n"
 "Language-Team: Vietnamese (http://www.transifex.com/projects/p/edx-platform/language/vi/)\n"
 "MIME-Version: 1.0\n"
@@ -69,7 +74,8 @@ msgstr ""
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
-#: cms/static/coffee/src/views/tabs.js
+#: cms/static/coffee/src/views/tabs.js cms/static/js/factories/manage_users.js
+#: cms/static/js/factories/manage_users.js
 #: cms/static/js/views/course_info_update.js
 #: cms/static/js/views/modals/edit_xblock.js
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
@@ -79,15 +85,14 @@ msgstr "OK"
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
-#: cms/static/coffee/src/views/tabs.js cms/static/js/views/asset.js
+#: cms/static/coffee/src/views/tabs.js cms/static/js/factories/export.js
+#: cms/static/js/factories/manage_users.js cms/static/js/views/asset.js
 #: cms/static/js/views/course_info_update.js
 #: cms/static/js/views/show_textbook.js cms/static/js/views/validation.js
 #: cms/static/js/views/modals/base_modal.js
 #: cms/static/js/views/modals/course_outline_modals.js
 #: cms/static/js/views/utils/view_utils.js
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
 msgid "Cancel"
 msgstr "Hủy bỏ"
 
@@ -95,7 +100,17 @@ msgstr "Hủy bỏ"
 msgid "This link will open in a new browser window/tab"
 msgstr "Liên kết này sẽ mở ra trong một cửa sổ hoặc tab mới của trình duyệt"
 
-#: cms/static/js/views/asset.js
+#. Translators: This is the status for a video that is in an unknown
+#. state
+#: cms/static/js/factories/manage_users.js
+#: cms/static/js/views/previous_video_upload.js
+#: lms/static/coffee/src/instructor_dashboard/util.js
+#: lms/static/coffee/src/instructor_dashboard/util.js
+#: lms/static/coffee/src/instructor_dashboard/util.js
+msgid "Unknown"
+msgstr "Không biết"
+
+#: cms/static/js/factories/manage_users.js cms/static/js/views/asset.js
 #: cms/static/js/views/group_configuration_item.js
 #: cms/static/js/views/show_textbook.js
 #: common/static/js/vendor/ova/catch/js/catch.js
@@ -109,6 +124,19 @@ msgstr "Xóa"
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Name"
 msgstr "Tên"
+
+#: cms/static/js/views/metadata.js lms/static/js/views/file_uploader.js
+msgid "Upload File"
+msgstr ""
+
+#. Translators: This message will be added to the front of messages of type
+#. error,
+#. e.g. "Error: required field is missing".
+#: cms/static/js/views/xblock_validation.js
+#: lms/static/js/verify_student/views/payment_confirmation_step_view.js
+#: lms/static/js/verify_student/views/step_view.js
+msgid "Error"
+msgstr ""
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -155,7 +183,7 @@ msgstr[0] "(%(earned)s/%(possible)s điểm)"
 #: common/lib/xmodule/xmodule/js/src/capa/display.js
 msgid "(%(num_points)s point possible)"
 msgid_plural "(%(num_points)s points possible)"
-msgstr[0] "(có khả năng đạt %(num_points)s)"
+msgstr[0] ""
 
 #: common/lib/xmodule/xmodule/js/src/capa/display.js
 #: common/lib/xmodule/xmodule/js/src/capa/display.js
@@ -181,7 +209,7 @@ msgstr "Tiết Lộ Câu Trả Lời"
 
 #: common/lib/xmodule/xmodule/js/src/capa/display.js
 msgid "Answer hidden"
-msgstr "Câu trả lời ẩn"
+msgstr ""
 
 #. Translators: the word unanswered here is about answering a problem the
 #. student must solve.;
@@ -198,7 +226,7 @@ msgstr "Trạng thái: chưa gửi"
 #. they feel they were graded on this problem
 #: common/lib/xmodule/xmodule/js/src/combinedopenended/display.js
 msgid "You need to pick a rating before you can submit."
-msgstr "Cần bình chọn trước khi gửi."
+msgstr ""
 
 #. Translators: this message appears when transitioning between openended
 #. grading
@@ -290,7 +318,7 @@ msgstr "Ẩn Câu Hỏi"
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Paragraph"
-msgstr ""
+msgstr "Đoạn văn"
 
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Preformatted"
@@ -301,7 +329,7 @@ msgstr ""
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Heading 1"
-msgstr "tiêu đề 1"
+msgstr ""
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -321,11 +349,13 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Add to Dictionary"
-msgstr ""
+msgstr "Thêm vào Từ điển"
 
+#. #-#-#-#-#  djangojs-partial.po (edx-platform)  #-#-#-#-#
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
+#: cms/templates/js/add-xblock-component-menu-problem.underscore
 msgid "Advanced"
 msgstr "Nâng cao"
 
@@ -333,19 +363,19 @@ msgstr "Nâng cao"
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Align center"
-msgstr ""
+msgstr "Căn giữa"
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Align left"
-msgstr ""
+msgstr "Căn lề trái"
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Align right"
-msgstr ""
+msgstr "Căn lề phải"
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -357,7 +387,7 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Alternative source"
-msgstr ""
+msgstr "Nguồn thay thế "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -375,13 +405,13 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Author"
-msgstr ""
+msgstr "Tác giả"
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Background color"
-msgstr ""
+msgstr "Màu nền"
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -400,25 +430,25 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Body"
-msgstr ""
+msgstr "Thân "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Bold"
-msgstr ""
+msgstr "In đậm "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Border color"
-msgstr ""
+msgstr "Màu viền "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Border"
-msgstr ""
+msgstr "Viền "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -484,14 +514,12 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Clear formatting"
-msgstr ""
+msgstr "Xóa định dạng "
 
 #. #-#-#-#-#  djangojs-partial.po (edx-platform)  #-#-#-#-#
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
-#: common/static/coffee/src/discussion/views/discussion_content_view.js
-#: common/static/coffee/src/discussion/views/discussion_content_view.js
 #: common/templates/js/image-modal.underscore
 #, fuzzy
 msgid "Close"
@@ -505,43 +533,43 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Code block"
-msgstr ""
+msgstr "Đoạn mã "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Code"
-msgstr ""
+msgstr "Mã "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Color"
-msgstr ""
+msgstr "Màu "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Cols"
-msgstr ""
+msgstr "Số cột "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Column group"
-msgstr ""
+msgstr "Nhóm cột "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Column"
-msgstr ""
+msgstr "Cột "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Constrain proportions"
-msgstr ""
+msgstr "Tỉ lệ giới hạn "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -553,19 +581,19 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Copy"
-msgstr ""
+msgstr "Copy "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Could not find the specified string."
-msgstr ""
+msgstr "Không thể tìm thấy xâu cần tìm. "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Custom color"
-msgstr ""
+msgstr "Tùy chỉnh màu"
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -577,43 +605,43 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Cut row"
-msgstr ""
+msgstr "Cắt hàng "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Cut"
-msgstr ""
+msgstr "Cắt "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Decrease indent"
-msgstr ""
+msgstr "Giảm thụt dòng "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Default"
-msgstr ""
+msgstr "Mặc định "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Delete column"
-msgstr ""
+msgstr "Xóa cột "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Delete row"
-msgstr ""
+msgstr "Xóa hàng "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Delete table"
-msgstr ""
+msgstr "Xóa bảng  "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -625,7 +653,7 @@ msgstr "Mô tả"
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Dimensions"
-msgstr ""
+msgstr "Kích thước "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -637,7 +665,7 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Div"
-msgstr ""
+msgstr "Chia nguyên "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -649,7 +677,7 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Edit HTML"
-msgstr ""
+msgstr "Chỉnh sửa HTML "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -662,31 +690,31 @@ msgstr "Chỉnh sửa"
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Embed"
-msgstr ""
+msgstr "Nhúng "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Emoticons"
-msgstr ""
+msgstr "Emoticons"
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Encoding"
-msgstr ""
+msgstr "Mã hóa "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "File"
-msgstr ""
+msgstr "Tập tin "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Find and replace"
-msgstr ""
+msgstr "Tìm và thay thế "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -698,31 +726,31 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Find previous"
-msgstr ""
+msgstr "Tìm phần trước "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Find"
-msgstr ""
+msgstr "Tìm "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Finish"
-msgstr ""
+msgstr "Hoàn tất "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Font Family"
-msgstr ""
+msgstr "Họ font "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Font Sizes"
-msgstr ""
+msgstr "Kích thước font "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -734,13 +762,13 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Format"
-msgstr ""
+msgstr "Định dạng "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Formats"
-msgstr ""
+msgstr "Các định dạng "
 
 #. #-#-#-#-#  djangojs-partial.po (edx-platform)  #-#-#-#-#
 #. Translators: this is a message from the raw HTML editor displayed in the
@@ -862,25 +890,25 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "HTML source code"
-msgstr ""
+msgstr "Mà nguồn HTML "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Ignore all"
-msgstr ""
+msgstr "Bỏ qua tất cả "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Ignore"
-msgstr ""
+msgstr "Bỏ qua "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Image description"
-msgstr ""
+msgstr "Chú thích ảnh "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -898,85 +926,85 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert column after"
-msgstr ""
+msgstr "Thêm cột vào sau "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert column before"
-msgstr ""
+msgstr "Thêm cột vào trước "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert date/time"
-msgstr ""
+msgstr "Chèn ngày tháng/thời gian "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert image"
-msgstr ""
+msgstr "Chèn hình ảnh "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert link"
-msgstr ""
+msgstr "Chèn liên kết "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert row after"
-msgstr ""
+msgstr "Thêm hàng vào sau "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert row before"
-msgstr ""
+msgstr "Thêm hàng vào trước "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert table"
-msgstr ""
+msgstr "Chèn bảng "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert template"
-msgstr ""
+msgstr "Chèn mẫu "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert video"
-msgstr ""
+msgstr "Chèn video "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert"
-msgstr ""
+msgstr "Chèn "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert/edit image"
-msgstr ""
+msgstr "Chèn/chỉnh sửa hình ảnh "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert/edit link"
-msgstr ""
+msgstr "Chèn/chỉnh sửa liên kết "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Insert/edit video"
-msgstr ""
+msgstr "Chèn/chỉnh sửa video "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -994,13 +1022,13 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Keywords"
-msgstr ""
+msgstr "Từ khóa "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Left to right"
-msgstr ""
+msgstr "Từ trái sang phải "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1048,13 +1076,13 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "New document"
-msgstr ""
+msgstr "New document"
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "New window"
-msgstr ""
+msgstr "Cửa sổ mới"
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1066,13 +1094,13 @@ msgstr "Sau"
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "No color"
-msgstr ""
+msgstr "Không màu "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Nonbreaking space"
-msgstr ""
+msgstr "Không khoảng trống "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1084,25 +1112,25 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Numbered list"
-msgstr ""
+msgstr "Danh sách có thứ tự "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Ok"
-msgstr ""
+msgstr "Ok "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Page break"
-msgstr ""
+msgstr "Ngắt trang "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Paste as text"
-msgstr ""
+msgstr "Dán kí tự "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1116,13 +1144,13 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Paste row after"
-msgstr ""
+msgstr "Dán hàng vào sau "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Paste row before"
-msgstr ""
+msgstr "Dán hàng vào trước "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1134,7 +1162,7 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Paste"
-msgstr ""
+msgstr "Dán "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1152,7 +1180,7 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Prev"
-msgstr ""
+msgstr "Trước "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1165,7 +1193,7 @@ msgstr "Xem trước"
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Print"
-msgstr ""
+msgstr "In "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1177,14 +1205,14 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Remove link"
-msgstr ""
+msgstr "Gỡ liên kết "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Replace all"
-msgstr ""
+msgstr "Thay thế tất cả "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1203,7 +1231,7 @@ msgstr "Thay thế"
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Restore last draft"
-msgstr ""
+msgstr "Khôi phục bản nháp cuối cùng"
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1217,31 +1245,31 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Right to left"
-msgstr ""
+msgstr "Phải sang trái "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Right"
-msgstr ""
+msgstr "Phải "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Robots"
-msgstr ""
+msgstr "Robots "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Row group"
-msgstr ""
+msgstr "Nhóm hàng "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Row properties"
-msgstr ""
+msgstr "Đặc tính hàng "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1289,25 +1317,25 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Source code"
-msgstr ""
+msgstr "Mã nguồn "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Source"
-msgstr ""
+msgstr "Nguồn  "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Special character"
-msgstr ""
+msgstr "Kí tự đặc biệt "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Spellcheck"
-msgstr ""
+msgstr "Kiểm tra chính tả "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1325,7 +1353,7 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Start search"
-msgstr ""
+msgstr "Bắt đầu tìm kiếm "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1361,31 +1389,31 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Table"
-msgstr ""
+msgstr "Bảng "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Target"
-msgstr ""
+msgstr "Mục tiêu "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Templates"
-msgstr ""
+msgstr "Mẫu "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Text color"
-msgstr ""
+msgstr "Màu kí tự "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Text to display"
-msgstr ""
+msgstr "Ký tự hiển thị  "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1425,7 +1453,7 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Underline"
-msgstr ""
+msgstr "Gạch chân "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1449,7 +1477,7 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Url"
-msgstr ""
+msgstr "Url "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1485,13 +1513,13 @@ msgstr ""
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Width"
-msgstr ""
+msgstr "Độ rộng "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
 #: common/lib/xmodule/xmodule/js/src/html/edit.js
 msgid "Words: {0}"
-msgstr ""
+msgstr "Số từ: {0} "
 
 #. Translators: this is a message from the raw HTML editor displayed in the
 #. browser when a user needs to edit HTML
@@ -1506,6 +1534,29 @@ msgid ""
 "Your browser doesn't support direct access to the clipboard. Please use the "
 "Ctrl+X/C/V keyboard shortcuts instead."
 msgstr ""
+"Trình duyệt của bạn không hỗ trợ truy cập trực tiếp vào clipboard. Vui lòng "
+"sử dụng tổ hợp phím Ctrl+X/C/V để thay thế. "
+
+#: common/lib/xmodule/xmodule/js/src/lti/lti.js
+msgid ""
+"Click OK to have your username and e-mail address sent to a 3rd party application.\n"
+"\n"
+"Click Cancel to return to this page without sending your information."
+msgstr ""
+
+#: common/lib/xmodule/xmodule/js/src/lti/lti.js
+msgid ""
+"Click OK to have your username sent to a 3rd party application.\n"
+"\n"
+"Click Cancel to return to this page without sending your information."
+msgstr ""
+
+#: common/lib/xmodule/xmodule/js/src/lti/lti.js
+msgid ""
+"Click OK to have your e-mail address sent to a 3rd party application.\n"
+"\n"
+"Click Cancel to return to this page without sending your information."
+msgstr ""
 
 #: common/lib/xmodule/xmodule/js/src/sequence/display.js
 msgid ""
@@ -1514,6 +1565,38 @@ msgid ""
 msgstr ""
 "Lỗi Sequence! Không thể điều hướng thanh %(tab_name)s trong SequenceModule. "
 "Xin vui lòng liên hệ với nhân viên phụ trách khóa học."
+
+#: common/lib/xmodule/xmodule/js/src/video/00_i18n.js
+#: common/lib/xmodule/xmodule/js/src/video/04_video_control.js
+msgid "Play"
+msgstr "Phát"
+
+#: common/lib/xmodule/xmodule/js/src/video/00_i18n.js
+#: common/lib/xmodule/xmodule/js/src/video/04_video_control.js
+msgid "Pause"
+msgstr "Tạm dừng"
+
+#: common/lib/xmodule/xmodule/js/src/video/00_i18n.js
+msgid "Mute"
+msgstr ""
+
+#: common/lib/xmodule/xmodule/js/src/video/00_i18n.js
+msgid "Unmute"
+msgstr ""
+
+#: common/lib/xmodule/xmodule/js/src/video/00_i18n.js
+#: common/lib/xmodule/xmodule/js/src/video/04_video_control.js
+msgid "Exit full browser"
+msgstr "Thoát khỏi chế độ toàn màn hình"
+
+#: common/lib/xmodule/xmodule/js/src/video/00_i18n.js
+#: common/lib/xmodule/xmodule/js/src/video/04_video_control.js
+msgid "Fill browser"
+msgstr "Chế độ toàn màn hình"
+
+#: common/lib/xmodule/xmodule/js/src/video/00_i18n.js
+msgid "Speed"
+msgstr "Tốc độ"
 
 #: common/lib/xmodule/xmodule/js/src/video/00_i18n.js
 msgid "Volume"
@@ -1570,22 +1653,6 @@ msgstr "Vui lòng thử dùng một trình duyệt khác, ví dụ như Google C
 #: common/lib/xmodule/xmodule/js/src/video/04_video_control.js
 msgid "Video slider"
 msgstr "Thanh trượt video"
-
-#: common/lib/xmodule/xmodule/js/src/video/04_video_control.js
-msgid "Pause"
-msgstr "Tạm dừng"
-
-#: common/lib/xmodule/xmodule/js/src/video/04_video_control.js
-msgid "Play"
-msgstr "Phát"
-
-#: common/lib/xmodule/xmodule/js/src/video/04_video_control.js
-msgid "Fill browser"
-msgstr "Chế độ toàn màn hình"
-
-#: common/lib/xmodule/xmodule/js/src/video/04_video_control.js
-msgid "Exit full browser"
-msgstr "Thoát khỏi chế độ toàn màn hình"
 
 #: common/lib/xmodule/xmodule/js/src/video/05_video_quality_control.js
 msgid "HD on"
@@ -1647,6 +1714,7 @@ msgstr "Hiển Thị Thảo Luận"
 #: common/static/coffee/src/discussion/discussion_module_view.js
 #: common/static/coffee/src/discussion/discussion_module_view.js
 #: common/static/coffee/src/discussion/utils.js
+#: common/static/coffee/src/discussion/utils.js
 #: common/static/coffee/src/discussion/views/discussion_thread_list_view.js
 #: common/static/coffee/src/discussion/views/discussion_thread_view.js
 #: common/static/coffee/src/discussion/views/discussion_thread_view.js
@@ -1685,34 +1753,75 @@ msgstr "Xảy ra sự cố trong lúc xử lý yêu cầu của bạn. Vui lòng
 #: common/static/coffee/src/discussion/utils.js
 #: common/static/coffee/src/discussion/views/discussion_thread_list_view.js
 #: common/static/coffee/src/discussion/views/discussion_thread_list_view.js
-#: common/static/coffee/src/discussion/views/new_post_view.js
-#: common/static/coffee/src/discussion/views/new_post_view.js
-#: common/static/coffee/src/discussion/views/new_post_view.js
+#: common/static/coffee/src/discussion/views/discussion_topic_menu_view.js
 msgid "…"
 msgstr "..."
 
 #: common/static/coffee/src/discussion/views/discussion_content_view.js
-#: common/static/coffee/src/discussion/views/discussion_content_view.js
-msgid "Open"
-msgstr "Mở"
+msgid "currently %(numVotes)s vote"
+msgid_plural "currently %(numVotes)s votes"
+msgstr[0] ""
 
 #: common/static/coffee/src/discussion/views/discussion_content_view.js
-msgid "remove vote"
-msgstr "bỏ bầu chọn"
+msgid "%(numVotes)s Vote"
+msgid_plural "%(numVotes)s Votes"
+msgstr[0] ""
 
 #: common/static/coffee/src/discussion/views/discussion_content_view.js
-msgid "vote"
-msgstr "bầu chọn"
+msgid "We had some trouble subscribing you to this thread. Please try again."
+msgstr ""
 
 #: common/static/coffee/src/discussion/views/discussion_content_view.js
-msgid "vote (click to remove your vote)"
-msgid_plural "votes (click to remove your vote)"
-msgstr[0] "bầu chọn (nhấp chọn để bỏ bầu chọn)"
+msgid ""
+"We had some trouble unsubscribing you from this thread. Please try again."
+msgstr ""
 
 #: common/static/coffee/src/discussion/views/discussion_content_view.js
-msgid "vote (click to vote)"
-msgid_plural "votes (click to vote)"
-msgstr[0] "bầu chọn (nhấp chọn để bầu chọn)"
+msgid ""
+"We had some trouble marking this response as an answer.  Please try again."
+msgstr ""
+
+#: common/static/coffee/src/discussion/views/discussion_content_view.js
+msgid ""
+"We had some trouble removing this response as an answer.  Please try again."
+msgstr ""
+
+#: common/static/coffee/src/discussion/views/discussion_content_view.js
+msgid "We had some trouble marking this response endorsed.  Please try again."
+msgstr ""
+
+#: common/static/coffee/src/discussion/views/discussion_content_view.js
+msgid "We had some trouble removing this endorsement.  Please try again."
+msgstr ""
+
+#: common/static/coffee/src/discussion/views/discussion_content_view.js
+msgid "We had some trouble saving your vote.  Please try again."
+msgstr ""
+
+#: common/static/coffee/src/discussion/views/discussion_content_view.js
+msgid "We had some trouble pinning this thread. Please try again."
+msgstr ""
+
+#: common/static/coffee/src/discussion/views/discussion_content_view.js
+msgid "We had some trouble unpinning this thread. Please try again."
+msgstr ""
+
+#: common/static/coffee/src/discussion/views/discussion_content_view.js
+msgid ""
+"We had some trouble removing your flag on this post.  Please try again."
+msgstr ""
+
+#: common/static/coffee/src/discussion/views/discussion_content_view.js
+msgid "We had some trouble reporting this post.  Please try again."
+msgstr ""
+
+#: common/static/coffee/src/discussion/views/discussion_content_view.js
+msgid "We had some trouble closing this thread.  Please try again."
+msgstr ""
+
+#: common/static/coffee/src/discussion/views/discussion_content_view.js
+msgid "We had some trouble reopening this thread.  Please try again."
+msgstr ""
 
 #: common/static/coffee/src/discussion/views/discussion_thread_list_view.js
 msgid "Load more"
@@ -1755,44 +1864,6 @@ msgstr ""
 msgid "Show posts by %(username)s."
 msgstr ""
 
-#: common/static/coffee/src/discussion/views/discussion_thread_show_view.js
-msgid "Click to remove report"
-msgstr "Nhấp chọn để bỏ báo cáo"
-
-#. Translators: The text between start_sr_span and end_span is not shown
-#. in most browsers but will be read by screen readers.
-#: common/static/coffee/src/discussion/views/discussion_thread_show_view.js
-#: common/static/coffee/src/discussion/views/thread_response_show_view.js
-msgid "Misuse Reported%(start_sr_span)s, click to remove report%(end_span)s"
-msgstr ""
-"Đã Báo Bài Đăng Không Phù Hợp%(start_sr_span)s, nhấp chọn để bỏ báo "
-"cáo%(end_span)s"
-
-#: common/static/coffee/src/discussion/views/discussion_thread_show_view.js
-#: common/static/coffee/src/discussion/views/response_comment_show_view.js
-#: common/static/coffee/src/discussion/views/response_comment_show_view.js
-#: common/static/coffee/src/discussion/views/thread_response_show_view.js
-msgid "Report Misuse"
-msgstr "Báo Bài Đăng Không Phù Hợp"
-
-#. Translators: The text between start_sr_span and end_span is not shown
-#. in most browsers but will be read by screen readers.
-#: common/static/coffee/src/discussion/views/discussion_thread_show_view.js
-msgid "Pinned%(start_sr_span)s, click to unpin%(end_span)s"
-msgstr "Đã ghim%(start_sr_span)s, nhấp chọn để gỡ ghim%(end_span)s"
-
-#: common/static/coffee/src/discussion/views/discussion_thread_show_view.js
-msgid "Click to unpin"
-msgstr "Nhấp chọn để gỡ ghim"
-
-#: common/static/coffee/src/discussion/views/discussion_thread_show_view.js
-msgid "Pinned"
-msgstr "Đã ghim"
-
-#: common/static/coffee/src/discussion/views/discussion_thread_show_view.js
-msgid "Pin Thread"
-msgstr "Ghim Chủ Đề"
-
 #: common/static/coffee/src/discussion/views/discussion_thread_view.js
 msgid ""
 "The thread you selected has been deleted. Please select another thread."
@@ -1805,6 +1876,11 @@ msgstr "Xảy ra sự cố trong lúc tải các câu trả lời. Vui lòng t�
 #: common/static/coffee/src/discussion/views/discussion_thread_view.js
 msgid "We had some trouble loading more responses. Please try again."
 msgstr "Xảy ra sự cố trong lúc tải các câu trả lời. Vui lòng thử lại."
+
+#: common/static/coffee/src/discussion/views/discussion_thread_view.js
+msgid "%(numResponses)s other response"
+msgid_plural "%(numResponses)s other responses"
+msgstr[0] ""
 
 #: common/static/coffee/src/discussion/views/discussion_thread_view.js
 msgid "%(numResponses)s response"
@@ -1836,24 +1912,12 @@ msgstr "Bạn chắc chắn muốn xóa bài đăng này?"
 msgid "We had some trouble loading the page you requested. Please try again."
 msgstr ""
 
+#: common/static/coffee/src/discussion/views/new_post_view.js
+msgid "Your post will be discarded."
+msgstr ""
+
 #: common/static/coffee/src/discussion/views/response_comment_show_view.js
 msgid "anonymous"
-msgstr ""
-
-#: common/static/coffee/src/discussion/views/response_comment_show_view.js
-#: common/static/coffee/src/discussion/views/thread_response_show_view.js
-msgid "staff"
-msgstr ""
-
-#: common/static/coffee/src/discussion/views/response_comment_show_view.js
-#: common/static/coffee/src/discussion/views/thread_response_show_view.js
-msgid "Community TA"
-msgstr ""
-
-#: common/static/coffee/src/discussion/views/response_comment_show_view.js
-#: common/static/coffee/src/discussion/views/response_comment_show_view.js
-#: common/static/coffee/src/discussion/views/thread_response_show_view.js
-msgid "Misuse Reported, click to remove report"
 msgstr ""
 
 #: common/static/coffee/src/discussion/views/response_comment_view.js
@@ -2082,161 +2146,6 @@ msgstr ""
 msgid "Tags:"
 msgstr ""
 
-#: lms/static/admin/js/SelectFilter2.js
-msgid "Available %s"
-msgstr "Có sẵn %s"
-
-#: lms/static/admin/js/SelectFilter2.js
-msgid ""
-"This is the list of available %s. You may choose some by selecting them in "
-"the box below and then clicking the \"Choose\" arrow between the two boxes."
-msgstr ""
-"Đây là danh sách %s có sẵn. Bạn có thể lựa chọn bằng cách chọn chúng trong "
-"hộp dưới đây rồi nhấn vào mũi tên \"Chọn\" giữa hai hộp."
-
-#: lms/static/admin/js/SelectFilter2.js
-msgid "Type into this box to filter down the list of available %s."
-msgstr "Gõ vào ô này để lọc ra danh sách %s có sẵn."
-
-#: lms/static/admin/js/SelectFilter2.js
-msgid "Filter"
-msgstr "Lọc"
-
-#: lms/static/admin/js/SelectFilter2.js
-msgid "Choose all"
-msgstr "Chọn tất cả"
-
-#: lms/static/admin/js/SelectFilter2.js
-msgid "Click to choose all %s at once."
-msgstr "Nhấn vào đây để chọn tất cả %s cùng một lúc."
-
-#: lms/static/admin/js/SelectFilter2.js
-msgid "Choose"
-msgstr "Chọn"
-
-#: lms/static/admin/js/SelectFilter2.js
-msgid "Remove"
-msgstr "Loại bỏ"
-
-#: lms/static/admin/js/SelectFilter2.js
-msgid "Chosen %s"
-msgstr "%s đã được chọn"
-
-#: lms/static/admin/js/SelectFilter2.js
-msgid ""
-"This is the list of chosen %s. You may remove some by selecting them in the "
-"box below and then clicking the \"Remove\" arrow between the two boxes."
-msgstr ""
-"Đây là danh sách %s đã lựa chọn. Bạn có thể loại bỏ một số bằng cách chọn "
-"chúng ở ô bên dưới và sau đó nhấp vào mũi tên \"Loại Bỏ\" giữa hai hộp."
-
-#: lms/static/admin/js/SelectFilter2.js
-msgid "Remove all"
-msgstr "Loại bỏ tất cả"
-
-#: lms/static/admin/js/SelectFilter2.js
-msgid "Click to remove all chosen %s at once."
-msgstr "Nhấn để loại bỏ tất cả %s đã chọn cùng một lúc."
-
-#: lms/static/admin/js/actions.js lms/static/admin/js/actions.min.js
-msgid "%(sel)s of %(cnt)s selected"
-msgid_plural "%(sel)s of %(cnt)s selected"
-msgstr[0] "%(sel)s của %(cnt)s đã chọn"
-
-#: lms/static/admin/js/actions.js lms/static/admin/js/actions.min.js
-msgid ""
-"You have unsaved changes on individual editable fields. If you run an "
-"action, your unsaved changes will be lost."
-msgstr ""
-"Bạn chưa lưu thay đổi trong các mục chỉnh sửa cá nhân. Nếu bạn chạy một tác "
-"vụ, những thay đổi  chưa lưu sẽ bị mất."
-
-#: lms/static/admin/js/actions.js lms/static/admin/js/actions.min.js
-msgid ""
-"You have selected an action, but you haven't saved your changes to "
-"individual fields yet. Please click OK to save. You'll need to re-run the "
-"action."
-msgstr ""
-"Bạn đã chọn một tác vụ, nhưng bạn chưa lưu những thay đổi của bạn trong mục "
-"cá nhân. Hãy nhấn OK để lưu. Bạn sẽ cần chạy lại tác vụ."
-
-#: lms/static/admin/js/actions.js lms/static/admin/js/actions.min.js
-msgid ""
-"You have selected an action, and you haven't made any changes on individual "
-"fields. You're probably looking for the Go button rather than the Save "
-"button."
-msgstr ""
-
-#. Translators: the names of months, keep the pipe (|) separators.
-#: lms/static/admin/js/calendar.js lms/static/admin/js/dateparse.js
-msgid ""
-"January|February|March|April|May|June|July|August|September|October|November|December"
-msgstr ""
-"Tháng 1|Tháng 2|Tháng 3|Tháng 4|Tháng 5|Tháng 6|Tháng 7|Tháng 8|Tháng "
-"9|Tháng 10|Tháng 11|Tháng 12"
-
-#. Translators: abbreviations for days of the week, keep the pipe (|)
-#. separators.
-#: lms/static/admin/js/calendar.js
-msgid "S|M|T|W|T|F|S"
-msgstr "CN|T2|T3|T4|T5|T6|T7"
-
-#: lms/static/admin/js/collapse.js lms/static/admin/js/collapse.js.c
-#: lms/static/admin/js/collapse.min.js
-msgid "Show"
-msgstr "Hiện"
-
-#: lms/static/admin/js/collapse.js lms/static/admin/js/collapse.min.js
-msgid "Hide"
-msgstr "Ẩn"
-
-#. Translators: the names of days, keep the pipe (|) separators.
-#: lms/static/admin/js/dateparse.js
-msgid "Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday"
-msgstr "Chủ Nhật|Thứ 2|Thứ 3|Thứ 4|Thứ 5|Thứ 6|Thứ 7"
-
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-msgid "Now"
-msgstr "Bây giờ"
-
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-msgid "Clock"
-msgstr "Đồng hồ"
-
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-msgid "Choose a time"
-msgstr "Chọn thời gian"
-
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-msgid "Midnight"
-msgstr "Nửa đêm"
-
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-msgid "6 a.m."
-msgstr "6h sáng"
-
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-msgid "Noon"
-msgstr "Giữa trưa"
-
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-msgid "Today"
-msgstr "Hôm nay"
-
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-msgid "Calendar"
-msgstr "Lịch"
-
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-msgid "Yesterday"
-msgstr "Hôm qua"
-
-#: lms/static/admin/js/admin/DateTimeShortcuts.js
-msgid "Tomorrow"
-msgstr "Ngày mai"
-
 #: lms/static/coffee/src/calculator.js
 msgid "Open Calculator"
 msgstr ""
@@ -2249,32 +2158,8 @@ msgstr ""
 msgid "Post body"
 msgstr ""
 
-#. Translators: "Distribution" refers to a grade distribution. This error
-#. message appears when there is an error getting the data on grade
-#. distribution.;
-#: lms/static/coffee/src/instructor_dashboard/analytics.js
-#: lms/static/coffee/src/instructor_dashboard/instructor_analytics.js
-msgid "Error fetching distribution."
-msgstr ""
-
-#: lms/static/coffee/src/instructor_dashboard/analytics.js
-#: lms/static/coffee/src/instructor_dashboard/instructor_analytics.js
-msgid "Unavailable metric display."
-msgstr ""
-
-#: lms/static/coffee/src/instructor_dashboard/analytics.js
-#: lms/static/coffee/src/instructor_dashboard/instructor_analytics.js
-msgid "Error fetching grade distributions."
-msgstr ""
-
-#: lms/static/coffee/src/instructor_dashboard/analytics.js
-#: lms/static/coffee/src/instructor_dashboard/instructor_analytics.js
-msgid "Last Updated: <%= timestamp %>"
-msgstr ""
-
-#: lms/static/coffee/src/instructor_dashboard/analytics.js
-#: lms/static/coffee/src/instructor_dashboard/instructor_analytics.js
-msgid "<%= num_students %> students scored."
+#: lms/static/coffee/src/instructor_dashboard/data_download.js
+msgid "Error generating student profile information. Please try again."
 msgstr ""
 
 #: lms/static/coffee/src/instructor_dashboard/data_download.js
@@ -2303,6 +2188,22 @@ msgid ""
 "sensitive nature of student information."
 msgstr ""
 
+#: lms/static/coffee/src/instructor_dashboard/instructor_analytics.js
+msgid "Unavailable metric display."
+msgstr ""
+
+#: lms/static/coffee/src/instructor_dashboard/instructor_analytics.js
+msgid "Error fetching grade distributions."
+msgstr ""
+
+#: lms/static/coffee/src/instructor_dashboard/instructor_analytics.js
+msgid "Last Updated: <%= timestamp %>"
+msgstr ""
+
+#: lms/static/coffee/src/instructor_dashboard/instructor_analytics.js
+msgid "<%= num_students %> students scored."
+msgstr ""
+
 #: lms/static/coffee/src/instructor_dashboard/membership.js
 msgid "Username"
 msgstr ""
@@ -2321,13 +2222,8 @@ msgid "Enter username or email"
 msgstr ""
 
 #: lms/static/coffee/src/instructor_dashboard/membership.js
+#: lms/static/js/views/cohort_editor.js
 msgid "Please enter a username or email."
-msgstr ""
-
-#. Translators: A rolename appears this sentence. A rolename is something like
-#. "staff" or "beta tester".;
-#: lms/static/coffee/src/instructor_dashboard/membership.js
-msgid "Error fetching list for role"
 msgstr ""
 
 #: lms/static/coffee/src/instructor_dashboard/membership.js
@@ -2348,6 +2244,30 @@ msgstr ""
 
 #: lms/static/coffee/src/instructor_dashboard/membership.js
 msgid "Error: You cannot remove yourself from the Instructor group!"
+msgstr ""
+
+#: lms/static/coffee/src/instructor_dashboard/membership.js
+msgid "Errors"
+msgstr ""
+
+#: lms/static/coffee/src/instructor_dashboard/membership.js
+msgid "The following errors were generated:"
+msgstr ""
+
+#: lms/static/coffee/src/instructor_dashboard/membership.js
+msgid "Warnings"
+msgstr ""
+
+#: lms/static/coffee/src/instructor_dashboard/membership.js
+msgid "The following warnings were generated:"
+msgstr ""
+
+#: lms/static/coffee/src/instructor_dashboard/membership.js
+msgid "Success"
+msgstr ""
+
+#: lms/static/coffee/src/instructor_dashboard/membership.js
+msgid "All accounts were created successfully."
 msgstr ""
 
 #: lms/static/coffee/src/instructor_dashboard/membership.js
@@ -2454,6 +2374,12 @@ msgstr "Tin nhắn của bạn phải có tiêu đề."
 #: lms/static/coffee/src/instructor_dashboard/send_email.js
 msgid "Your message cannot be blank."
 msgstr "Tin nhắn của bạn phải có nội dung."
+
+#: lms/static/coffee/src/instructor_dashboard/send_email.js
+msgid ""
+"There are invalid keywords in your email. Please check the following "
+"keywords and try again:"
+msgstr ""
 
 #: lms/static/coffee/src/instructor_dashboard/send_email.js
 msgid "Your email was successfully queued for sending."
@@ -2675,12 +2601,6 @@ msgid ""
 msgstr ""
 
 #: lms/static/coffee/src/instructor_dashboard/util.js
-#: lms/static/coffee/src/instructor_dashboard/util.js
-#: lms/static/coffee/src/instructor_dashboard/util.js
-msgid "Unknown"
-msgstr ""
-
-#: lms/static/coffee/src/instructor_dashboard/util.js
 msgid "Subject"
 msgstr ""
 
@@ -2890,6 +2810,10 @@ msgstr "Tiêu đề"
 msgid "You have been logged out of your edX account. "
 msgstr ""
 
+#: lms/static/js/course_survey.js
+msgid "There has been an error processing your survey."
+msgstr ""
+
 #: lms/static/js/staff_debug_actions.js
 msgid "Unknown Error Occurred."
 msgstr ""
@@ -2916,6 +2840,215 @@ msgstr ""
 
 #: lms/static/js/staff_debug_actions.js
 msgid "Failed to rescore problem."
+msgstr ""
+
+#: lms/static/js/dashboard/donation.js
+msgid "Please enter a valid donation amount."
+msgstr ""
+
+#: lms/static/js/dashboard/donation.js
+msgid "Your donation could not be submitted."
+msgstr ""
+
+#: lms/static/js/dashboard/legacy.js
+msgid "An error occurred. Please try again later."
+msgstr ""
+
+#: lms/static/js/dashboard/legacy.js
+msgid "Please verify your new email address"
+msgstr ""
+
+#: lms/static/js/dashboard/legacy.js
+msgid ""
+"You'll receive a confirmation in your inbox. Please follow the link in the "
+"email to confirm your email address change."
+msgstr ""
+
+#: lms/static/js/student_account/account.js
+#: lms/static/js/student_profile/profile.js
+msgid "The data could not be saved."
+msgstr ""
+
+#: lms/static/js/student_account/account.js
+msgid "Please enter a valid email address"
+msgstr ""
+
+#: lms/static/js/student_account/account.js
+msgid "Please enter a valid password"
+msgstr ""
+
+#: lms/static/js/student_account/account.js
+msgid ""
+"Password reset email sent. Follow the link in the email to change your "
+"password."
+msgstr ""
+
+#: lms/static/js/student_account/account.js
+msgid "We weren't able to send you a password reset email."
+msgstr ""
+
+#: lms/static/js/student_account/account.js
+msgid "Please check your email to confirm the change"
+msgstr ""
+
+#: lms/static/js/student_profile/profile.js
+msgid "Full name cannot be blank"
+msgstr "Tên đầy đủ không được để trống"
+
+#: lms/static/js/student_profile/profile.js
+msgid "Language cannot be blank"
+msgstr ""
+
+#: lms/static/js/student_profile/profile.js
+msgid "We couldn't populate the list of language choices."
+msgstr ""
+
+#: lms/static/js/student_profile/profile.js
+msgid "Saved"
+msgstr ""
+
+#: lms/static/js/verify_student/views/make_payment_step_view.js
+msgid "An unexpected error occurred.  Please try again."
+msgstr ""
+
+#: lms/static/js/verify_student/views/make_payment_step_view.js
+msgid "Could not submit order"
+msgstr ""
+
+#: lms/static/js/verify_student/views/payment_confirmation_step_view.js
+msgid "Could not retrieve payment information"
+msgstr ""
+
+#: lms/static/js/verify_student/views/review_photos_step_view.js
+msgid "An unexpected error occurred. Please try again later."
+msgstr ""
+
+#: lms/static/js/verify_student/views/review_photos_step_view.js
+msgid "Could not submit photos"
+msgstr ""
+
+#: lms/static/js/verify_student/views/step_view.js
+msgid "An unexpected error occurred.  Please reload the page to try again."
+msgstr ""
+
+#: lms/static/js/verify_student/views/webcam_photo_view.js
+msgid "Video capture error"
+msgstr ""
+
+#: lms/static/js/verify_student/views/webcam_photo_view.js
+msgid ""
+"Please check that your webcam is connected and you have allowed access to "
+"your webcam."
+msgstr ""
+
+#: lms/static/js/verify_student/views/webcam_photo_view.js
+msgid "No Webcam Detected"
+msgstr ""
+
+#: lms/static/js/verify_student/views/webcam_photo_view.js
+msgid "You don't seem to have a webcam connected."
+msgstr ""
+
+#: lms/static/js/verify_student/views/webcam_photo_view.js
+msgid "Double-check that your webcam is connected and working to continue."
+msgstr ""
+
+#: lms/static/js/verify_student/views/webcam_photo_view.js
+msgid "No Flash Detected"
+msgstr ""
+
+#: lms/static/js/verify_student/views/webcam_photo_view.js
+msgid "You don't seem to have Flash installed."
+msgstr ""
+
+#: lms/static/js/verify_student/views/webcam_photo_view.js
+msgid "%(a_start)s Get Flash %(a_end)s to continue your enrollment."
+msgstr ""
+
+#: lms/static/js/views/cohort_editor.js
+msgid "Error adding students."
+msgstr ""
+
+#: lms/static/js/views/cohort_editor.js
+msgid "{numUsersAdded} student has been added to this cohort group"
+msgid_plural "{numUsersAdded} students have been added to this cohort group"
+msgstr[0] ""
+
+#: lms/static/js/views/cohort_editor.js
+msgid "{numMoved} student was removed from {oldCohort}"
+msgid_plural "{numMoved} students were removed from {oldCohort}"
+msgstr[0] ""
+
+#: lms/static/js/views/cohort_editor.js
+msgid "{numPresent} student was already in the cohort group"
+msgid_plural "{numPresent} students were already in the cohort group"
+msgstr[0] ""
+
+#: lms/static/js/views/cohort_editor.js
+msgid "Unknown user: {user}"
+msgstr ""
+
+#: lms/static/js/views/cohort_editor.js
+msgid "There was an error when trying to add students:"
+msgid_plural "There were {numErrors} errors when trying to add students:"
+msgstr[0] ""
+
+#: lms/static/js/views/cohort_editor.js
+msgid "View all errors"
+msgstr ""
+
+#: lms/static/js/views/cohorts.js
+msgid "You currently have no cohort groups configured"
+msgstr ""
+
+#: lms/static/js/views/cohorts.js
+#: lms/templates/instructor/instructor_dashboard_2/cohorts.underscore
+msgid "Add Cohort Group"
+msgstr ""
+
+#: lms/static/js/views/cohorts.js
+msgid ""
+"The {cohortGroupName} cohort group has been created. You can manually add "
+"students to this group below."
+msgstr ""
+
+#: lms/static/js/views/cohorts.js
+msgid ""
+"We've encountered an error. Please refresh your browser and then try again."
+msgstr ""
+
+#: lms/static/js/views/cohorts.js
+msgid "Please enter a name for your new cohort group."
+msgstr ""
+
+#: lms/static/js/views/cohorts.js
+msgid "Assign students to cohort groups by uploading a CSV file."
+msgstr ""
+
+#: lms/static/js/views/cohorts.js
+msgid "Choose a .csv file"
+msgstr ""
+
+#: lms/static/js/views/cohorts.js
+msgid "Only properly formatted .csv files will be accepted."
+msgstr ""
+
+#: lms/static/js/views/cohorts.js
+msgid "Upload File and Assign Students"
+msgstr ""
+
+#: lms/static/js/views/cohorts.js
+msgid ""
+"Your file '{file}' has been uploaded. Please allow a few minutes for "
+"processing."
+msgstr ""
+
+#: lms/static/js/views/file_uploader.js
+msgid "Your upload of '{file}' succeeded."
+msgstr ""
+
+#: lms/static/js/views/file_uploader.js
+msgid "Your upload of '{file}' failed."
 msgstr ""
 
 #: lms/templates/class_dashboard/all_section_metrics.js
@@ -2989,23 +3122,168 @@ msgstr ""
 msgid "This link will open in a modal window"
 msgstr "Liên kết này sẽ mở ra trong một cửa sổ con"
 
-#: cms/static/js/sock.js
-msgid "Hide Studio Help"
-msgstr "Ẩn Trợ Giúp Studio"
-
-#: cms/static/js/sock.js
-msgid "Looking for Help with Studio?"
-msgstr ""
-
 #: cms/static/js/collections/group.js
 msgid "Group %s"
-msgstr ""
+msgstr "Nhóm %s"
 
 #. Translators: Dictionary used for creation ids that are used in
 #. default group names. For example: A, B, AA in Group A,
 #. Group B, ..., Group AA, etc.
 #: cms/static/js/collections/group.js
 msgid "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+msgstr "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+#: cms/static/js/factories/export.js
+msgid "There has been an error while exporting."
+msgstr ""
+
+#: cms/static/js/factories/export.js
+msgid ""
+"There has been a failure to export to XML at least one component. It is "
+"recommended that you go to the edit page and repair the error before "
+"attempting another export. Please check that all components on the page are "
+"valid and do not display any error messages."
+msgstr ""
+
+#: cms/static/js/factories/export.js
+msgid "Correct failed component"
+msgstr ""
+
+#: cms/static/js/factories/export.js
+msgid "Return to Export"
+msgstr ""
+
+#: cms/static/js/factories/export.js
+msgid ""
+"There has been a failure to export your course to XML. Unfortunately, we do "
+"not have specific enough information to assist you in identifying the failed"
+" component. It is recommended that you inspect your courseware to identify "
+"any components in error and try again."
+msgstr ""
+
+#: cms/static/js/factories/export.js
+msgid "The raw error message is:"
+msgstr ""
+
+#: cms/static/js/factories/export.js
+msgid "There has been an error with your export."
+msgstr ""
+
+#: cms/static/js/factories/export.js
+msgid "Yes, take me to the main course page"
+msgstr ""
+
+#: cms/static/js/factories/import.js
+msgid "There was an error during the upload process."
+msgstr ""
+
+#: cms/static/js/factories/import.js
+msgid "There was an error while unpacking the file."
+msgstr ""
+
+#: cms/static/js/factories/import.js
+msgid "There was an error while verifying the file you submitted."
+msgstr ""
+
+#: cms/static/js/factories/import.js
+msgid "There was an error while importing the new course to our database."
+msgstr ""
+
+#: cms/static/js/factories/import.js
+msgid "Your import has failed."
+msgstr ""
+
+#: cms/static/js/factories/import.js cms/static/js/factories/import.js
+#: cms/static/js/views/import.js cms/static/js/views/import.js.c
+msgid "Choose new file"
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid "A valid email address is required"
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid "You must enter a valid email address in order to add a new team member"
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid "Return and add email address"
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid "Already a course team member"
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid ""
+"{email} is already on the “{course}” team. If you're trying to add a new "
+"member, please double-check the email address you provided."
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid "Return to team listing"
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid "Error adding user"
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid "Are you sure?"
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid ""
+"Are you sure you want to delete {email} from the course team for “{course}”?"
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid "Error removing user"
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid "There was an error changing the user's role"
+msgstr ""
+
+#: cms/static/js/factories/manage_users.js
+msgid "Try Again"
+msgstr ""
+
+#: cms/static/js/factories/settings_advanced.js
+msgid "Hide Deprecated Settings"
+msgstr ""
+
+#: cms/static/js/factories/settings_advanced.js
+msgid "Show Deprecated Settings"
+msgstr ""
+
+#: cms/static/js/factories/textbooks.js
+#: cms/static/js/views/pages/group_configurations.js
+msgid "You have unsaved changes. Do you really want to leave this page?"
+msgstr ""
+
+#. Translators: This is the status of a video upload that is queued
+#. waiting for other uploads to complete
+#: cms/static/js/models/active_video_upload.js
+msgid "Queued"
+msgstr ""
+
+#. Translators: This is the status of an active video upload
+#. Translators: This is the status of an active video upload
+#: cms/static/js/models/active_video_upload.js cms/static/js/views/assets.js
+#: cms/static/js/views/previous_video_upload.js
+msgid "Uploading"
+msgstr ""
+
+#. Translators: This is the status of a video upload that has
+#. completed successfully
+#: cms/static/js/models/active_video_upload.js
+msgid "Upload completed"
+msgstr ""
+
+#. Translators: This is the status of a video upload that has failed
+#: cms/static/js/models/active_video_upload.js
+msgid "Upload failed"
 msgstr ""
 
 #: cms/static/js/models/course.js cms/static/js/models/section.js
@@ -3047,6 +3325,10 @@ msgstr ""
 #: cms/static/js/models/uploads.js
 msgid "or"
 msgstr "hoặc"
+
+#: cms/static/js/models/xblock_validation.js
+msgid "This component has validation issues."
+msgstr ""
 
 #: cms/static/js/models/settings/course_details.js
 msgid "The course must have an assigned start date."
@@ -3116,7 +3398,21 @@ msgid "Date Added"
 msgstr "Ngày Thêm Vào"
 
 #: cms/static/js/views/assets.js
-msgid "Uploading…"
+msgid "File {filename} exceeds maximum size of {maxFileSizeInMBs} MB"
+msgstr ""
+
+#: cms/static/js/views/assets.js
+msgid ""
+"Please follow the instructions here to upload a file elsewhere and link to "
+"it: {maxFileSizeRedirectUrl}"
+msgstr ""
+
+#: cms/static/js/views/assets.js
+msgid "Your file could not be uploaded"
+msgstr ""
+
+#: cms/static/js/views/assets.js
+msgid "Max file size exceeded"
 msgstr ""
 
 #: cms/static/js/views/assets.js
@@ -3124,12 +3420,12 @@ msgstr ""
 msgid "Choose File"
 msgstr ""
 
-#: cms/static/js/views/assets.js
+#: cms/static/js/views/assets.js cms/static/js/views/assets.js.c
 #: cms/templates/js/asset-upload-modal.underscore
 msgid "Upload New File"
 msgstr ""
 
-#: cms/static/js/views/assets.js
+#: cms/static/js/views/assets.js cms/static/js/views/assets.js.c
 msgid "Load Another File"
 msgstr ""
 
@@ -3207,8 +3503,12 @@ msgid "Deleting"
 msgstr "Đang xóa"
 
 #: cms/static/js/views/import.js
+msgid "Error importing course"
+msgstr ""
+
+#: cms/static/js/views/import.js
 msgid "There was an error with the upload"
-msgstr "Có lỗi trong quá trình tải lên"
+msgstr ""
 
 #: cms/static/js/views/import.js
 msgid ""
@@ -3217,10 +3517,6 @@ msgid ""
 msgstr ""
 "Định dạng tập tin không được hỗ trợ. Xin vui lòng tải lên một tập tin với "
 "phần mở rộng <code>tar.gz</code>."
-
-#: cms/static/js/views/metadata.js
-msgid "Upload File"
-msgstr ""
 
 #: cms/static/js/views/overview.js
 msgid "Collapse All Sections"
@@ -3270,13 +3566,36 @@ msgstr ""
 msgid "%(total_items)s total"
 msgstr ""
 
-#: cms/static/js/views/section_edit.js
-msgid "Your change could not be saved"
-msgstr "Thay đổi của bạn không thể lưu lại"
+#. Translators: This is the status for a video that the servers
+#. are currently processing
+#: cms/static/js/views/previous_video_upload.js
+msgid "In Progress"
+msgstr ""
 
-#: cms/static/js/views/section_edit.js
-msgid "Return and resolve this issue"
-msgstr "Quay lại và giải quyết vấn đề này"
+#. Translators: This is the status for a video that the servers
+#. have successfully processed
+#: cms/static/js/views/previous_video_upload.js
+msgid "Complete"
+msgstr ""
+
+#. Translators: This is the status for a video that the servers
+#. have failed to process
+#: cms/static/js/views/previous_video_upload.js
+msgid "Failed"
+msgstr ""
+
+#. Translators: This is the status for a video for which an invalid
+#. processing token was provided in the course settings
+#: cms/static/js/views/previous_video_upload.js
+msgid "Invalid Token"
+msgstr ""
+
+#. Translators: This is listed as the duration for a video
+#. that has not yet reached the point in its processing by
+#. the servers where its duration is determined.
+#: cms/static/js/views/previous_video_upload.js
+msgid "Pending"
+msgstr ""
 
 #: cms/static/js/views/show_textbook.js
 msgid "Delete “<%= name %>”?"
@@ -3337,6 +3656,13 @@ msgstr "Thiết lập"
 msgid "New %(component_type)s"
 msgstr ""
 
+#. Translators: This message will be added to the front of messages of type
+#. warning,
+#. e.g. "Warning: this component has not been configured yet".
+#: cms/static/js/views/xblock_validation.js
+msgid "Warning"
+msgstr ""
+
 #: cms/static/js/views/components/add_xblock.js
 #: cms/static/js/views/utils/xblock_utils.js
 msgid "Adding&hellip;"
@@ -3373,33 +3699,46 @@ msgstr ""
 msgid "Editing: %(title)s"
 msgstr "Đang chỉnh sửa: %(title)s"
 
+#: cms/static/js/views/modals/validation_error_modal.js
+msgid "Validation Error While Saving"
+msgstr ""
+
+#: cms/static/js/views/modals/validation_error_modal.js
+msgid "Undo Changes"
+msgstr ""
+
+#: cms/static/js/views/modals/validation_error_modal.js
+msgid "Change Manually"
+msgstr ""
+
 #: cms/static/js/views/pages/container.js
 msgid "Duplicating&hellip;"
 msgstr ""
 
 #: cms/static/js/views/pages/container_subviews.js
 msgid "Publishing&hellip;"
-msgstr ""
+msgstr "Xuất bản&hellip;"
 
 #: cms/static/js/views/pages/container_subviews.js
 #: cms/static/js/views/pages/container_subviews.js
-#: cms/templates/js/publish-xblock.underscore
 msgid "Discard Changes"
-msgstr ""
+msgstr "Xóa Thay Đổi"
 
 #: cms/static/js/views/pages/container_subviews.js
 msgid ""
 "Are you sure you want to revert to the last published version of the unit? "
 "You cannot undo this action."
 msgstr ""
+"Bạn chắc chắn muốn trở lại phiên bản trước của bài học? Bạn sẽ không thể "
+"hoàn tác bước này."
 
 #: cms/static/js/views/pages/container_subviews.js
 msgid "Discarding Changes&hellip;"
-msgstr ""
+msgstr "Xóa Thay đổi&hellip;"
 
 #: cms/static/js/views/pages/container_subviews.js
 msgid "Hiding from Students&hellip;"
-msgstr ""
+msgstr "Ẩn đổi với Học viên&hellip;"
 
 #: cms/static/js/views/pages/container_subviews.js
 msgid "Explicitly Hiding from Students&hellip;"
@@ -3412,7 +3751,7 @@ msgstr ""
 #: cms/static/js/views/pages/container_subviews.js
 #: cms/static/js/views/pages/container_subviews.js
 msgid "Make Visible to Students"
-msgstr ""
+msgstr "Hiện đối với Học Viên"
 
 #: cms/static/js/views/pages/container_subviews.js
 msgid ""
@@ -3423,10 +3762,6 @@ msgstr ""
 
 #: cms/static/js/views/pages/container_subviews.js
 msgid "Making Visible to Students&hellip;"
-msgstr ""
-
-#: cms/static/js/views/pages/group_configurations.js
-msgid "You have unsaved changes. Do you really want to leave this page?"
 msgstr ""
 
 #: cms/static/js/views/settings/advanced.js
@@ -3447,6 +3782,10 @@ msgid ""
 "Please note that validation of your policy key and value pairs is not "
 "currently in place yet. If you are having difficulties, please review your "
 "policy pairs."
+msgstr ""
+
+#: cms/static/js/views/settings/main.js
+msgid "%(hours)s:%(minutes)s (current UTC time)"
 msgstr ""
 
 #: cms/static/js/views/settings/main.js
@@ -3514,9 +3853,14 @@ msgstr ""
 msgid "Upload translation"
 msgstr ""
 
+#: cms/templates/js/previous-video-upload-list.underscore
+#: lms/templates/verify_student/enrollment_confirmation_step.underscore
+msgid "Status"
+msgstr ""
+
 #: common/templates/js/image-modal.underscore
 msgid "Large"
-msgstr ""
+msgstr "Lớn"
 
 #: common/templates/js/image-modal.underscore
 msgid "Zoom In"
@@ -3526,9 +3870,665 @@ msgstr "Nhỏ lại"
 msgid "Zoom Out"
 msgstr "phóng to ra"
 
+#: common/templates/js/discussion/thread-show.underscore
+msgid "This post is visible only to %(group_name)s."
+msgstr ""
+
+#: common/templates/js/discussion/thread-show.underscore
+msgid "This post is visible to everyone."
+msgstr ""
+
+#: common/templates/js/discussion/thread-show.underscore
+msgid "%(post_type)s posted %(time_ago)s by %(author)s"
+msgstr ""
+
+#: common/templates/js/discussion/thread-show.underscore
+msgid "Pinned"
+msgstr ""
+
+#: common/templates/js/discussion/thread-show.underscore
+msgid "Reported"
+msgstr ""
+
+#: common/templates/js/discussion/thread-show.underscore
+msgid "Closed"
+msgstr ""
+
+#: common/templates/js/discussion/thread-show.underscore
+msgid "(this post is about %(courseware_title_linked)s)"
+msgstr ""
+
+#: lms/templates/dashboard/donation.underscore
+msgid "Donate"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/add-cohort-form.underscore
+msgid "Add a New Cohort Group"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/add-cohort-form.underscore
+msgid "New Cohort Name"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/add-cohort-form.underscore
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid "(Required Field)"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/add-cohort-form.underscore
+msgid "Enter Your New Cohort Group's Name"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid "(contains %(student_count)s student)"
+msgid_plural "(contains %(student_count)s students)"
+msgstr[0] ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid ""
+"Students are added to this group only when you provide their email addresses"
+" or usernames on this page."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid "What does this mean?"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid "Students are added to this group automatically."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid "Edit settings in Studio"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid "Add students to this cohort group"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid ""
+"Note: Students can only be in one cohort group. Adding students to this "
+"group overrides any previous group assignment."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid ""
+"Enter email addresses and/or usernames separated by new lines or commas for "
+"students to add. *"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid "e.g. johndoe@example.com, JaneDoe, joeydoe@example.com"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid ""
+"You will not get notification for emails that bounce, so please double-check"
+" spelling."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-editor.underscore
+msgid "Add Students"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-selector.underscore
+msgid "Select a cohort group"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohort-selector.underscore
+msgid "%(cohort_name)s (%(user_count)s)"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohorts.underscore
+msgid "Cohort Management"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohorts.underscore
+msgid "Assign students to cohort groups manually"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohorts.underscore
+msgid "Select a cohort group to manage"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohorts.underscore
+msgid "View Cohort Group"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohorts.underscore
+msgid "Assign students to cohort groups by uploading a CSV file"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/cohorts.underscore
+msgid ""
+"To review student cohort group assignments or see the results of uploading a"
+" CSV file, download course profile information or cohort results on "
+"%(link_start)s the Data Download page. %(link_end)s"
+msgstr ""
+
+#: lms/templates/student_account/access.underscore
+msgid "Welcome!"
+msgstr ""
+
+#: lms/templates/student_account/access.underscore
+msgid "Log in or register to take courses from the world's best universities."
+msgstr ""
+
+#: lms/templates/student_account/access.underscore
+msgid ""
+"Sorry, we're having some technical problems. Wait a few minutes and try "
+"again."
+msgstr ""
+
+#: lms/templates/student_account/access.underscore
+#: lms/templates/student_account/access.underscore
+msgid "I am a new user"
+msgstr ""
+
+#: lms/templates/student_account/access.underscore
+msgid "I am a returning user"
+msgstr ""
+
+#: lms/templates/student_account/account.underscore
+msgid "New Address"
+msgstr ""
+
+#: lms/templates/student_account/account.underscore
+msgid "Password"
+msgstr ""
+
+#: lms/templates/student_account/account.underscore
+msgid "Change My Email Address"
+msgstr ""
+
+#: lms/templates/student_account/account.underscore
+#: lms/templates/student_account/password_reset.underscore
+msgid "Reset Password"
+msgstr ""
+
+#: lms/templates/student_account/form_field.underscore
+msgid "Forgot password?"
+msgstr ""
+
+#: lms/templates/student_account/login.underscore
+msgid ""
+"You've successfully logged into %(currentProvider)s, but your "
+"%(currentProvider)s account isn't linked with an %(platformName)s account. "
+"To link your accounts, go to your %(platformName)s dashboard."
+msgstr ""
+
+#: lms/templates/student_account/login.underscore
+msgid "We couldn't log you in."
+msgstr ""
+
+#: lms/templates/student_account/login.underscore
+msgid "Log in"
+msgstr ""
+
+#: lms/templates/student_account/login.underscore
+msgid "Log in using %(name)s"
+msgstr ""
+
+#: lms/templates/student_account/password_reset.underscore
+msgid ""
+"Enter the email address you used to create your account. We'll send you a "
+"link you can use to reset your password."
+msgstr ""
+
+#: lms/templates/student_account/password_reset.underscore
+msgid "An error occurred."
+msgstr ""
+
+#: lms/templates/student_account/password_reset.underscore
+msgid "Reset password"
+msgstr ""
+
+#: lms/templates/student_account/password_reset.underscore
+msgid "Password Reset Email Sent"
+msgstr ""
+
+#: lms/templates/student_account/password_reset.underscore
+msgid ""
+"We've sent instructions for resetting your password to the email address you"
+" provided."
+msgstr ""
+
+#: lms/templates/student_account/register.underscore
+msgid "You've successfully logged into %(currentProvider)s."
+msgstr ""
+
+#: lms/templates/student_account/register.underscore
+msgid ""
+"We just need a little more information before you start learning with "
+"%(platformName)s."
+msgstr ""
+
+#: lms/templates/student_account/register.underscore
+msgid "Register using %(name)s"
+msgstr ""
+
+#: lms/templates/student_account/register.underscore
+msgid "We couldn't complete your registration."
+msgstr ""
+
+#: lms/templates/student_account/register.underscore
+msgid "Register"
+msgstr ""
+
+#: lms/templates/student_account/register.underscore
+msgid "Required field"
+msgstr ""
+
+#: lms/templates/student_profile/profile.underscore
+msgid "Full Name"
+msgstr ""
+
+#: lms/templates/student_profile/profile.underscore
+msgid "Preferred Language"
+msgstr ""
+
+#: lms/templates/student_profile/profile.underscore
+msgid "Update Profile"
+msgstr ""
+
+#: lms/templates/verify_student/enrollment_confirmation_step.underscore
+msgid "Congratulations! You are now verified on %(platformName)s!"
+msgstr ""
+
+#: lms/templates/verify_student/enrollment_confirmation_step.underscore
+msgid "You are now enrolled as a verified student for:"
+msgstr ""
+
+#: lms/templates/verify_student/enrollment_confirmation_step.underscore
+msgid "A list of courses you have just enrolled in as a verified student"
+msgstr ""
+
+#: lms/templates/verify_student/enrollment_confirmation_step.underscore
+msgid "Course"
+msgstr ""
+
+#: lms/templates/verify_student/enrollment_confirmation_step.underscore
+msgid "Starts: %(start)s"
+msgstr ""
+
+#: lms/templates/verify_student/enrollment_confirmation_step.underscore
+msgid "Explore your course!"
+msgstr ""
+
+#: lms/templates/verify_student/enrollment_confirmation_step.underscore
+msgid "Go to your Dashboard"
+msgstr ""
+
+#: lms/templates/verify_student/enrollment_confirmation_step.underscore
+msgid "Verified Status"
+msgstr ""
+
+#: lms/templates/verify_student/enrollment_confirmation_step.underscore
+msgid ""
+"Thank you for submitting your identification photos, we will review them "
+"soon. If there is a problem with any of the items, we will contact you to "
+"resubmit. You can now enroll in any of the verified certificate courses for "
+"one year without having to re-verify."
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+msgid "Take Your Photo"
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+msgid ""
+"Use your webcam to take a picture of your face so we can match it with the "
+"picture on your ID."
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid "Tips on taking a successful photo"
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+msgid "Make sure your face is well-lit"
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+msgid "Be sure your entire face is inside the frame"
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+msgid ""
+"Once in position, use the camera button %(icon)s to capture your picture"
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+msgid "Can we match the photo you took with the one on your ID?"
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid "Use the retake photo button if you are not pleased with your photo"
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid "Common Questions"
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid "Why does %(platformName)s need my photo?"
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+msgid ""
+"As part of the verification process, we need your photo to confirm your "
+"identity."
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid "What does %(platformName)s do with this picture?"
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid ""
+"We encrypt it and send it to our secure authorization service for review. We"
+" use the highest levels of security and do not save the photo or information"
+" anywhere once the match has been completed."
+msgstr ""
+
+#: lms/templates/verify_student/face_photo_step.underscore
+#: lms/templates/verify_student/id_photo_step.underscore
+#: lms/templates/verify_student/intro_step.underscore
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Next: %(nextStepTitle)s"
+msgstr ""
+
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid "Take a Photo of Your ID"
+msgstr ""
+
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid ""
+"Use your webcam to take a picture of your ID so we can match it with your "
+"photo and the name on your account."
+msgstr ""
+
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid ""
+"You need an ID with your name and photo. A driver's license, passport, or "
+"other government-issued IDs are all acceptable."
+msgstr ""
+
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid "Ensure that you can see your photo and read your name"
+msgstr ""
+
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid "Make sure your ID is well-lit"
+msgstr ""
+
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid "Once in position, use the camera button %(icon)s to capture your ID"
+msgstr ""
+
+#: lms/templates/verify_student/id_photo_step.underscore
+msgid ""
+"We need to match your ID with your photo and name to confirm your identity."
+msgstr ""
+
+#: lms/templates/verify_student/intro_step.underscore
+msgid "Thanks for returning to verify your ID in: %(courseName)s"
+msgstr ""
+
+#: lms/templates/verify_student/intro_step.underscore
+#: lms/templates/verify_student/intro_step.underscore
+#: lms/templates/verify_student/make_payment_step.underscore
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Activate Your Account"
+msgstr ""
+
+#: lms/templates/verify_student/intro_step.underscore
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid "Check your email"
+msgstr ""
+
+#: lms/templates/verify_student/intro_step.underscore
+msgid ""
+"You need to activate your account before you can register for courses. Check"
+" your inbox for an activation email."
+msgstr ""
+
+#: lms/templates/verify_student/intro_step.underscore
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Photo ID"
+msgstr ""
+
+#: lms/templates/verify_student/intro_step.underscore
+msgid ""
+"A driver's license, passport, or government-issued ID with your name and "
+"picture"
+msgstr ""
+
+#: lms/templates/verify_student/intro_step.underscore
+#: lms/templates/verify_student/make_payment_step.underscore
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Webcam"
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid "You are enrolling in: %(courseName)s"
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid "You are upgrading your enrollment for: %(courseName)s"
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid ""
+"We've already verified your identity through the photos of you and your ID "
+"you provided earlier. You can now pay and complete registration."
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid "Choose your contribution for your Verified Track upgrade"
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid "Enter Your Contribution Level"
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid ""
+"Please confirm your contribution for this course (min. $ %(minPrice)s "
+"%(currency)s)"
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid "Your Course Total"
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid "To complete your enrollment, you will need to pay:"
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid ""
+"You can pay now even if you don't have the following items available, but "
+"you will need to have these by %(date)s to qualify to earn a Verified "
+"Certificate."
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid ""
+"You can pay now even if you don't have the following items available, but "
+"you will need to have these to qualify to earn a Verified Certificate."
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid ""
+"You need to activate your account before you can enroll in courses. Check "
+"your inbox for an activation email."
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid "Government-issued Photo ID"
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid "Next: Make payment"
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid "Continue to payment"
+msgstr ""
+
+#: lms/templates/verify_student/make_payment_step.underscore
+msgid "Activate your account"
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Thank you! We have received your payment for %(courseName)s"
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid ""
+"Please print this page for your records; it serves as your receipt. You will"
+" also receive an email with the same information."
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Order No."
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Date"
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Total"
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Please Note"
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Items with strikethough have been refunded."
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Billed To"
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "No receipt available."
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Next Step: Confirm your identity"
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Check your email."
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid ""
+"A driver's license, passport, or government-issued ID with your name and "
+"picture."
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid ""
+"If you don't confirm your identity now, you can go to the dashboard to "
+"explore your course and %(platformName)s will remind you later."
+msgstr ""
+
+#: lms/templates/verify_student/payment_confirmation_step.underscore
+msgid "Want to confirm your identity later?"
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Review your photos"
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Make sure we can verify your identity from the photos below."
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Photo requirements:"
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Does the photo of you show your whole face?"
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Does the photo of you match your ID photo?"
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Is your name on your ID readable?"
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Does the name on your ID match your account name: %(fullName)s?"
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Edit your name"
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "You should change the name on your account to match your ID."
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Photos don't meet the requirements?"
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Retake your photos"
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Before proceeding, please confirm that your details match"
+msgstr ""
+
+#: lms/templates/verify_student/review_photos_step.underscore
+msgid "Confirm"
+msgstr ""
+
+#: lms/templates/verify_student/webcam_photo.underscore
+msgid ""
+"Don't see your picture? Make sure to allow your browser to use your camera "
+"when it asks for permission."
+msgstr ""
+
+#: lms/templates/verify_student/webcam_photo.underscore
+msgid "Retake photo"
+msgstr ""
+
+#: lms/templates/verify_student/webcam_photo.underscore
+msgid "Take photo"
+msgstr ""
+
+#: cms/templates/js/active-video-upload-list.underscore
+msgid "Drag and drop or click here to upload video files."
+msgstr ""
+
+#: cms/templates/js/active-video-upload.underscore
+msgid "status"
+msgstr ""
+
 #: cms/templates/js/add-xblock-component-menu-problem.underscore
 msgid "Common Problem Types"
-msgstr ""
+msgstr "Loại Câu Hỏi Thường Gặp"
 
 #: cms/templates/js/add-xblock-component.underscore
 msgid "Add New Component"
@@ -3930,6 +4930,18 @@ msgstr ""
 msgid "Page number"
 msgstr ""
 
+#: cms/templates/js/previous-video-upload-list.underscore
+msgid "Previous Uploads"
+msgstr ""
+
+#: cms/templates/js/previous-video-upload-list.underscore
+msgid "Duration"
+msgstr ""
+
+#: cms/templates/js/previous-video-upload-list.underscore
+msgid "Video ID"
+msgstr ""
+
 #: cms/templates/js/publish-history.underscore
 msgid "Never published"
 msgstr ""
@@ -4058,6 +5070,18 @@ msgstr ""
 msgid "File upload succeeded"
 msgstr ""
 
+#: cms/templates/js/validation-error-modal.underscore
+msgid ""
+"There were {strong_start}{num_errors} validation error(s){strong_end} while "
+"trying to save the course setting(s) in the database."
+msgstr ""
+
+#: cms/templates/js/validation-error-modal.underscore
+msgid ""
+"Please check the following validation feedbacks and reflect them in your "
+"course settings:"
+msgstr ""
+
 #: cms/templates/js/xblock-string-field-editor.underscore
 #: cms/templates/js/xblock-string-field-editor.underscore
 msgid "Edit the name"
@@ -4099,6 +5123,10 @@ msgstr ""
 
 #: cms/templates/js/mock/mock-group-configuration-page.underscore
 msgid "New Group Configuration"
+msgstr ""
+
+#: cms/templates/js/video/metadata-translations-item.underscore
+msgid "Remove"
 msgstr ""
 
 #: cms/templates/js/video/transcripts/metadata-videolist-entry.underscore
