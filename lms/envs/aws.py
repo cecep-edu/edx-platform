@@ -435,8 +435,27 @@ ORA2_FILE_PREFIX = ENV_TOKENS.get("ORA2_FILE_PREFIX", ORA2_FILE_PREFIX)
 MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED = ENV_TOKENS.get("MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED", 5)
 MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS = ENV_TOKENS.get("MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS", 15 * 60)
 
-MICROSITE_CONFIGURATION = ENV_TOKENS.get('MICROSITE_CONFIGURATION', {})
-MICROSITE_ROOT_DIR = path(ENV_TOKENS.get('MICROSITE_ROOT_DIR', ''))
+#MICROSITE_CONFIGURATION = ENV_TOKENS.get('MICROSITE_CONFIGURATION', {})
+#MICROSITE_ROOT_DIR = path(ENV_TOKENS.get('MICROSITE_ROOT_DIR', ''))
+MICROSITE_CONFIGURATION = {
+"cec": {
+    "domain_prefix": "cec",
+    "university": "CentroEducacionContinua",
+    "platform_name": "Centro de Educacion Continua",
+    "logo_image_url": "cec/images/header-logo.png",
+    "email_from_address": "cec@iaen.edu.ec",
+    "payment_support_email": "cec@iaen.edu.ec",
+    "ENABLE_MKTG_SITE": False,
+    "SITE_NAME": "cec.localhost",
+    "course_org_filter": "CentroEducacionContinua", "course_about_show_social_links": False,
+    "css_overrides_file": "cec/css/cec.css",
+    "show_partners": False,
+    "show_homepage_promo_video": True,
+    "homepage_promo_video_youtube_id": "MJZN700YS0o", "course_index_overlay_text": "Centro de Educacion Continua", "course_index_overlay_logo_file": "cec/images/header-logo.png", "homepage_overlay_html": "<h1>CURSOS DEL CENTRO DE EDUCACION CONTINUA</h1>", "ALWAYS_REDIRECT_HOMEPAGE_TO_DASHBOARD_FOR_AUTHENTICATED_USER": False,
+    }
+}
+
+MICROSITE_ROOT_DIR = COMMON_ROOT / 'test' / 'cec'
 
 #### PASSWORD POLICY SETTINGS #####
 PASSWORD_MIN_LENGTH = ENV_TOKENS.get("PASSWORD_MIN_LENGTH")
