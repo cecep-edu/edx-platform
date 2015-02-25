@@ -17,6 +17,7 @@ from django.test.utils import override_settings
 
 from util.testing import UrlResetMixin
 from third_party_auth.tests.testutil import simulate_running_pipeline
+from embargo.test_utils import restrict_course
 from openedx.core.djangoapps.user_api.api import account as account_api
 from openedx.core.djangoapps.user_api.api import profile as profile_api
 from xmodule.modulestore.tests.django_utils import (
@@ -24,9 +25,6 @@ from xmodule.modulestore.tests.django_utils import (
 )
 from xmodule.modulestore.tests.factories import CourseFactory
 from student.tests.factories import CourseModeFactory
-
-
-MODULESTORE_CONFIG = mixed_store_config(settings.COMMON_TEST_DATA_ROOT, {}, include_xml=False)
 
 
 @ddt.ddt
@@ -377,13 +375,16 @@ class StudentAccountUpdateTest(UrlResetMixin, TestCase):
 
 
 @ddt.ddt
-@override_settings(MODULESTORE=MODULESTORE_CONFIG)
-class StudentAccountLoginAndRegistrationTest(ModuleStoreTestCase):
+class StudentAccountLoginAndRegistrationTest(UrlResetMixin, ModuleStoreTestCase):
     """ Tests for the student account views that update the user's account information. """
 
     USERNAME = "bob"
     EMAIL = "bob@example.com"
     PASSWORD = "password"
+
+    @mock.patch.dict(settings.FEATURES, {'ENABLE_COUNTRY_ACCESS': True})
+    def setUp(self):
+        super(StudentAccountLoginAndRegistrationTest, self).setUp('embargo')
 
     @ddt.data(
         ("account_login", "login"),
@@ -438,14 +439,14 @@ class StudentAccountLoginAndRegistrationTest(ModuleStoreTestCase):
             {
                 "name": "Facebook",
                 "iconClass": "fa-facebook",
-                "loginUrl": self._third_party_login_url("facebook", "account_login"),
-                "registerUrl": self._third_party_login_url("facebook", "account_register")
+                "loginUrl": self._third_party_login_url("facebook", "login"),
+                "registerUrl": self._third_party_login_url("facebook", "register")
             },
             {
                 "name": "Google",
                 "iconClass": "fa-google-plus",
-                "loginUrl": self._third_party_login_url("google-oauth2", "account_login"),
-                "registerUrl": self._third_party_login_url("google-oauth2", "account_register")
+                "loginUrl": self._third_party_login_url("google-oauth2", "login"),
+                "registerUrl": self._third_party_login_url("google-oauth2", "register")
             }
         ]
         self._assert_third_party_auth_data(response, current_provider, expected_providers)
@@ -472,12 +473,12 @@ class StudentAccountLoginAndRegistrationTest(ModuleStoreTestCase):
                 "name": "Facebook",
                 "iconClass": "fa-facebook",
                 "loginUrl": self._third_party_login_url(
-                    "facebook", "account_login",
+                    "facebook", "login",
                     course_id=unicode(course.id),
                     redirect_url=course_modes_choose_url
                 ),
                 "registerUrl": self._third_party_login_url(
-                    "facebook", "account_register",
+                    "facebook", "register",
                     course_id=unicode(course.id),
                     redirect_url=course_modes_choose_url
                 )
@@ -486,12 +487,12 @@ class StudentAccountLoginAndRegistrationTest(ModuleStoreTestCase):
                 "name": "Google",
                 "iconClass": "fa-google-plus",
                 "loginUrl": self._third_party_login_url(
-                    "google-oauth2", "account_login",
+                    "google-oauth2", "login",
                     course_id=unicode(course.id),
                     redirect_url=course_modes_choose_url
                 ),
                 "registerUrl": self._third_party_login_url(
-                    "google-oauth2", "account_register",
+                    "google-oauth2", "register",
                     course_id=unicode(course.id),
                     redirect_url=course_modes_choose_url
                 )
@@ -520,12 +521,12 @@ class StudentAccountLoginAndRegistrationTest(ModuleStoreTestCase):
                 "name": "Facebook",
                 "iconClass": "fa-facebook",
                 "loginUrl": self._third_party_login_url(
-                    "facebook", "account_login",
+                    "facebook", "login",
                     course_id=unicode(course.id),
                     redirect_url=shoppingcart_url
                 ),
                 "registerUrl": self._third_party_login_url(
-                    "facebook", "account_register",
+                    "facebook", "register",
                     course_id=unicode(course.id),
                     redirect_url=shoppingcart_url
                 )
@@ -534,12 +535,12 @@ class StudentAccountLoginAndRegistrationTest(ModuleStoreTestCase):
                 "name": "Google",
                 "iconClass": "fa-google-plus",
                 "loginUrl": self._third_party_login_url(
-                    "google-oauth2", "account_login",
+                    "google-oauth2", "login",
                     course_id=unicode(course.id),
                     redirect_url=shoppingcart_url
                 ),
                 "registerUrl": self._third_party_login_url(
-                    "google-oauth2", "account_register",
+                    "google-oauth2", "register",
                     course_id=unicode(course.id),
                     redirect_url=shoppingcart_url
                 )
@@ -549,6 +550,70 @@ class StudentAccountLoginAndRegistrationTest(ModuleStoreTestCase):
         # Verify that the login page contains the correct provider URLs
         response = self.client.get(reverse("account_login"), {"course_id": unicode(course.id)})
         self._assert_third_party_auth_data(response, None, expected_providers)
+
+    @mock.patch.dict(settings.FEATURES, {'ENABLE_COUNTRY_ACCESS': True})
+    def test_third_party_auth_enrollment_embargo(self):
+        course = CourseFactory.create()
+
+        # Start the pipeline attempting to enroll in a restricted course
+        with restrict_course(course.id) as redirect_url:
+            response = self.client.get(reverse("account_login"), {"course_id": unicode(course.id)})
+
+            # Expect that the course ID has been removed from the
+            # login URLs (so the user won't be enrolled) and
+            # the ?next param sends users to the blocked message.
+            expected_providers = [
+                {
+                    "name": "Facebook",
+                    "iconClass": "fa-facebook",
+                    "loginUrl": self._third_party_login_url(
+                        "facebook", "login",
+                        course_id=unicode(course.id),
+                        redirect_url=redirect_url
+                    ),
+                    "registerUrl": self._third_party_login_url(
+                        "facebook", "register",
+                        course_id=unicode(course.id),
+                        redirect_url=redirect_url
+                    )
+                },
+                {
+                    "name": "Google",
+                    "iconClass": "fa-google-plus",
+                    "loginUrl": self._third_party_login_url(
+                        "google-oauth2", "login",
+                        course_id=unicode(course.id),
+                        redirect_url=redirect_url
+                    ),
+                    "registerUrl": self._third_party_login_url(
+                        "google-oauth2", "register",
+                        course_id=unicode(course.id),
+                        redirect_url=redirect_url
+                    )
+                }
+            ]
+            self._assert_third_party_auth_data(response, None, expected_providers)
+
+    @override_settings(SITE_NAME=settings.MICROSITE_TEST_HOSTNAME)
+    def test_microsite_uses_old_login_page(self):
+        # Retrieve the login page from a microsite domain
+        # and verify that we're served the old page.
+        resp = self.client.get(
+            reverse("account_login"),
+            HTTP_HOST=settings.MICROSITE_TEST_HOSTNAME
+        )
+        self.assertContains(resp, "Log into your Test Microsite Account")
+        self.assertContains(resp, "login-form")
+
+    def test_microsite_uses_old_register_page(self):
+        # Retrieve the register page from a microsite domain
+        # and verify that we're served the old page.
+        resp = self.client.get(
+            reverse("account_register"),
+            HTTP_HOST=settings.MICROSITE_TEST_HOSTNAME
+        )
+        self.assertContains(resp, "Register for Test Microsite")
+        self.assertContains(resp, "register-form")
 
     def _assert_third_party_auth_data(self, response, current_provider, providers):
         """Verify that third party auth info is rendered correctly in a DOM data attribute. """

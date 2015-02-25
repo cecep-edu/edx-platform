@@ -285,6 +285,15 @@ class CourseFields(object):
                  default=DEFAULT_START_DATE,
                  scope=Scope.settings)
     end = Date(help="Date that this class ends", scope=Scope.settings)
+    cosmetic_display_price = Integer(
+        display_name=_("Cosmetic Course Display Price"),
+        help=_(
+            "The cost displayed to students for enrolling in the course. If a paid course registration price is "
+            "set by an administrator in the database, that price will be displayed instead of this one."
+        ),
+        default=0,
+        scope=Scope.settings,
+    )
     advertised_start = String(
         display_name=_("Course Advertised Start Date"),
         help=_(
@@ -1401,13 +1410,13 @@ class CourseDescriptor(CourseFields, SequenceDescriptor):
             blackout_periods = [(date_proxy.from_json(start),
                                  date_proxy.from_json(end))
                                 for start, end
-                                in self.discussion_blackouts]
+                                in filter(None, self.discussion_blackouts)]
             now = datetime.now(UTC())
             for start, end in blackout_periods:
                 if start <= now <= end:
                     return False
         except:
-            log.exception("Error parsing discussion_blackouts for course {0}".format(self.id))
+            log.exception("Error parsing discussion_blackouts %s for course %s", self.discussion_blackouts, self.id)
 
         return True
 

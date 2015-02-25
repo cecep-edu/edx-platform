@@ -47,6 +47,14 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 DEFAULT_FILE_STORAGE = ''#'storages.backends.s3boto.S3BotoStorage'
 MEDIA_ROOT = '/edx/var/edxapp/uploads'
 
+# IMPORTANT: With this enabled, the server must always be behind a proxy that
+# strips the header HTTP_X_FORWARDED_PROTO from client requests. Otherwise,
+# a user can fool our server into thinking it was an https connection.
+# See
+# https://docs.djangoproject.com/en/dev/ref/settings/#secure-proxy-ssl-header
+# for other warnings.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 ###################################### CELERY  ################################
 
 # Don't use a connection pool, since connections are dropped by ELB.
@@ -315,3 +323,11 @@ VIDEO_UPLOAD_PIPELINE = ENV_TOKENS.get('VIDEO_UPLOAD_PIPELINE', VIDEO_UPLOAD_PIP
 #date format the api will be formatting the datetime values
 API_DATE_FORMAT = '%Y-%m-%d'
 API_DATE_FORMAT = ENV_TOKENS.get('API_DATE_FORMAT', API_DATE_FORMAT)
+
+# Video Caching. Pairing country codes with CDN URLs.
+# Example: {'CN': 'http://api.xuetangx.com/edx/video?s3_url='}
+VIDEO_CDN_URL = ENV_TOKENS.get('VIDEO_CDN_URL', {})
+
+if FEATURES['ENABLE_COURSEWARE_INDEX']:
+    # Use ElasticSearch for the search engine
+    SEARCH_ENGINE = "search.elastic.ElasticSearchEngine"

@@ -25,7 +25,6 @@ from courseware.models import StudentModule
 from lms.djangoapps.lms_xblock.field_data import LmsFieldData
 from lms.djangoapps.lms_xblock.runtime import LmsModuleSystem, unquote_slashes, quote_slashes
 from lms.djangoapps.lms_xblock.models import XBlockAsidesConfig
-from .module_utils import yield_dynamic_descriptor_descendents
 from edxmako.shortcuts import render_to_string
 from eventtracking import tracker
 from psychometrics.psychoanalyze import make_psychometrics_data_update_handler
@@ -59,7 +58,8 @@ from util.sandboxing import can_execute_unsafe_code, get_python_lib_zip
 if settings.FEATURES.get('MILESTONES_APP', False):
     from milestones import api as milestones_api
     from milestones.exceptions import InvalidMilestoneRelationshipTypeException
-    from util.milestones_helpers import serialize_user
+    from util.milestones_helpers import serialize_user, calculate_entrance_exam_score
+    from util.module_utils import yield_dynamic_descriptor_descendents
 
 log = logging.getLogger(__name__)
 
@@ -382,7 +382,21 @@ def get_module_system_for_user(user, field_data_cache,
             request_token=request_token,
         )
 
-    def _fulfill_content_milestones(course_key, content_key, user_id):  # pylint: disable=unused-argument
+    def _calculate_entrance_exam_score(user, course_descriptor):
+        """
+        Internal helper to calculate a user's score for a course's entrance exam
+        """
+        exam_key = UsageKey.from_string(course_descriptor.entrance_exam_id)
+        exam_descriptor = modulestore().get_item(exam_key)
+        exam_module_generators = yield_dynamic_descriptor_descendents(
+            exam_descriptor,
+            inner_get_module
+        )
+        exam_modules = [module for module in exam_module_generators]
+        exam_score = calculate_entrance_exam_score(user, course_descriptor, exam_modules)
+        return exam_score
+
+    def _fulfill_content_milestones(user, course_key, content_key):
         """
         Internal helper to handle milestone fulfillments for the specified content module
         """
@@ -395,30 +409,9 @@ def get_module_system_for_user(user, field_data_cache,
             entrance_exam_enabled = getattr(course, 'entrance_exam_enabled', False)
             in_entrance_exam = getattr(content, 'in_entrance_exam', False)
             if entrance_exam_enabled and in_entrance_exam:
-                exam_key = UsageKey.from_string(course.entrance_exam_id)
-                exam_descriptor = modulestore().get_item(exam_key)
-                exam_modules = yield_dynamic_descriptor_descendents(
-                    exam_descriptor,
-                    inner_get_module
-                )
-                ignore_categories = ['course', 'chapter', 'sequential', 'vertical']
-                module_pcts = []
-                exam_pct = 0
-                for module in exam_modules:
-                    if module.graded and module.category not in ignore_categories:
-                        module_pct = 0
-                        try:
-                            student_module = StudentModule.objects.get(
-                                module_state_key=module.scope_ids.usage_id,
-                                student_id=user_id
-                            )
-                            if student_module.max_grade:
-                                module_pct = student_module.grade / student_module.max_grade
-                        except StudentModule.DoesNotExist:
-                            pass
-                        module_pcts.append(module_pct)
-                exam_pct = sum(module_pcts) / float(len(module_pcts))
+                exam_pct = _calculate_entrance_exam_score(user, course)
                 if exam_pct >= course.entrance_exam_minimum_score_pct:
+                    exam_key = UsageKey.from_string(course.entrance_exam_id)
                     relationship_types = milestones_api.get_milestone_relationship_types()
                     content_milestones = milestones_api.get_course_content_milestones(
                         course_key,
@@ -426,7 +419,7 @@ def get_module_system_for_user(user, field_data_cache,
                         relationship=relationship_types['FULFILLS']
                     )
                     # Add each milestone to the user's set...
-                    user = {'id': user_id}
+                    user = {'id': user.id}
                     for milestone in content_milestones:
                         milestones_api.add_user_milestone(user, milestone)
 
@@ -470,9 +463,9 @@ def get_module_system_for_user(user, field_data_cache,
         # thanks to the updated grading information that was just submitted
         if settings.FEATURES.get('MILESTONES_APP', False):
             _fulfill_content_milestones(
+                user,
                 course_id,
                 descriptor.location,
-                user_id
             )
 
     def publish(block, event_type, event):
@@ -598,6 +591,8 @@ def get_module_system_for_user(user, field_data_cache,
 
     field_data = LmsFieldData(descriptor._field_data, student_data)  # pylint: disable=protected-access
 
+    user_is_staff = has_access(user, u'staff', descriptor.location, course_id)
+
     system = LmsModuleSystem(
         track_function=track_function,
         render_template=render_to_string,
@@ -644,10 +639,10 @@ def get_module_system_for_user(user, field_data_cache,
             'i18n': ModuleI18nService(),
             'fs': xblock.reference.plugins.FSService(),
             'field-data': field_data,
-            'user': DjangoXBlockUserService(user),
+            'user': DjangoXBlockUserService(user, user_is_staff=user_is_staff),
         },
         get_user_role=lambda: get_user_role(user, course_id),
-        descriptor_runtime=descriptor.runtime,
+        descriptor_runtime=descriptor._runtime,  # pylint: disable=protected-access
         rebind_noauth_module_to_user=rebind_noauth_module_to_user,
         user_location=user_location,
         request_token=request_token,
@@ -668,7 +663,7 @@ def get_module_system_for_user(user, field_data_cache,
             make_psychometrics_data_update_handler(course_id, user, descriptor.location)
         )
 
-    system.set(u'user_is_staff', has_access(user, u'staff', descriptor.location, course_id))
+    system.set(u'user_is_staff', user_is_staff)
     system.set(u'user_is_admin', has_access(user, u'staff', 'global'))
 
     # make an ErrorDescriptor -- assuming that the descriptor's system is ok

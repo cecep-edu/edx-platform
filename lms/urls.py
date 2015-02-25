@@ -10,6 +10,8 @@ from microsite_configuration import microsite
 if settings.DEBUG or settings.FEATURES.get('ENABLE_DJANGO_ADMIN_SITE'):
     admin.autodiscover()
 
+# Use urlpatterns formatted as within the Django docs with first parameter "stuck" to the open parenthesis
+# pylint: disable=bad-continuation
 urlpatterns = ('',  # nopep8
     # certificate view
     url(r'^update_certificate$', 'certificates.views.update_certificate'),
@@ -18,8 +20,6 @@ urlpatterns = ('',  # nopep8
     url(r'^dashboard$', 'student.views.dashboard', name="dashboard"),
     url(r'^login_ajax$', 'student.views.login_user', name="login"),
     url(r'^login_ajax/(?P<error>[^/]*)$', 'student.views.login_user'),
-    url(r'^login$', 'student.views.signin_user', name="signin_user"),
-    url(r'^register$', 'student.views.register_user', name="register_user"),
 
     url(r'^admin_dashboard$', 'dashboard.views.dashboard'),
 
@@ -33,7 +33,6 @@ urlpatterns = ('',  # nopep8
     url(r'^segmentio/event$', 'track.views.segmentio.segmentio_event'),
     url(r'^t/(?P<template>[^/]*)$', 'static_template_view.views.index'),   # TODO: Is this used anymore? What is STATIC_GRAB?
 
-    url(r'^accounts/login$', 'student.views.accounts_login', name="accounts_login"),
     url(r'^accounts/manage_user_standing', 'student.views.manage_user_standing',
         name='manage_user_standing'),
     url(r'^accounts/disable_account_ajax$', 'student.views.disable_account_ajax',
@@ -79,7 +78,30 @@ urlpatterns = ('',  # nopep8
     # CourseInfo API RESTful endpoints
     url(r'^api/course/details/v0/', include('course_about.urls')),
 
+    # Courseware search endpoints
+    url(r'^search/', include('search.urls')),
+
+    # Course content API
+    url(r'^api/course_structure/', include('course_structure_api.urls', namespace='course_structure_api')),
 )
+
+if settings.FEATURES["ENABLE_COMBINED_LOGIN_REGISTRATION"]:
+    # Backwards compatibility with old URL structure, but serve the new views
+    urlpatterns += (
+        url(r'^login$', 'student_account.views.login_and_registration_form',
+            {'initial_mode': 'login'}, name="signin_user"),
+        url(r'^register$', 'student_account.views.login_and_registration_form',
+            {'initial_mode': 'register'}, name="register_user"),
+        url(r'^accounts/login$', 'student_account.views.login_and_registration_form',
+            {'initial_mode': 'login'}, name="accounts_login"),
+    )
+else:
+    # Serve the old views
+    urlpatterns += (
+        url(r'^login$', 'student.views.signin_user', name="signin_user"),
+        url(r'^register$', 'student.views.register_user', name="register_user"),
+        url(r'^accounts/login$', 'student.views.accounts_login', name="accounts_login"),
+    )
 
 if settings.FEATURES["ENABLE_MOBILE_REST_API"]:
     urlpatterns += (
@@ -94,7 +116,6 @@ urlpatterns += (
     url(r'^verify_student/', include('verify_student.urls')),
     url(r'^course_modes/', include('course_modes.urls')),
 )
-
 
 js_info_dict = {
     'domain': 'djangojs',
@@ -376,7 +397,6 @@ if settings.COURSEWARE_ENABLED:
 
         # Student account and profile
         url(r'^account/', include('student_account.urls')),
-        url(r'^profile/', include('student_profile.urls')),
 
         # Student Notes
         url(r'^courses/{}/edxnotes'.format(settings.COURSE_ID_PATTERN),
@@ -463,6 +483,12 @@ if settings.FEATURES.get('RESTRICT_ENROLL_BY_REG_METHOD'):
 urlpatterns += (
     url(r'^shoppingcart/', include('shoppingcart.urls')),
 )
+
+# Country access (embargo)
+if settings.FEATURES.get('ENABLE_COUNTRY_ACCESS'):
+    urlpatterns += (
+        url(r'^embargo/', include('embargo.urls')),
+    )
 
 # Survey Djangoapp
 urlpatterns += (

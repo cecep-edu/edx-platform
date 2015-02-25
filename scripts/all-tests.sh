@@ -55,47 +55,14 @@ set -e
 #
 ###############################################################################
 
-# Violations thresholds for failing the build
-PYLINT_THRESHOLD=6300
-PEP8_THRESHOLD=0
-
-source $HOME/jenkins_env
-
 # Clean up previous builds
 git clean -qxfd
 
-# Clear the mongo database
-# Note that this prevents us from running jobs in parallel on a single worker.
-mongo --quiet --eval 'db.getMongo().getDBNames().forEach(function(i){db.getSiblingDB(i).dropDatabase()})'
+source scripts/jenkins-common.sh
 
-# Ensure we have fetched origin/master
-# Some of the reporting tools compare the checked out branch to origin/master;
-# depending on how the GitHub plugin refspec is configured, this may
-# not already be fetched.
-git fetch origin master:refs/remotes/origin/master
-
-# Reset the jenkins worker's ruby environment back to
-# the state it was in when the instance was spun up.
-if [ -e $HOME/edx-rbenv_clean.tar.gz ]; then
-    rm -rf $HOME/.rbenv
-    tar -C $HOME -xf $HOME/edx-rbenv_clean.tar.gz
-fi
-
-# Bootstrap Ruby requirements so we can run the tests
-bundle install
-
-# Ensure the Ruby environment contains no stray gems
-bundle clean --force
-
-# Reset the jenkins worker's virtualenv back to the
-# state it was in when the instance was spun up.
-if [ -e $HOME/edx-venv_clean.tar.gz ]; then
-    rm -rf $HOME/edx-venv
-    tar -C $HOME -xf $HOME/edx-venv_clean.tar.gz
-fi
-
-# Activate the Python virtualenv
-source $HOME/edx-venv/bin/activate
+# Violations thresholds for failing the build
+PYLINT_THRESHOLD=6300
+PEP8_THRESHOLD=0
 
 # If the environment variable 'SHARD' is not set, default to 'all'.
 # This could happen if you are trying to use this script from
@@ -126,8 +93,22 @@ END
         ;;
 
     "unit")
-        paver test
-        paver coverage
+        case "$SHARD" in        
+            "lms")
+                paver test_system -s lms
+                paver coverage
+                ;;
+            "cms-js-commonlib")
+                paver test_system -s cms
+                paver test_js --coverage --skip_clean
+                paver test_lib --skip_clean
+                paver coverage
+                ;;
+            *)
+                paver test
+                paver coverage
+                ;;
+        esac
         ;;
 
     "lms-acceptance")
@@ -137,8 +118,18 @@ END
                 paver test_acceptance -s lms --extra_args="-v 3"
                 ;;
 
+            "2")
+                mkdir -p reports
+                mkdir -p reports/acceptance
+                cat > reports/acceptance/xunit.xml <<END
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="nosetests" tests="1" errors="0" failures="0" skip="0">
+<testcase classname="lettuce.tests" name="shard_placeholder" time="0.001"></testcase>
+</testsuite>
+END
+                ;;
             *)
-                paver test_acceptance -s lms --extra_args="-v 3 --tag shard_${SHARD}"
+                paver test_acceptance -s lms --extra_args="-v 3"
                 ;;
         esac
         ;;
@@ -146,13 +137,20 @@ END
     "cms-acceptance")
         case "$SHARD" in
 
-            "all")
+            "all"|"1")
                 paver test_acceptance -s cms --extra_args="-v 3"
                 ;;
 
-            *)
-                paver test_acceptance -s cms --extra_args="-v 3 --tag shard_${SHARD}"
+            "2"|"3")
+                mkdir -p reports/acceptance
+                cat > reports/acceptance/xunit.xml <<END
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="nosetests" tests="1" errors="0" failures="0" skip="0">
+<testcase classname="lettuce.tests" name="shard_placeholder" time="0.001"></testcase>
+</testsuite>
+END
                 ;;
+
         esac
         ;;
 
@@ -175,12 +173,17 @@ END
                 ;;
 
             "3")
-                paver test_bokchoy --extra_args="-a shard_1=False,shard_2=False"
+                paver test_bokchoy --extra_args="-a 'shard_3'"
+                paver bokchoy_coverage
+                ;;
+
+            "4")
+                paver test_bokchoy --extra_args="-a shard_1=False,shard_2=False,shard_3=False"
                 paver bokchoy_coverage
                 ;;
 
             # Default case because if we later define another bok-choy shard on Jenkins
-            # (e.g. Shard 4) in the multi-config project and expand this file
+            # (e.g. Shard 5) in the multi-config project and expand this file
             # with an additional case condition, old branches without that commit
             # would not execute any tests on the worker assigned to that shard
             # and thus their build would fail.
@@ -190,7 +193,7 @@ END
                 # action doesn't fail the build.
                 # May be unnecessary if we changed the "Skip if there are no test files"
                 # option to True in the jenkins job definitions.
-                mkdir -p reports
+                mkdir -p reports/bok_choy
                 cat > reports/bok_choy/xunit.xml <<END
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="nosetests" tests="1" errors="0" failures="0" skip="0">

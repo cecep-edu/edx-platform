@@ -6,27 +6,22 @@ import json
 import unittest
 
 from mock import patch
-from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.conf import settings
-from xmodule.modulestore.tests.django_utils import (
-    ModuleStoreTestCase, mixed_store_config
-)
+from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory
+from util.testing import UrlResetMixin
 from enrollment import api
 from enrollment.errors import CourseEnrollmentError
+from openedx.core.djangoapps.user_api.models import UserOrgTag
 from student.tests.factories import UserFactory, CourseModeFactory
 from student.models import CourseEnrollment
-
-# Since we don't need any XML course fixtures, use a modulestore configuration
-# that disables the XML modulestore.
-MODULESTORE_CONFIG = mixed_store_config(settings.COMMON_TEST_DATA_ROOT, {}, include_xml=False)
+from embargo.test_utils import restrict_course
 
 
 @ddt.ddt
-@override_settings(MODULESTORE=MODULESTORE_CONFIG)
 @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
 class EnrollmentTest(ModuleStoreTestCase, APITestCase):
     """
@@ -87,6 +82,30 @@ class EnrollmentTest(ModuleStoreTestCase, APITestCase):
         self.assertEqual(unicode(self.course.id), data['course_details']['course_id'])
         self.assertEqual('honor', data['mode'])
         self.assertTrue(data['is_active'])
+
+    @ddt.data(
+        (True, u"True"),
+        (False, u"False"),
+        (None, None)
+    )
+    @ddt.unpack
+    def test_email_opt_in_true(self, opt_in, pref_value):
+        """
+        Verify that the email_opt_in parameter sets the underlying flag.
+        And that if the argument is not present, then it does not affect the flag
+        """
+        def _assert_no_opt_in_set():
+            """ Check the tag doesn't exit"""
+            with self.assertRaises(UserOrgTag.DoesNotExist):
+                UserOrgTag.objects.get(user=self.user, org=self.course.id.org, key="email-optin")
+
+        _assert_no_opt_in_set()
+        self._create_enrollment(email_opt_in=opt_in)
+        if opt_in is None:
+            _assert_no_opt_in_set()
+        else:
+            preference = UserOrgTag.objects.get(user=self.user, org=self.course.id.org, key="email-optin")
+            self.assertEquals(preference.value, pref_value)
 
     def test_enroll_prof_ed(self):
         # Create the prod ed mode.
@@ -213,21 +232,20 @@ class EnrollmentTest(ModuleStoreTestCase, APITestCase):
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def _create_enrollment(self, course_id=None, username=None, expected_status=status.HTTP_200_OK):
+    def _create_enrollment(self, course_id=None, username=None, expected_status=status.HTTP_200_OK, email_opt_in=None):
+        """Enroll in the course and verify the URL we are sent to. """
         course_id = unicode(self.course.id) if course_id is None else course_id
         username = self.user.username if username is None else username
-        """Enroll in the course and verify the URL we are sent to. """
 
-        resp = self.client.post(
-            reverse('courseenrollments'),
-            {
-                'course_details': {
-                    'course_id': course_id
-                },
-                'user': username
+        params = {
+            'course_details': {
+                'course_id': course_id
             },
-            format='json'
-        )
+            'user': username
+        }
+        if email_opt_in is not None:
+            params['email_opt_in'] = email_opt_in
+        resp = self.client.post(reverse('courseenrollments'), params, format='json')
         self.assertEqual(resp.status_code, expected_status)
 
         if expected_status == status.HTTP_200_OK:
@@ -236,3 +254,80 @@ class EnrollmentTest(ModuleStoreTestCase, APITestCase):
             self.assertEqual('honor', data['mode'])
             self.assertTrue(data['is_active'])
         return resp
+
+    def test_get_enrollment_with_invalid_key(self):
+        resp = self.client.post(
+            reverse('courseenrollments'),
+            {
+                'course_details': {
+                    'course_id': 'invalidcourse'
+                },
+                'user': self.user.username
+            },
+            format='json'
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("No course ", resp.content)
+
+
+@unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
+class EnrollmentEmbargoTest(UrlResetMixin, ModuleStoreTestCase):
+    """Test that enrollment is blocked from embargoed countries. """
+
+    USERNAME = "Bob"
+    EMAIL = "bob@example.com"
+    PASSWORD = "edx"
+
+    @patch.dict(settings.FEATURES, {'ENABLE_COUNTRY_ACCESS': True})
+    def setUp(self):
+        """ Create a course and user, then log in. """
+        super(EnrollmentEmbargoTest, self).setUp('embargo')
+        self.course = CourseFactory.create()
+        self.user = UserFactory.create(username=self.USERNAME, email=self.EMAIL, password=self.PASSWORD)
+        self.client.login(username=self.USERNAME, password=self.PASSWORD)
+
+    @patch.dict(settings.FEATURES, {'ENABLE_COUNTRY_ACCESS': True})
+    def test_embargo_change_enrollment_restrict(self):
+        url = reverse('courseenrollments')
+        data = json.dumps({
+            'course_details': {
+                'course_id': unicode(self.course.id)
+            },
+            'user': self.user.username
+        })
+
+        # Attempt to enroll from a country embargoed for this course
+        with restrict_course(self.course.id) as redirect_url:
+            response = self.client.post(url, data, content_type='application/json')
+
+            # Expect an error response
+            self.assertEqual(response.status_code, 403)
+
+            # Expect that the redirect URL is included in the response
+            resp_data = json.loads(response.content)
+            self.assertEqual(resp_data['user_message_url'], redirect_url)
+
+        # Verify that we were not enrolled
+        self.assertEqual(self._get_enrollments(), [])
+
+    @patch.dict(settings.FEATURES, {'ENABLE_COUNTRY_ACCESS': True})
+    def test_embargo_change_enrollment_allow(self):
+        url = reverse('courseenrollments')
+        data = json.dumps({
+            'course_details': {
+                'course_id': unicode(self.course.id)
+            },
+            'user': self.user.username
+        })
+
+        response = self.client.post(url, data, content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        # Verify that we were enrolled
+        self.assertEqual(len(self._get_enrollments()), 1)
+
+    def _get_enrollments(self):
+        """Retrieve the enrollment list for the current user. """
+        url = reverse('courseenrollments')
+        resp = self.client.get(url)
+        return json.loads(resp.content)

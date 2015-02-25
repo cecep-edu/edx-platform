@@ -35,13 +35,14 @@ from util.tests.test_date_utils import fake_ugettext, fake_pgettext
 from util.views import ensure_valid_course_key
 
 
-@override_settings(MODULESTORE=TEST_DATA_MIXED_TOY_MODULESTORE)
-class TestJumpTo(TestCase):
+class TestJumpTo(ModuleStoreTestCase):
     """
     Check the jumpto link for a course.
     """
+    MODULESTORE = TEST_DATA_MIXED_TOY_MODULESTORE
 
     def setUp(self):
+        super(TestJumpTo, self).setUp()
         # Use toy course from XML
         self.course_key = SlashSeparatedCourseKey('edX', 'toy', '2012_Fall')
 
@@ -76,12 +77,12 @@ class TestJumpTo(TestCase):
 
 
 @ddt.ddt
-@override_settings(MODULESTORE=TEST_DATA_MOCK_MODULESTORE)
-class ViewsTestCase(TestCase):
+class ViewsTestCase(ModuleStoreTestCase):
     """
     Tests for views.py methods.
     """
     def setUp(self):
+        super(ViewsTestCase, self).setUp()
         self.course = CourseFactory.create()
         self.chapter = ItemFactory.create(category='chapter', parent_location=self.course.location)  # pylint: disable=no-member
         self.section = ItemFactory.create(category='sequential', parent_location=self.chapter.location, due=datetime(2013, 9, 18, 11, 30, 00))
@@ -198,6 +199,24 @@ class ViewsTestCase(TestCase):
         mock_course = MagicMock()
         mock_course.id = self.course_key
         self.assertTrue(views.registered_for_course(mock_course, self.user))
+
+    @override_settings(PAID_COURSE_REGISTRATION_CURRENCY=["USD", "$"])
+    def test_get_cosmetic_display_price(self):
+        """
+        Check that get_cosmetic_display_price() returns the correct price given its inputs.
+        """
+        registration_price = 99
+        self.course.cosmetic_display_price = 10
+        # Since registration_price is set, it overrides the cosmetic_display_price and should be returned
+        self.assertEqual(views.get_cosmetic_display_price(self.course, registration_price), "$99")
+
+        registration_price = 0
+        # Since registration_price is not set, cosmetic_display_price should be returned
+        self.assertEqual(views.get_cosmetic_display_price(self.course, registration_price), "$10")
+
+        self.course.cosmetic_display_price = 0
+        # Since both prices are not set, there is no price, thus "Free"
+        self.assertEqual(views.get_cosmetic_display_price(self.course, registration_price), "Free")
 
     def test_jump_to_invalid(self):
         # TODO add a test for invalid location
@@ -351,13 +370,17 @@ class ViewsTestCase(TestCase):
         # in the label escaped as expected.
         self._email_opt_in_checkbox(response, cgi.escape(self.org_html))
 
-    @patch.dict(settings.FEATURES, {'IS_EDX_DOMAIN': True})
+    @patch.dict(settings.FEATURES, {
+        'IS_EDX_DOMAIN': True,
+        'ENABLE_MKTG_EMAIL_OPT_IN': True
+    })
     def test_mktg_about_language_edx_domain(self):
         # Since we're in an edx-controlled domain, and our marketing site
         # supports only English, override the language setting
         # and use English.
-        response = self._load_mktg_about(language='eo')
+        response = self._load_mktg_about(language='eo', org=self.org_html)
         self.assertContains(response, "Enroll in")
+        self.assertContains(response, "and learn about its other programs")
 
     @patch.dict(settings.FEATURES, {'IS_EDX_DOMAIN': False})
     def test_mktg_about_language_openedx(self):
@@ -447,7 +470,7 @@ class ViewsTestCase(TestCase):
 
 
 # setting TIME_ZONE_DISPLAYED_FOR_DEADLINES explicitly
-@override_settings(MODULESTORE=TEST_DATA_MOCK_MODULESTORE, TIME_ZONE_DISPLAYED_FOR_DEADLINES="UTC")
+@override_settings(TIME_ZONE_DISPLAYED_FOR_DEADLINES="UTC")
 class BaseDueDateTests(ModuleStoreTestCase):
     """
     Base class that verifies that due dates are rendered correctly on a page
@@ -475,6 +498,7 @@ class BaseDueDateTests(ModuleStoreTestCase):
         return course
 
     def setUp(self):
+        super(BaseDueDateTests, self).setUp()
         self.request_factory = RequestFactory()
         self.user = UserFactory.create()
         self.request = self.request_factory.get("foo")
@@ -562,7 +586,6 @@ class TestAccordionDueDate(BaseDueDateTests):
         )
 
 
-@override_settings(MODULESTORE=TEST_DATA_MOCK_MODULESTORE)
 class StartDateTests(ModuleStoreTestCase):
     """
     Test that start dates are properly localized and displayed on the student
@@ -570,6 +593,7 @@ class StartDateTests(ModuleStoreTestCase):
     """
 
     def setUp(self):
+        super(StartDateTests, self).setUp()
         self.request_factory = RequestFactory()
         self.user = UserFactory.create()
         self.request = self.request_factory.get("foo")
@@ -617,13 +641,13 @@ class StartDateTests(ModuleStoreTestCase):
         self.assertIn("2015-JULY-17", text)
 
 
-@override_settings(MODULESTORE=TEST_DATA_MOCK_MODULESTORE)
 class ProgressPageTests(ModuleStoreTestCase):
     """
     Tests that verify that the progress page works correctly.
     """
 
     def setUp(self):
+        super(ProgressPageTests, self).setUp()
         self.request_factory = RequestFactory()
         self.user = UserFactory.create()
         self.request = self.request_factory.get("foo")
@@ -658,6 +682,8 @@ class VerifyCourseKeyDecoratorTests(TestCase):
     """
 
     def setUp(self):
+        super(VerifyCourseKeyDecoratorTests, self).setUp()
+
         self.request = RequestFactory().get("foo")
         self.valid_course_id = "edX/test/1"
         self.invalid_course_id = "edX/"

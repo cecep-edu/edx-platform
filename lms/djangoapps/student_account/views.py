@@ -2,6 +2,8 @@
 
 import logging
 import json
+from ipware.ip import get_ip
+
 from django.conf import settings
 from django.http import (
     HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
@@ -14,9 +16,21 @@ from django.utils.translation import ugettext as _
 from django_future.csrf import ensure_csrf_cookie
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+
+from opaque_keys.edx.keys import CourseKey
+from opaque_keys import InvalidKeyError
 from edxmako.shortcuts import render_to_response, render_to_string
 from microsite_configuration import microsite
+from embargo import api as embargo_api
 import third_party_auth
+from external_auth.login_and_register import (
+    login as external_auth_login,
+    register as external_auth_register
+)
+from student.views import (
+    signin_user as old_login_view,
+    register_user as old_register_view
+)
 
 from openedx.core.djangoapps.user_api.api import account as account_api
 from openedx.core.djangoapps.user_api.api import profile as profile_api
@@ -62,7 +76,7 @@ def login_and_registration_form(request, initial_mode="login"):
     the user_api.
 
     Keyword Args:
-        initial_mode (string): Either "login" or "registration".
+        initial_mode (string): Either "login" or "register".
 
     """
     # If we're already logged in, redirect to the dashboard
@@ -71,6 +85,19 @@ def login_and_registration_form(request, initial_mode="login"):
 
     # Retrieve the form descriptions from the user API
     form_descriptions = _get_form_descriptions(request)
+
+    # If this is a microsite, revert to the old login/registration pages.
+    # We need to do this for now to support existing themes.
+    if microsite.is_request_in_microsite():
+        if initial_mode == "login":
+            return old_login_view(request)
+        elif initial_mode == "register":
+            return old_register_view(request)
+
+    # Allow external auth to intercept and handle the request
+    ext_auth_response = _external_auth_intercept(request, initial_mode)
+    if ext_auth_response is not None:
+        return ext_auth_response
 
     # Otherwise, render the combined login/registration page
     context = {
@@ -299,15 +326,48 @@ def _third_party_auth_context(request):
 
     course_id = request.GET.get("course_id")
     email_opt_in = request.GET.get('email_opt_in')
+    redirect_to = request.GET.get("next")
+
+    # Check if the user is trying to enroll in a course
+    # that they don't have access to based on country
+    # access rules.
+    #
+    # If so, set the redirect URL to the blocked page.
+    # We need to set it here, rather than redirecting
+    # from within the pipeline, because a redirect
+    # from the pipeline can prevent users
+    # from completing the authentication process.
+    #
+    # Note that we can't check the user's country
+    # profile at this point, since the user hasn't
+    # authenticated.  If the user ends up being blocked
+    # by their country preference, we let them enroll;
+    # they'll still be blocked when they try to access
+    # the courseware.
+    if course_id:
+        try:
+            course_key = CourseKey.from_string(course_id)
+            redirect_url = embargo_api.redirect_if_blocked(
+                course_key,
+                ip_address=get_ip(request),
+                url=request.path
+            )
+            if redirect_url:
+                redirect_to = embargo_api.message_url_path(course_key, "enrollment")
+        except InvalidKeyError:
+            pass
+
     login_urls = auth_pipeline_urls(
-        third_party_auth.pipeline.AUTH_ENTRY_LOGIN_2,
+        third_party_auth.pipeline.AUTH_ENTRY_LOGIN,
         course_id=course_id,
-        email_opt_in=email_opt_in
+        email_opt_in=email_opt_in,
+        redirect_url=redirect_to
     )
     register_urls = auth_pipeline_urls(
-        third_party_auth.pipeline.AUTH_ENTRY_REGISTER_2,
+        third_party_auth.pipeline.AUTH_ENTRY_REGISTER,
         course_id=course_id,
-        email_opt_in=email_opt_in
+        email_opt_in=email_opt_in,
+        redirect_url=redirect_to
     )
 
     if third_party_auth.is_enabled():
@@ -377,3 +437,20 @@ def _local_server_get(url, session):
 
     # Return the content of the response
     return response.content
+
+
+def _external_auth_intercept(request, mode):
+    """Allow external auth to intercept a login/registration request.
+
+    Arguments:
+        request (Request): The original request.
+        mode (str): Either "login" or "register"
+
+    Returns:
+        Response or None
+
+    """
+    if mode == "login":
+        return external_auth_login(request)
+    elif mode == "register":
+        return external_auth_register(request)

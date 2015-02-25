@@ -53,7 +53,7 @@ def is_youtube_available():
         'metadata': 'http://gdata.youtube.com/feeds/api/videos/',
         # For transcripts, you need to check an actual video, so we will
         # just specify our default video and see if that one is available.
-        'transcript': 'http://video.google.com/timedtext?lang=en&v=OEoXaMPEzfM',
+        'transcript': 'http://video.google.com/timedtext?lang=en&v=3_yD_cEKoCk',
     }
 
     for url in youtube_api_urls.itervalues():
@@ -232,6 +232,24 @@ def element_has_text(page, css_selector, text):
         text_present = True
 
     return text_present
+
+
+def assert_event_emitted_num_times(event_collection, event_name, event_time, event_user_id, num_times_emitted):
+    """
+    Tests the number of times a particular event was emitted.
+    :param event_collection: MongoClient instance to query.
+    :param event_name: Expected event name (e.g., "edx.course.enrollment.activated")
+    :param event_time: Latest expected time, after which the event would fire (e.g., the beginning of the test case)
+    """
+    assert(
+        event_collection.find(
+            {
+                "name": event_name,
+                "time": {"$gt": event_time},
+                "event.user_id": int(event_user_id),
+            }
+        ).count() == num_times_emitted
+    )
 
 
 class UniqueCourseTest(WebAppTest):

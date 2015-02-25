@@ -16,11 +16,11 @@ from xmodule.modulestore.tests.factories import CourseFactory
 from xmodule.modulestore.tests.django_utils import TEST_DATA_MOCK_MODULESTORE
 
 
-@override_settings(MODULESTORE=TEST_DATA_MOCK_MODULESTORE)
 class EmbargoCourseFormTest(ModuleStoreTestCase):
     """Test the course form properly validates course IDs"""
 
     def setUp(self):
+        super(EmbargoCourseFormTest, self).setUp()
         self.course = CourseFactory.create()
         self.true_form_data = {'course_id': self.course.id.to_deprecated_string(), 'embargoed': True}
         self.false_form_data = {'course_id': self.course.id.to_deprecated_string(), 'embargoed': False}
@@ -70,9 +70,7 @@ class EmbargoCourseFormTest(ModuleStoreTestCase):
         self.assertFalse(form.is_valid())
 
         msg = 'COURSE NOT FOUND'
-        msg += u' --- Entered course id was: "{0}". '.format(bad_id)
-        msg += 'Please recheck that you have supplied a valid course id.'
-        self.assertEquals(msg, form._errors['course_id'][0])  # pylint: disable=protected-access
+        self.assertIn(msg, form._errors['course_id'][0])  # pylint: disable=protected-access
 
         with self.assertRaisesRegexp(ValueError, "The EmbargoedCourse could not be created because the data didn't validate."):
             form.save()
@@ -87,9 +85,7 @@ class EmbargoCourseFormTest(ModuleStoreTestCase):
         self.assertFalse(form.is_valid())
 
         msg = 'COURSE NOT FOUND'
-        msg += u' --- Entered course id was: "{0}". '.format(bad_id)
-        msg += 'Please recheck that you have supplied a valid course id.'
-        self.assertEquals(msg, form._errors['course_id'][0])  # pylint: disable=protected-access
+        self.assertIn(msg, form._errors['course_id'][0])  # pylint: disable=protected-access
 
         with self.assertRaisesRegexp(ValueError, "The EmbargoedCourse could not be created because the data didn't validate."):
             form.save()

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This config file runs the simplest dev environment using sqlite, and db-based
 sessions. Assumes structure:
@@ -249,3 +250,15 @@ FEATURES['MILESTONES_APP'] = True
 # ENTRANCE EXAMS
 FEATURES['ENTRANCE_EXAMS'] = True
 ENTRANCE_EXAM_MIN_SCORE_PCT = 50
+
+VIDEO_CDN_URL = {
+    'CN': 'http://api.xuetangx.com/edx/video?s3_url='
+}
+
+# Courseware Search Index
+FEATURES['ENABLE_COURSEWARE_INDEX'] = True
+SEARCH_ENGINE = "search.tests.mock_search_engine.MockSearchEngine"
+# Path at which to store the mock index
+MOCK_SEARCH_BACKING_FILE = (
+    TEST_ROOT / "index_file.dat"  # pylint: disable=no-value-for-parameter
+).abspath()

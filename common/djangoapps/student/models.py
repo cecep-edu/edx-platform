@@ -16,11 +16,13 @@ import json
 import logging
 from pytz import UTC
 import uuid
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import dogstats_wrapper as dog_stats_api
 from django.db.models import Q
 import pytz
+from urllib import urlencode
 
+from django.utils.translation import ugettext as _, ugettext_lazy
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -122,13 +124,12 @@ def anonymous_id_for_user(user, course_id, save=True):
         )
         if anonymous_user_id.anonymous_user_id != digest:
             log.error(
-                "Stored anonymous user id {stored!r} for user {user!r} "
-                "in course {course!r} doesn't match computed id {digest!r}".format(
-                    user=user,
-                    course=course_id,
-                    stored=anonymous_user_id.anonymous_user_id,
-                    digest=digest
-                )
+                u"Stored anonymous user id %r for user %r "
+                u"in course %r doesn't match computed id %r",
+                user,
+                course_id,
+                anonymous_user_id.anonymous_user_id,
+                digest
             )
     except IntegrityError:
         # Another thread has already created this entry, so
@@ -917,7 +918,12 @@ class CourseEnrollment(models.Model):
 
         except:  # pylint: disable=bare-except
             if event_name and self.course_id:
-                log.exception('Unable to emit event %s for user %s and course %s', event_name, self.user.username, self.course_id)
+                log.exception(
+                    u'Unable to emit event %s for user %s and course %s',
+                    event_name,
+                    self.user.username,  # pylint: disable=no-member
+                    self.course_id,
+                )
 
     @classmethod
     def enroll(cls, user, course_key, mode="honor", check_access=False):
@@ -958,10 +964,9 @@ class CourseEnrollment(models.Model):
             course = modulestore().get_course(course_key)
         except ItemNotFoundError:
             log.warning(
-                "User {0} failed to enroll in non-existent course {1}".format(
-                    user.username,
-                    course_key.to_deprecated_string()
-                )
+                u"User %s failed to enroll in non-existent course %s",
+                user.username,
+                course_key.to_deprecated_string(),
             )
             raise NonExistentCourseError
 
@@ -970,27 +975,24 @@ class CourseEnrollment(models.Model):
                 raise NonExistentCourseError
             if CourseEnrollment.is_enrollment_closed(user, course):
                 log.warning(
-                    "User {0} failed to enroll in course {1} because enrollment is closed".format(
-                        user.username,
-                        course_key.to_deprecated_string()
-                    )
+                    u"User %s failed to enroll in course %s because enrollment is closed",
+                    user.username,
+                    course_key.to_deprecated_string()
                 )
                 raise EnrollmentClosedError
 
             if CourseEnrollment.is_course_full(course):
                 log.warning(
-                    "User {0} failed to enroll in full course {1}".format(
-                        user.username,
-                        course_key.to_deprecated_string()
-                    )
+                    u"User %s failed to enroll in full course %s",
+                    user.username,
+                    course_key.to_deprecated_string(),
                 )
                 raise CourseFullError
         if CourseEnrollment.is_enrolled(user, course_key):
             log.warning(
-                "User {0} attempted to enroll in {1}, but they were already enrolled".format(
-                    user.username,
-                    course_key.to_deprecated_string()
-                )
+                u"User %s attempted to enroll in %s, but they were already enrolled",
+                user.username,
+                course_key.to_deprecated_string()
             )
             if check_access:
                 raise AlreadyEnrolledError
@@ -1057,8 +1059,11 @@ class CourseEnrollment(models.Model):
             record.update_enrollment(is_active=False, skip_refund=skip_refund)
 
         except cls.DoesNotExist:
-            err_msg = u"Tried to unenroll student {} from {} but they were not enrolled"
-            log.error(err_msg.format(user, course_id))
+            log.error(
+                u"Tried to unenroll student %s from %s but they were not enrolled",
+                user,
+                course_id
+            )
 
     @classmethod
     def unenroll_by_email(cls, email, course_id):
@@ -1074,8 +1079,11 @@ class CourseEnrollment(models.Model):
             user = User.objects.get(email=email)
             return cls.unenroll(user, course_id)
         except User.DoesNotExist:
-            err_msg = u"Tried to unenroll email {} from course {}, but user not found"
-            log.error(err_msg.format(email, course_id))
+            log.error(
+                u"Tried to unenroll email %s from course %s, but user not found",
+                email,
+                course_id
+            )
 
     @classmethod
     def is_enrolled(cls, user, course_key):
@@ -1457,3 +1465,64 @@ class DashboardConfiguration(ConfigurationModel):
     @property
     def recent_enrollment_seconds(self):
         return self.recent_enrollment_time_delta
+
+
+class LinkedInAddToProfileConfiguration(ConfigurationModel):
+    """
+    LinkedIn Add to Profile Configuration
+
+    This configuration enables the "Add to Profile" LinkedIn
+    button on the student dashboard.  The button appears when
+    users have a certificate available; when clicked,
+    users are sent to the LinkedIn site with a pre-filled
+    form allowing them to add the certificate to their
+    LinkedIn profile.
+    """
+
+    MODE_TO_CERT_NAME = {
+        "honor": ugettext_lazy(u"{platform_name} Honor Code Certificate for {course_name}"),
+        "verified": ugettext_lazy(u"{platform_name} Verified Certificate for {course_name}"),
+        "professional": ugettext_lazy(u"{platform_name} Professional Certificate for {course_name}"),
+    }
+
+    company_identifier = models.TextField(
+        help_text=ugettext_lazy(
+            u"The company identifier for the LinkedIn Add-to-Profile button "
+            u"e.g 0_0dPSPyS070e0HsE9HNz_13_d11_"
+        )
+    )
+
+    # Deprecated
+    dashboard_tracking_code = models.TextField(default="", blank=True)
+
+    def add_to_profile_url(self, course_name, enrollment_mode, cert_url, source="o"):
+        """Construct the URL for the "add to profile" button.
+
+        Arguments:
+            course_name (unicode): The display name of the course.
+            enrollment_mode (str): The enrollment mode of the user (e.g. "verified", "honor", "professional")
+            cert_url (str): The download URL for the certificate.
+
+        Keyword Arguments:
+            source (str): Either "o" (for onsite/UI), "e" (for emails), or "m" (for mobile)
+
+        """
+        params = OrderedDict([
+            ('_ed', self.company_identifier),
+            ('pfCertificationName', self._cert_name(course_name, enrollment_mode).encode('utf-8')),
+            ('pfCertificationUrl', cert_url),
+            ('source', source)
+        ])
+        return u'http://www.linkedin.com/profile/add?{params}'.format(
+            params=urlencode(params)
+        )
+
+    def _cert_name(self, course_name, enrollment_mode):
+        """Name of the certification, for display on LinkedIn. """
+        return self.MODE_TO_CERT_NAME.get(
+            enrollment_mode,
+            _(u"{platform_name} Certificate for {course_name}")
+        ).format(
+            platform_name=settings.PLATFORM_NAME,
+            course_name=course_name
+        )

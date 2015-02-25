@@ -12,6 +12,7 @@ from student.roles import (
     CourseInstructorRole, CourseStaffRole, CourseCreatorRole, LibraryUserRole,
     OrgStaffRole, OrgInstructorRole, OrgLibraryUserRole,
 )
+from xblock.reference.user_service import XBlockUser
 from xmodule.library_content_module import LibraryVersionReference
 from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.django import modulestore
@@ -80,7 +81,10 @@ class LibraryTestCase(ModuleStoreTestCase):
         of a LibraryContent block
         """
         if 'user' not in lib_content_block.runtime._services:  # pylint: disable=protected-access
-            lib_content_block.runtime._services['user'] = Mock(user_id=self.user.id)  # pylint: disable=protected-access
+            mocked_user_service = Mock(user_id=self.user.id)
+            mocked_user_service.get_current_user.return_value = XBlockUser(is_current_user=True)
+            lib_content_block.runtime._services['user'] = mocked_user_service  # pylint: disable=protected-access
+
         handler_url = reverse_usage_url(
             'component_handler',
             lib_content_block.location,
@@ -847,3 +851,27 @@ class TestOverrides(LibraryTestCase):
         self.assertEqual(self.problem_in_course.display_name, new_display_name)
         self.assertEqual(self.problem_in_course.weight, new_weight)
         self.assertEqual(self.problem_in_course.data, new_data_value)
+
+
+class TestIncompatibleModuleStore(LibraryTestCase):
+    """
+    Tests for proper validation errors with an incompatible course modulestore.
+    """
+    def setUp(self):
+        super(TestIncompatibleModuleStore, self).setUp()
+        # Create a course in an incompatible modulestore.
+        with modulestore().default_store(ModuleStoreEnum.Type.mongo):
+            self.course = CourseFactory.create()
+
+        # Add a LibraryContent block to the course:
+        self.lc_block = self._add_library_content_block(self.course, self.lib_key)
+
+    def test_incompatible_modulestore(self):
+        """
+        Verifies that, if a user is using a modulestore that doesn't support libraries,
+        a validation error will be produced.
+        """
+        validation = self.lc_block.validate()
+        self.assertEqual(validation.summary.type, validation.summary.ERROR)
+        self.assertIn(
+            "This course does not support content libraries.", validation.summary.text)

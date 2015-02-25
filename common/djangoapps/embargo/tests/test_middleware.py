@@ -24,19 +24,15 @@ from config_models.models import cache
 from embargo.models import EmbargoedCourse, EmbargoedState, IPFilter
 
 
-# Since we don't need any XML course fixtures, use a modulestore configuration
-# that disables the XML modulestore.
-MODULESTORE_CONFIG = mixed_store_config(settings.COMMON_TEST_DATA_ROOT, {}, include_xml=False)
-
-
 @ddt.ddt
-@override_settings(MODULESTORE=MODULESTORE_CONFIG)
 @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
 class EmbargoMiddlewareTests(ModuleStoreTestCase):
     """
     Tests of EmbargoMiddleware
     """
     def setUp(self):
+        super(EmbargoMiddlewareTests, self).setUp()
+
         self.user = UserFactory(username='fred', password='secret')
         self.client.login(username='fred', password='secret')
         self.embargo_course = CourseFactory.create()
@@ -54,7 +50,7 @@ class EmbargoMiddlewareTests(ModuleStoreTestCase):
         CourseEnrollment.enroll(self.user, self.regular_course.id)
         CourseEnrollment.enroll(self.user, self.embargo_course.id)
         # Text from lms/templates/static_templates/embargo.html
-        self.embargo_text = "Unfortunately, at this time edX must comply with export controls, and we cannot allow you to access this particular course."
+        self.embargo_text = "Unfortunately, at this time edX must comply with export controls, and we cannot allow you to access this course."
 
         self.patcher = mock.patch.object(pygeoip.GeoIP, 'country_code_by_addr', self.mock_country_code_by_addr)
         self.patcher.start()

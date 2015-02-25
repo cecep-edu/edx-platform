@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import logging
 import pytz
 import unittest
+import ddt
 
 from django.conf import settings
 from django.contrib.auth.models import User, AnonymousUser
@@ -21,28 +22,39 @@ from mock import Mock, patch
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
 
 from student.models import (
-    anonymous_id_for_user, user_by_anonymous_id, CourseEnrollment, unique_id_for_user
+    anonymous_id_for_user, user_by_anonymous_id, CourseEnrollment, unique_id_for_user,
+    LinkedInAddToProfileConfiguration
 )
 from student.views import (process_survey_link, _cert_info,
                            change_enrollment, complete_course_mode_info)
 from student.tests.factories import UserFactory, CourseModeFactory
 from xmodule.modulestore.tests.factories import CourseFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
-from xmodule.modulestore.tests.django_utils import TEST_DATA_MOCK_MODULESTORE
 
 # These imports refer to lms djangoapps.
 # Their testcases are only run under lms.
 from bulk_email.models import Optout  # pylint: disable=import-error
 from certificates.models import CertificateStatuses  # pylint: disable=import-error
 from certificates.tests.factories import GeneratedCertificateFactory  # pylint: disable=import-error
+from verify_student.models import SoftwareSecurePhotoVerification
 import shoppingcart  # pylint: disable=import-error
 
+# Explicitly import the cache from ConfigurationModel so we can reset it after each test
+from config_models.models import cache
 
 log = logging.getLogger(__name__)
 
 
+@ddt.ddt
 class CourseEndingTest(TestCase):
     """Test things related to course endings: certificates, surveys, etc"""
+
+    def setUp(self):
+        super(CourseEndingTest, self).setUp()
+
+        # Clear the model-based config cache to avoid
+        # interference between tests.
+        cache.clear()
 
     def test_process_survey_link(self):
         username = "fred"
@@ -59,9 +71,10 @@ class CourseEndingTest(TestCase):
         user = Mock(username="fred")
         survey_url = "http://a_survey.com"
         course = Mock(end_of_course_survey_url=survey_url, certificates_display_behavior='end')
+        course_mode = 'honor'
 
         self.assertEqual(
-            _cert_info(user, course, None),
+            _cert_info(user, course, None, course_mode),
             {
                 'status': 'processing',
                 'show_disabled_download_button': False,
@@ -72,19 +85,20 @@ class CourseEndingTest(TestCase):
 
         cert_status = {'status': 'unavailable'}
         self.assertEqual(
-            _cert_info(user, course, cert_status),
+            _cert_info(user, course, cert_status, course_mode),
             {
                 'status': 'processing',
                 'show_disabled_download_button': False,
                 'show_download_url': False,
                 'show_survey_button': False,
-                'mode': None
+                'mode': None,
+                'linked_in_url': None
             }
         )
 
         cert_status = {'status': 'generating', 'grade': '67', 'mode': 'honor'}
         self.assertEqual(
-            _cert_info(user, course, cert_status),
+            _cert_info(user, course, cert_status, course_mode),
             {
                 'status': 'generating',
                 'show_disabled_download_button': True,
@@ -92,13 +106,14 @@ class CourseEndingTest(TestCase):
                 'show_survey_button': True,
                 'survey_url': survey_url,
                 'grade': '67',
-                'mode': 'honor'
+                'mode': 'honor',
+                'linked_in_url': None
             }
         )
 
         cert_status = {'status': 'regenerating', 'grade': '67', 'mode': 'verified'}
         self.assertEqual(
-            _cert_info(user, course, cert_status),
+            _cert_info(user, course, cert_status, course_mode),
             {
                 'status': 'generating',
                 'show_disabled_download_button': True,
@@ -106,7 +121,8 @@ class CourseEndingTest(TestCase):
                 'show_survey_button': True,
                 'survey_url': survey_url,
                 'grade': '67',
-                'mode': 'verified'
+                'mode': 'verified',
+                'linked_in_url': None
             }
         )
 
@@ -116,8 +132,9 @@ class CourseEndingTest(TestCase):
             'download_url': download_url,
             'mode': 'honor'
         }
+
         self.assertEqual(
-            _cert_info(user, course, cert_status),
+            _cert_info(user, course, cert_status, course_mode),
             {
                 'status': 'ready',
                 'show_disabled_download_button': False,
@@ -126,7 +143,8 @@ class CourseEndingTest(TestCase):
                 'show_survey_button': True,
                 'survey_url': survey_url,
                 'grade': '67',
-                'mode': 'honor'
+                'mode': 'honor',
+                'linked_in_url': None
             }
         )
 
@@ -136,7 +154,7 @@ class CourseEndingTest(TestCase):
             'mode': 'honor'
         }
         self.assertEqual(
-            _cert_info(user, course, cert_status),
+            _cert_info(user, course, cert_status, course_mode),
             {
                 'status': 'notpassing',
                 'show_disabled_download_button': False,
@@ -144,7 +162,8 @@ class CourseEndingTest(TestCase):
                 'show_survey_button': True,
                 'survey_url': survey_url,
                 'grade': '67',
-                'mode': 'honor'
+                'mode': 'honor',
+                'linked_in_url': None
             }
         )
 
@@ -155,31 +174,143 @@ class CourseEndingTest(TestCase):
             'download_url': download_url, 'mode': 'honor'
         }
         self.assertEqual(
-            _cert_info(user, course2, cert_status),
+            _cert_info(user, course2, cert_status, course_mode),
             {
                 'status': 'notpassing',
                 'show_disabled_download_button': False,
                 'show_download_url': False,
                 'show_survey_button': False,
                 'grade': '67',
-                'mode': 'honor'
+                'mode': 'honor',
+                'linked_in_url': None
             }
         )
 
         # test when the display is unavailable or notpassing, we get the correct results out
         course2.certificates_display_behavior = 'early_no_info'
         cert_status = {'status': 'unavailable'}
-        self.assertIsNone(_cert_info(user, course2, cert_status))
+        self.assertIsNone(_cert_info(user, course2, cert_status, course_mode))
 
         cert_status = {
             'status': 'notpassing', 'grade': '67',
             'download_url': download_url,
             'mode': 'honor'
         }
-        self.assertIsNone(_cert_info(user, course2, cert_status))
+        self.assertIsNone(_cert_info(user, course2, cert_status, course_mode))
+
+    def test_linked_in_url_with_unicode_course_display_name(self):
+        """Test with unicode display name values."""
+
+        user = Mock(username="fred")
+        survey_url = "http://a_survey.com"
+        course = Mock(
+            end_of_course_survey_url=survey_url,
+            certificates_display_behavior='end',
+            display_name=u'edx/abc/courseregisters®'
+        )
+        download_url = 'http://s3.edx/cert'
+
+        cert_status = {
+            'status': 'downloadable', 'grade': '67',
+            'download_url': download_url,
+            'mode': 'honor'
+        }
+        LinkedInAddToProfileConfiguration(
+            company_identifier='0_mC_o2MizqdtZEmkVXjH4eYwMj4DnkCWrZP_D9',
+            enabled=True
+        ).save()
+
+        status_dict = _cert_info(user, course, cert_status, 'honor')
+        expected_url = (
+            'http://www.linkedin.com/profile/add'
+            '?_ed=0_mC_o2MizqdtZEmkVXjH4eYwMj4DnkCWrZP_D9&'
+            'pfCertificationName=edX+Honor+Code+Certificate+for+edx%2Fabc%2Fcourseregisters%C2%AE&'
+            'pfCertificationUrl=http%3A%2F%2Fs3.edx%2Fcert&'
+            'source=o'
+        )
+        self.assertEqual(expected_url, status_dict['linked_in_url'])
+
+    def test_linked_in_url_not_exists_without_config(self):
+        user = Mock(username="fred")
+        survey_url = "http://a_survey.com"
+        course = Mock(
+            display_name="Demo Course",
+            end_of_course_survey_url=survey_url,
+            certificates_display_behavior='end'
+        )
+
+        download_url = 'http://s3.edx/cert'
+        cert_status = {
+            'status': 'downloadable', 'grade': '67',
+            'download_url': download_url,
+            'mode': 'verified'
+        }
+
+        self.assertEqual(
+            _cert_info(user, course, cert_status, 'verified'),
+            {
+                'status': 'ready',
+                'show_disabled_download_button': False,
+                'show_download_url': True,
+                'download_url': download_url,
+                'show_survey_button': True,
+                'survey_url': survey_url,
+                'grade': '67',
+                'mode': 'verified',
+                'linked_in_url': None
+            }
+        )
+
+        # Enabling the configuration will cause the LinkedIn
+        # "add to profile" button to appear.
+        # We need to clear the cache again to make sure we
+        # pick up the modified configuration.
+        cache.clear()
+        LinkedInAddToProfileConfiguration(
+            company_identifier='0_mC_o2MizqdtZEmkVXjH4eYwMj4DnkCWrZP_D9',
+            enabled=True
+        ).save()
+
+        status_dict = _cert_info(user, course, cert_status, 'honor')
+        expected_url = (
+            'http://www.linkedin.com/profile/add'
+            '?_ed=0_mC_o2MizqdtZEmkVXjH4eYwMj4DnkCWrZP_D9&'
+            'pfCertificationName=edX+Verified+Certificate+for+Demo+Course&'
+            'pfCertificationUrl=http%3A%2F%2Fs3.edx%2Fcert&'
+            'source=o'
+        )
+        self.assertEqual(expected_url, status_dict['linked_in_url'])
+
+    @ddt.data(
+        ('honor', 'edX Honor Code Certificate for DemoX'),
+        ('verified', 'edX Verified Certificate for DemoX'),
+        ('professional', 'edX Professional Certificate for DemoX'),
+        ('default_mode', 'edX Certificate for DemoX')
+    )
+    @ddt.unpack
+    def test_linked_in_url_certificate_types(self, cert_mode, cert_name):
+        user = Mock(username="fred")
+        course = Mock(
+            display_name='DemoX',
+            end_of_course_survey_url='http://example.com',
+            certificates_display_behavior='end'
+        )
+        cert_status = {
+            'status': 'downloadable',
+            'grade': '67',
+            'download_url': 'http://edx.org',
+            'mode': cert_mode
+        }
+
+        LinkedInAddToProfileConfiguration(
+            company_identifier="abcd123",
+            enabled=True
+        ).save()
+
+        status_dict = _cert_info(user, course, cert_status, cert_mode)
+        self.assertIn(cert_name.replace(' ', '+'), status_dict['linked_in_url'])
 
 
-@override_settings(MODULESTORE=TEST_DATA_MOCK_MODULESTORE)
 class DashboardTest(ModuleStoreTestCase):
     """
     Tests for dashboard utility functions
@@ -190,13 +321,23 @@ class DashboardTest(ModuleStoreTestCase):
         self.course = CourseFactory.create()
         self.user = UserFactory.create(username="jack", email="jack@fake.edx.org", password='test')
         self.client = Client()
+        cache.clear()
 
     @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
-    def check_verification_status_on(self, mode, value):
+    def _check_verification_status_on(self, mode, value):
         """
         Check that the css class and the status message are in the dashboard html.
         """
+        CourseModeFactory(mode_slug=mode, course_id=self.course.id)
         CourseEnrollment.enroll(self.user, self.course.location.course_key, mode=mode)
+
+        if mode == 'verified':
+            # Simulate a successful verification attempt
+            attempt = SoftwareSecurePhotoVerification.objects.create(user=self.user)
+            attempt.mark_ready()
+            attempt.submit()
+            attempt.approve()
+
         response = self.client.get(reverse('dashboard'))
         self.assertContains(response, "class=\"course {0}\"".format(mode))
         self.assertContains(response, value)
@@ -207,16 +348,25 @@ class DashboardTest(ModuleStoreTestCase):
         Test that the certificate verification status for courses is visible on the dashboard.
         """
         self.client.login(username="jack", password="test")
-        self.check_verification_status_on('verified', 'You\'re enrolled as a verified student')
-        self.check_verification_status_on('honor', 'You\'re enrolled as an honor code student')
-        self.check_verification_status_on('audit', 'You\'re auditing this course')
+        self._check_verification_status_on('verified', 'You\'re enrolled as a verified student')
+        self._check_verification_status_on('honor', 'You\'re enrolled as an honor code student')
+        self._check_verification_status_on('audit', 'You\'re auditing this course')
 
     @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
-    def check_verification_status_off(self, mode, value):
+    def _check_verification_status_off(self, mode, value):
         """
         Check that the css class and the status message are not in the dashboard html.
         """
+        CourseModeFactory(mode_slug=mode, course_id=self.course.id)
         CourseEnrollment.enroll(self.user, self.course.location.course_key, mode=mode)
+
+        if mode == 'verified':
+            # Simulate a successful verification attempt
+            attempt = SoftwareSecurePhotoVerification.objects.create(user=self.user)
+            attempt.mark_ready()
+            attempt.submit()
+            attempt.approve()
+
         response = self.client.get(reverse('dashboard'))
         self.assertNotContains(response, "class=\"course {0}\"".format(mode))
         self.assertNotContains(response, value)
@@ -228,9 +378,9 @@ class DashboardTest(ModuleStoreTestCase):
         if the verified certificates setting is off.
         """
         self.client.login(username="jack", password="test")
-        self.check_verification_status_off('verified', 'You\'re enrolled as a verified student')
-        self.check_verification_status_off('honor', 'You\'re enrolled as an honor code student')
-        self.check_verification_status_off('audit', 'You\'re auditing this course')
+        self._check_verification_status_off('verified', 'You\'re enrolled as a verified student')
+        self._check_verification_status_off('honor', 'You\'re enrolled as an honor code student')
+        self._check_verification_status_off('audit', 'You\'re auditing this course')
 
     def test_course_mode_info(self):
         verified_mode = CourseModeFactory.create(
@@ -280,8 +430,14 @@ class DashboardTest(ModuleStoreTestCase):
             recipient_name='Testw_1', recipient_email='test2@test.com', internal_reference="A",
             course_id=self.course.id, is_valid=False
         )
+        invoice_item = shoppingcart.models.CourseRegistrationCodeInvoiceItem.objects.create(
+            invoice=sale_invoice_1,
+            qty=1,
+            unit_price=1234.32,
+            course_id=self.course.id
+        )
         course_reg_code = shoppingcart.models.CourseRegistrationCode(
-            code="abcde", course_id=self.course.id, created_by=self.user, invoice=sale_invoice_1, mode_slug='honor'
+            code="abcde", course_id=self.course.id, created_by=self.user, invoice=sale_invoice_1, invoice_item=invoice_item, mode_slug='honor'
         )
         course_reg_code.save()
 
@@ -346,6 +502,7 @@ class DashboardTest(ModuleStoreTestCase):
             mode_display_name='Verified',
             expiration_datetime=datetime.now(pytz.UTC) + timedelta(days=1)
         )
+
         enrollment = CourseEnrollment.enroll(self.user, self.course.id, mode='verified')
 
         self.assertTrue(enrollment.refundable())
@@ -358,6 +515,96 @@ class DashboardTest(ModuleStoreTestCase):
         )
 
         self.assertFalse(enrollment.refundable())
+
+    @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
+    def test_linked_in_add_to_profile_btn_not_appearing_without_config(self):
+
+        """
+         without linked-in config don't show Add Certificate to LinkedIn button
+        """
+        self.client.login(username="jack", password="test")
+
+        CourseModeFactory.create(
+            course_id=self.course.id,
+            mode_slug='verified',
+            mode_display_name='verified',
+            expiration_datetime=datetime.now(pytz.UTC) - timedelta(days=1)
+        )
+
+        CourseEnrollment.enroll(self.user, self.course.id, mode='honor')
+
+        self.course.start = datetime.now(pytz.UTC) - timedelta(days=2)
+        self.course.end = datetime.now(pytz.UTC) - timedelta(days=1)
+        self.course.display_name = u"Omega"
+        self.course = self.update_course(self.course, self.user.id)
+
+        download_url = 'www.edx.org'
+        GeneratedCertificateFactory.create(
+            user=self.user,
+            course_id=self.course.id,
+            status=CertificateStatuses.downloadable,
+            mode='honor',
+            grade='67',
+            download_url=download_url
+        )
+        response = self.client.get(reverse('dashboard'))
+
+        self.assertEquals(response.status_code, 200)
+        self.assertNotIn('Add Certificate to LinkedIn', response.content)
+
+        response_url = 'http://www.linkedin.com/profile/add?_ed='
+        self.assertNotContains(response, response_url)
+
+    @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
+    def test_linked_in_add_to_profile_btn_with_certificate(self):
+
+        """
+        If user has a certificate with valid linked-in config then Add Certificate to LinkedIn button
+        should be visible. and it has URL value with valid parameters.
+        """
+
+        self.client.login(username="jack", password="test")
+        LinkedInAddToProfileConfiguration(
+            company_identifier='0_mC_o2MizqdtZEmkVXjH4eYwMj4DnkCWrZP_D9',
+            enabled=True
+        ).save()
+
+        CourseModeFactory.create(
+            course_id=self.course.id,
+            mode_slug='verified',
+            mode_display_name='verified',
+            expiration_datetime=datetime.now(pytz.UTC) - timedelta(days=1)
+        )
+
+        CourseEnrollment.enroll(self.user, self.course.id, mode='honor')
+
+        self.course.start = datetime.now(pytz.UTC) - timedelta(days=2)
+        self.course.end = datetime.now(pytz.UTC) - timedelta(days=1)
+        self.course.display_name = u"Omega"
+        self.course = self.update_course(self.course, self.user.id)
+
+        download_url = 'www.edx.org'
+        GeneratedCertificateFactory.create(
+            user=self.user,
+            course_id=self.course.id,
+            status=CertificateStatuses.downloadable,
+            mode='honor',
+            grade='67',
+            download_url=download_url
+        )
+        response = self.client.get(reverse('dashboard'))
+
+        self.assertEquals(response.status_code, 200)
+        self.assertIn('Add Certificate to LinkedIn', response.content)
+
+        expected_url = (
+            'http://www.linkedin.com/profile/add'
+            '?_ed=0_mC_o2MizqdtZEmkVXjH4eYwMj4DnkCWrZP_D9&'
+            'pfCertificationName=edX+Honor+Code+Certificate+for+Omega&'
+            'pfCertificationUrl=www.edx.org&'
+            'source=o'
+        )
+        self.assertContains(response, expected_url)
 
 
 class EnrollInCourseTest(TestCase):
@@ -590,7 +837,6 @@ class EnrollInCourseTest(TestCase):
         self.assert_enrollment_mode_change_event_was_emitted(user, course_id, "honor")
 
 
-@override_settings(MODULESTORE=TEST_DATA_MOCK_MODULESTORE)
 @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
 class ChangeEnrollmentViewTest(ModuleStoreTestCase):
     """Tests the student.views.change_enrollment view"""
@@ -673,7 +919,6 @@ class ChangeEnrollmentViewTest(ModuleStoreTestCase):
         self.assertEqual(enrollment_mode, u'honor')
 
 
-@override_settings(MODULESTORE=TEST_DATA_MOCK_MODULESTORE)
 class PaidRegistrationTest(ModuleStoreTestCase):
     """
     Tests for paid registration functionality (not verified student), involves shoppingcart
@@ -706,7 +951,6 @@ class PaidRegistrationTest(ModuleStoreTestCase):
             shoppingcart.models.Order.get_cart_for_user(self.user), self.course.id))
 
 
-@override_settings(MODULESTORE=TEST_DATA_MOCK_MODULESTORE)
 class AnonymousLookupTable(ModuleStoreTestCase):
     """
     Tests for anonymous_id_functions

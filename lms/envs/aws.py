@@ -505,5 +505,9 @@ PDF_RECEIPT_COBRAND_LOGO_HEIGHT_MM = ENV_TOKENS.get(
     'PDF_RECEIPT_COBRAND_LOGO_HEIGHT_MM', PDF_RECEIPT_COBRAND_LOGO_HEIGHT_MM
 )
 
+if FEATURES.get('ENABLE_COURSEWARE_SEARCH'):
+    # Use ElasticSearch as the search engine herein
+    SEARCH_ENGINE = "search.elastic.ElasticSearchEngine"
+
 import newrelic.agent
 newrelic.agent.initialize('/var/tmp/newrelic-cms.ini')

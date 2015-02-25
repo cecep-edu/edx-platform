@@ -10,7 +10,7 @@ from django.utils.translation import ugettext as _
 import django.utils
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_GET
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, Http404
@@ -22,6 +22,7 @@ from edxmako.shortcuts import render_to_response
 from xmodule.course_module import DEFAULT_START_DATE
 from xmodule.error_module import ErrorDescriptor
 from xmodule.modulestore.django import modulestore
+from xmodule.modulestore.courseware_index import CoursewareSearchIndexer, SearchIndexingError
 from xmodule.contentstore.content import StaticContent
 from xmodule.tabs import PDFTextbookTabs
 from xmodule.partitions.partitions import UserPartition
@@ -75,6 +76,7 @@ from course_action_state.managers import CourseActionStateItemNotFoundError
 from microsite_configuration import microsite
 from xmodule.course_module import CourseFields
 from xmodule.split_test_module import get_split_user_partitions
+from student.auth import has_course_author_access
 
 from util.milestones_helpers import (
     set_prerequisite_courses,
@@ -90,7 +92,7 @@ CONTENT_GROUP_CONFIGURATION_DESCRIPTION = 'The groups in this configuration can 
 CONTENT_GROUP_CONFIGURATION_NAME = 'Content Group Configuration'
 
 __all__ = ['course_info_handler', 'course_handler', 'course_listing',
-           'course_info_update_handler',
+           'course_info_update_handler', 'course_search_index_handler',
            'course_rerun_handler',
            'settings_handler',
            'grading_handler',
@@ -119,6 +121,15 @@ def get_course_and_check_access(course_key, user, depth=0):
         raise PermissionDenied()
     course_module = modulestore().get_course(course_key, depth=depth)
     return course_module
+
+
+def reindex_course_and_check_access(course_key, user):
+    """
+    Internal method used to restart indexing on a course.
+    """
+    if not has_course_author_access(user, course_key):
+        raise PermissionDenied()
+    return CoursewareSearchIndexer.do_course_reindex(modulestore(), course_key)
 
 
 @login_required
@@ -283,6 +294,28 @@ def course_rerun_handler(request, course_key_string):
             })
 
 
+@login_required
+@ensure_csrf_cookie
+@require_GET
+def course_search_index_handler(request, course_key_string):
+    """
+    The restful handler for course indexing.
+    GET
+        html: return status of indexing task
+    """
+    # Only global staff (PMs) are able to index courses
+    if not GlobalStaff().has_user(request.user):
+        raise PermissionDenied()
+    course_key = CourseKey.from_string(course_key_string)
+    with modulestore().bulk_operations(course_key):
+        try:
+            reindex_course_and_check_access(course_key, request.user)
+        except SearchIndexingError as search_err:
+            return HttpResponse(search_err.error_list, status=500)
+
+        return HttpResponse({}, status=200)
+
+
 def _course_outline_json(request, course_module):
     """
     Returns a JSON representation of the course module and recursively all of its children.
@@ -426,7 +459,7 @@ def course_listing(request):
         'course_creator_status': _get_course_creator_status(request.user),
         'rerun_creator_status': GlobalStaff().has_user(request.user),
         'allow_unicode_course_id': settings.FEATURES.get('ALLOW_UNICODE_COURSE_ID', False),
-        'allow_course_reruns': settings.FEATURES.get('ALLOW_COURSE_RERUNS', False)
+        'allow_course_reruns': settings.FEATURES.get('ALLOW_COURSE_RERUNS', True)
     })
 
 
@@ -448,6 +481,9 @@ def course_index(request, course_key):
     with modulestore().bulk_operations(course_key):
         course_module = get_course_and_check_access(course_key, request.user, depth=None)
         lms_link = get_lms_link_for_item(course_module.location)
+        reindex_link = None
+        if settings.FEATURES.get('ENABLE_COURSEWARE_INDEX', False):
+            reindex_link = "/course_search_index/{course_id}".format(course_id=unicode(course_key))
         sections = course_module.get_children()
         course_structure = _course_outline_json(request, course_module)
         locator_to_show = request.REQUEST.get('show', None)
@@ -471,6 +507,7 @@ def course_index(request, course_key):
             'rerun_notification_id': current_action.id if current_action else None,
             'course_release_date': course_release_date,
             'settings_url': settings_url,
+            'reindex_link': reindex_link,
             'notification_dismiss_url': reverse_course_url(
                 'course_notifications_handler',
                 current_action.course_key,
@@ -630,10 +667,7 @@ def _create_new_course(request, org, number, run, fields):
     Returns the URL for the course overview page.
     Raises DuplicateCourseError if the course already exists
     """
-    store_for_new_course = (
-        settings.FEATURES.get('DEFAULT_STORE_FOR_NEW_COURSE') or
-        modulestore().default_modulestore.get_modulestore_type()
-    )
+    store_for_new_course = modulestore().default_modulestore.get_modulestore_type()
     new_course = create_new_course_in_store(store_for_new_course, request.user, org, number, run, fields)
     return JsonResponse({
         'url': reverse_course_url('course_handler', new_course.id),
@@ -1426,7 +1460,7 @@ class GroupConfiguration(object):
 
             validation_summary = split_test.general_validation_message()
             usage_info[split_test.user_partition_id].append({
-                'label': '{} / {}'.format(unit.display_name, split_test.display_name),
+                'label': u"{} / {}".format(unit.display_name, split_test.display_name),
                 'url': unit_url,
                 'validation': validation_summary.to_json() if validation_summary else None,
             })

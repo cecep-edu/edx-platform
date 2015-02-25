@@ -739,6 +739,25 @@ def registered_for_course(course, user):
         return False
 
 
+def get_cosmetic_display_price(course, registration_price):
+    """
+    Return Course Price as a string preceded by correct currency, or 'Free'
+    """
+    currency_symbol = settings.PAID_COURSE_REGISTRATION_CURRENCY[1]
+
+    price = course.cosmetic_display_price
+    if registration_price > 0:
+        price = registration_price
+
+    if price:
+        # Translators: This will look like '$50', where {currency_symbol} is a symbol such as '$' and {price} is a
+        # numerical amount in that currency. Adjust this display as needed for your language.
+        return _("{currency_symbol}{price}").format(currency_symbol=currency_symbol, price=price)
+    else:
+        # Translators: This refers to the cost of the course. In this case, the course costs nothing so it is free.
+        return _('Free')
+
+
 @ensure_csrf_cookie
 @cache_if_anonymous()
 def course_about(request, course_id):
@@ -795,6 +814,9 @@ def course_about(request, course_id):
             reg_then_add_to_cart_link = "{reg_url}?course_id={course_id}&enrollment_action=add_to_cart".format(
                 reg_url=reverse('register_user'), course_id=course.id.to_deprecated_string())
 
+        course_price = get_cosmetic_display_price(course, registration_price)
+        can_add_course_to_cart = _is_shopping_cart_enabled and registration_price
+
         # Used to provide context to message to student if enrollment not allowed
         can_enroll = has_access(request.user, 'enroll', course)
         invitation_only = course.invitation_only
@@ -817,8 +839,8 @@ def course_about(request, course_id):
             'studio_url': studio_url,
             'registered': registered,
             'course_target': course_target,
-            'registration_price': registration_price,
-            'currency_symbol': settings.PAID_COURSE_REGISTRATION_CURRENCY[1],
+            'is_cosmetic_price_enabled': settings.FEATURES.get('ENABLE_COSMETIC_DISPLAY_PRICE'),
+            'course_price': course_price,
             'in_cart': in_cart,
             'reg_then_add_to_cart_link': reg_then_add_to_cart_link,
             'show_courseware_link': show_courseware_link,
@@ -830,7 +852,7 @@ def course_about(request, course_id):
             # We do not want to display the internal courseware header, which is used when the course is found in the
             # context. This value is therefor explicitly set to render the appropriate header.
             'disable_courseware_header': True,
-            'is_shopping_cart_enabled': _is_shopping_cart_enabled,
+            'can_add_course_to_cart': can_add_course_to_cart,
             'cart_link': reverse('shoppingcart.views.show_cart'),
             'pre_requisite_courses': pre_requisite_courses
         })
@@ -877,6 +899,15 @@ def mktg_course_about(request, course_id):
         'course_modes': course_modes,
     }
 
+    # The edx.org marketing site currently displays only in English.
+    # To avoid displaying a different language in the register / access button,
+    # we force the language to English.
+    # However, OpenEdX installations with a different marketing front-end
+    # may want to respect the language specified by the user or the site settings.
+    force_english = settings.FEATURES.get('IS_EDX_DOMAIN', False)
+    if force_english:
+        translation.activate('en-us')
+
     if settings.FEATURES.get('ENABLE_MKTG_EMAIL_OPT_IN'):
         # Drupal will pass organization names using a GET parameter, as follows:
         #     ?org=Harvard
@@ -909,15 +940,6 @@ def mktg_course_about(request, course_id):
                 "I would like to receive email from {institution_series} and learn about their other programs.",
                 len(org_list)
             ).format(institution_series=org_name_string)
-
-    # The edx.org marketing site currently displays only in English.
-    # To avoid displaying a different language in the register / access button,
-    # we force the language to English.
-    # However, OpenEdX installations with a different marketing front-end
-    # may want to respect the language specified by the user or the site settings.
-    force_english = settings.FEATURES.get('IS_EDX_DOMAIN', False)
-    if force_english:
-        translation.activate('en-us')
 
     try:
         return render_to_response('courseware/mktg_course_about.html', context)

@@ -82,7 +82,7 @@
             'js/student_profile/profile': 'js/student_profile/profile',
 
             // edxnotes
-            'annotator': 'xmodule_js/common_static/js/vendor/edxnotes/annotator-full.min'
+            'annotator_1.2.9': 'xmodule_js/common_static/js/vendor/edxnotes/annotator-full.min'
         },
         shim: {
             'gettext': {
@@ -511,7 +511,7 @@
                 ]
             },
             // Student Notes
-            'annotator': {
+            'annotator_1.2.9': {
                 exports: 'Annotator',
                 deps: ['jquery']
             }
@@ -560,7 +560,8 @@
         'lms/include/js/spec/edxnotes/models/note_spec.js',
         'lms/include/js/spec/edxnotes/plugins/events_spec.js',
         'lms/include/js/spec/edxnotes/plugins/scroller_spec.js',
-        'lms/include/js/spec/edxnotes/collections/notes_spec.js'
+        'lms/include/js/spec/edxnotes/collections/notes_spec.js',
+        'lms/include/js/spec/search/search_spec.js'
     ]);
 
 }).call(this, requirejs, define);

@@ -7,9 +7,9 @@ import json
 from datetime import datetime
 from time import time
 import unicodecsv
+import logging
 
 from celery import Task, current_task
-from celery.utils.log import get_task_logger
 from celery.states import SUCCESS, FAILURE
 from django.contrib.auth.models import User
 from django.core.files.storage import DefaultStorage
@@ -20,6 +20,7 @@ from pytz import UTC
 from track.views import task_track
 from util.file import course_filename_prefix_generator, UniversalNewlineIterator
 from xmodule.modulestore.django import modulestore
+from xmodule.split_test_module import get_split_user_partitions
 
 from courseware.courses import get_course_by_id
 from courseware.grades import iterate_grades_for
@@ -37,7 +38,7 @@ from student.models import CourseEnrollment
 
 
 # define different loggers for use within tasks and on client side
-TASK_LOG = get_task_logger(__name__)
+TASK_LOG = logging.getLogger('edx.celery.task')
 
 # define value to use when no task_id is provided:
 UNKNOWN_TASK_ID = 'unknown-task_id'
@@ -553,9 +554,8 @@ def upload_grades_csv(_xmodule_instance_args, _entry_id, course_id, _task_input,
     course = get_course_by_id(course_id)
     cohorts_header = ['Cohort Name'] if course.is_cohorted else []
 
-    partition_service = LmsPartitionService(user=None, course_id=course_id)
-    partitions = partition_service.course_partitions
-    group_configs_header = ['Group Configuration Group Name ({})'.format(partition.name) for partition in partitions]
+    experiment_partitions = get_split_user_partitions(course.user_partitions)
+    group_configs_header = [u'Experiment Group ({})'.format(partition.name) for partition in experiment_partitions]
 
     # Loop over all our students and build our CSV lists in memory
     header = None
@@ -589,7 +589,7 @@ def upload_grades_csv(_xmodule_instance_args, _entry_id, course_id, _task_input,
                 cohorts_group_name.append(group.name if group else '')
 
             group_configs_group_names = []
-            for partition in partitions:
+            for partition in experiment_partitions:
                 group = LmsPartitionService(student, course_id).get_group(partition, assign=False)
                 group_configs_group_names.append(group.name if group else '')
 
