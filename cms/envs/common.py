@@ -133,19 +133,19 @@ FEATURES = {
     # only supported in courses using split mongo. Change the setting
     # DEFAULT_STORE_FOR_NEW_COURSE to be 'split' to have future courses
     # and libraries created with split.
-    'ENABLE_CONTENT_LIBRARIES': False,
+    'ENABLE_CONTENT_LIBRARIES': True,
 
     # Milestones application flag
-    'MILESTONES_APP': False,
+    'MILESTONES_APP': True,
 
     # Prerequisite courses feature flag
     'ENABLE_PREREQUISITE_COURSES': False,
 
     # Toggle course milestones app/feature
-    'MILESTONES_APP': False,
+    'MILESTONES_APP': True,
 
     # Toggle course entrance exams feature
-    'ENTRANCE_EXAMS': False,
+    'ENTRANCE_EXAMS': True,
 }
 
 ENABLE_JASMINE = False
@@ -186,7 +186,7 @@ for namespace, template_dirs in lms.envs.common.MAKO_TEMPLATES.iteritems():
 
 TEMPLATE_DIRS = MAKO_TEMPLATES['main']
 
-EDX_ROOT_URL = 'beta.iaen.edu.ec'
+EDX_ROOT_URL = ''
 
 LOGIN_REDIRECT_URL = EDX_ROOT_URL + '/signin'
 LOGIN_URL = EDX_ROOT_URL + '/signin'

@@ -321,10 +321,10 @@ FEATURES = {
     'ENABLE_EDXNOTES': False,
 
     # Milestones application flag
-    'MILESTONES_APP': False,
+    'MILESTONES_APP': True,
 
     # Prerequisite courses feature flag
-    'ENABLE_PREREQUISITE_COURSES': False,
+    'ENABLE_PREREQUISITE_COURSES': True,
 
     # For easily adding modes to courses during acceptance testing
     'MODE_CREATION_FOR_TESTING': False,
@@ -689,7 +689,7 @@ CMS_BASE = 'localhost:8001'
 
 # Site info
 SITE_ID = 1
-SITE_NAME = "upex.edu.ec"
+SITE_NAME = "beta.upex.edu.ec"
 HTTPS = 'on'
 ROOT_URLCONF = 'lms.urls'
 # NOTE: Please set ALLOWED_HOSTS to some sane value, as we do not allow the default '*'
@@ -738,8 +738,6 @@ FAVICON_PATH = 'images/favicon.ico'
 # Locale/Internationalization
 TIME_ZONE = 'America/Guayaquil'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 LANGUAGE_CODE = 'es-419'  # http://www.i18nguy.com/unicode/language-identifiers.html
-TIME_ZONE = 'America/New_York'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-LANGUAGE_CODE = 'en'  # http://www.i18nguy.com/unicode/language-identifiers.html
 # these languages display right to left
 LANGUAGES_BIDI = ("en@rtl", "he", "ar", "fa", "ur", "fa-ir")
 
