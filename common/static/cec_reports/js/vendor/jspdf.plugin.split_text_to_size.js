@@ -1,0 +1,1 @@
+jsPDF-0.9.0rc2/jspdf.plugin.split_text_to_size.js
