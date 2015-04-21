@@ -1,0 +1,1 @@
+jsPDF-0.9.0rc2/jspdf.plugin.standard_fonts_metrics.js

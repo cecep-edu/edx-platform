@@ -185,5 +185,6 @@ urlpatterns += (
 
 urlpatterns += (
     url(r'^city_lookup/$', 'cities.views.lookup_handler', name='lookup_handler'),
+    url(r'^reports/', include('cec_reports.urls')),
 )
 
