@@ -25,7 +25,6 @@ from student.views import get_course_enrollment_pairs
 
 from django.contrib.auth.decorators import login_required
 
-
 # GET /reports
 @login_required(login_url="/signin")
 def index(request):
@@ -35,14 +34,11 @@ def index(request):
 @login_required(login_url="/signin")
 def courses(request):
 	courses, in_proccess = courses_list()
-
 	resp = []
 	for course in courses:
 		resp.append(course_outline_json(request, course))
 	for course in in_proccess:
 		resp.append(course_outline_json(request, course))
-
-
 	return JsonResponse(resp)
 
 
@@ -142,7 +138,6 @@ def student(request):
 @login_required(login_url="/signin")
 def staff(request):
     _courses, in_proccess = courses_list()
-
     courses = []
 
     for course in _courses:
@@ -190,7 +185,6 @@ def staff_courses(request):
 	user = User.objects.get(pk=request.GET.get('id'))
 
 	_courses, in_proccess = courses_list()
-
 	courses = []
 
 	for course in _courses:
@@ -231,6 +225,7 @@ def staff_courses(request):
 
 
 	return JsonResponse(courses)
+
 
 def courses_list():
     """

@@ -8,7 +8,6 @@ USE_I18N = True
 USE_L10N = True
 
 INSTALLED_APPS += ('cities','cec_reports',)
-
 DELTA_YEAR = 12
 MAX_YEAR_ALLOWED = 70
 
