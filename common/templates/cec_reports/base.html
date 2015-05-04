@@ -342,6 +342,9 @@
                     <th>
                       <a href="" ng-click="zpredicate = 'email'; reverse=!reverse">Email</a>
                     </th>
+		    <th>
+		      <a href="" ng-click="zpredicate = 'cedula'; reverse=!reverse">Cédula</a>
+		    </th>
                     <th>
                       <a href="" ng-click="zpredicate = 'city'; reverse=!reverse">Localización</a>
                     </th>
@@ -354,6 +357,7 @@
                   <tr ng-repeat="student in students | filter:{name:theSearch.name} | orderBy:zpredicate:reverse">
                     <td><a href="#/student/{$ student.id $}">{$ student.name $}</a></td>
                     <td><a href="mailto:{$ student.email $}">{$ student.email $}</a></td>
+		    <td>{$ student.cedula $}</td>
                     <td>{$ student.city $}</td>
                     <td>{$ student.education $}</td>
                   </tr>
