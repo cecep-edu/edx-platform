@@ -6,7 +6,7 @@ This config file runs the simplest dev environment"""
 # pylint: disable=wildcard-import, unused-wildcard-import
 
 from .common import *
-from logsettings import get_logger_config
+from openedx.core.lib.logsettings import get_logger_config
 
 # import settings from LMS for consistent behavior with CMS
 from lms.envs.dev import (WIKI_ENABLED)
@@ -51,12 +51,8 @@ CONTENTSTORE = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'edx',
-        'USER': 'vagrant',
-        'PASSWORD': 'vagrant',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ENV_ROOT / "db" / "edx.db",
     }
 }
 
@@ -119,7 +115,10 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'edx_location_mem_cache',
     },
-
+    'course_structure_cache': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'edx_course_structure_mem_cache',
+    },
 }
 
 # Make the keyedcache startup warnings go away
@@ -143,33 +142,23 @@ MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 INTERNAL_IPS = ('127.0.0.1',)
 
 DEBUG_TOOLBAR_PANELS = (
-    'debug_toolbar.panels.version.VersionDebugPanel',
+    'debug_toolbar.panels.versions.VersionsPanel',
     'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsDebugPanel',
-    'debug_toolbar.panels.headers.HeaderPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
     'debug_toolbar.panels.request.RequestPanel',
     'debug_toolbar.panels.sql.SQLPanel',
     'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
-
-    #  Enabling the profiler has a weird bug as of django-debug-toolbar==0.9.4 and
-    #  Django=1.3.1/1.4 where requests to views get duplicated (your method gets
-    #  hit twice). So you can uncomment when you need to diagnose performance
-    #  problems, but you shouldn't leave it on.
-    #  'debug_toolbar.panels.profiling.ProfilingDebugPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel',
 )
-
-DEBUG_TOOLBAR_CONFIG = {
-    'INTERCEPT_REDIRECTS': False
-}
 
 # To see stacktraces for MongoDB queries, set this to True.
 # Stacktraces slow down page loads drastically (for pages with lots of queries).
 DEBUG_TOOLBAR_MONGO_STACKTRACES = False
 
-# Enable URL that shows information about the status of variuous services
+# Enable URL that shows information about the status of various services
 FEATURES['ENABLE_SERVICE_STATUS'] = True
-FEATURES['ALLOW_COURSE_RERUNS'] = True
 
 ############################# SEGMENT-IO ##################################
 
@@ -180,20 +169,10 @@ SEGMENT_IO_KEY = os.environ.get('SEGMENT_IO_KEY')
 if SEGMENT_IO_KEY:
     FEATURES['SEGMENT_IO'] = True
 
-CERT_QUEUE = 'certificates'
 
-XQUEUE_INTERFACE = {
-    "url": "http://127.0.0.1:3032",
-    "django_auth": {
-        "username": "lms",
-        "password": "abcd"
-    },
-    "basic_auth": ('anant', 'agarwal'),
-}
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 try:
     from .private import *  # pylint: disable=import-error
 except ImportError:
     pass
-CERT_QUEUE = "certificates"

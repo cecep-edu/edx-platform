@@ -106,10 +106,12 @@ define([
                         'groups': [
                             {
                                 'version': 1,
-                                'name': 'Group 1'
+                                'name': 'Group 1',
+                                'usage': []
                             }, {
                                 'version': 1,
-                                'name': 'Group 2'
+                                'name': 'Group 2',
+                                'usage': []
                             }
                         ]
                     },
@@ -124,12 +126,17 @@ define([
                         'groups': [
                             {
                                 'version': 1,
-                                'name': 'Group 1'
+                                'order': 0,
+                                'name': 'Group 1',
+                                'usage': []
                             }, {
                                 'version': 1,
-                                'name': 'Group 2'
+                                'order': 1,
+                                'name': 'Group 2',
+                                'usage': []
                             }
-                        ]
+                        ],
+                        'usage': []
                     },
                     model = new GroupConfigurationModel(
                         serverModelSpec, { parse: true }
