@@ -682,8 +682,8 @@ def dashboard(request):
         'provider_states': [],
         'order_history_list': order_history_list,
         'courses_requirements_not_met': courses_requirements_not_met,
-        'courses_allow_unenroll': courses_unenroll
-        'ccx_membership_triplets': ccx_membership_triplets,
+        'courses_allow_unenroll': courses_unenroll,
+        'ccx_membership_triplets': ccx_membership_triplets
     }
 
     return render_to_response('dashboard.html', context)
