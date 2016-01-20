@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime
+from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
@@ -8,16 +8,70 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'CourseAllowUnenroll'
+        db.create_table('student_courseallowunenroll', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('course_id', self.gf('xmodule_django.models.CourseKeyField')(max_length=255, db_index=True)),
+        ))
+        db.send_create_signal('student', ['CourseAllowUnenroll'])
+
+        # Adding unique constraint on 'CourseAllowUnenroll', fields ['course_id']
+        db.create_unique('student_courseallowunenroll', ['course_id'])
+
+        # Adding field 'UserProfile.cedula'
+        db.add_column('auth_userprofile', 'cedula',
+                      self.gf('django.db.models.fields.CharField')(max_length=132, null=True, blank=True),
+                      keep_default=False)
+
+        # Adding field 'UserProfile.grado_ocupacional'
+        db.add_column('auth_userprofile', 'grado_ocupacional',
+                      self.gf('django.db.models.fields.CharField')(default='none', max_length=64, null=True, blank=True),
+                      keep_default=False)
+
+        # Adding field 'UserProfile.institucion'
+        db.add_column('auth_userprofile', 'institucion',
+                      self.gf('django.db.models.fields.CharField')(default='NINGUNO', max_length=128, null=True, blank=True),
+                      keep_default=False)
+
+
+        # Renaming column for 'UserProfile.city' to match new field type.
+        db.rename_column('auth_userprofile', 'city', 'city_id')
+        # Changing field 'UserProfile.city'
+        db.alter_column('auth_userprofile', 'city_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cities.City'], null=True))
+        # Adding index on 'UserProfile', fields ['city']
+        db.create_index('auth_userprofile', ['city_id'])
+
         # Adding unique constraint on 'UserProfile', fields ['cedula']
-        pass
-#        db.create_unique('auth_userprofile', ['cedula'])
+        db.create_unique('auth_userprofile', ['cedula'])
 
 
     def backwards(self, orm):
         # Removing unique constraint on 'UserProfile', fields ['cedula']
-        pass
-#        db.delete_unique('auth_userprofile', ['cedula'])
+        db.delete_unique('auth_userprofile', ['cedula'])
 
+        # Removing index on 'UserProfile', fields ['city']
+        db.delete_index('auth_userprofile', ['city_id'])
+
+        # Removing unique constraint on 'CourseAllowUnenroll', fields ['course_id']
+        db.delete_unique('student_courseallowunenroll', ['course_id'])
+
+        # Deleting model 'CourseAllowUnenroll'
+        db.delete_table('student_courseallowunenroll')
+
+        # Deleting field 'UserProfile.cedula'
+        db.delete_column('auth_userprofile', 'cedula')
+
+        # Deleting field 'UserProfile.grado_ocupacional'
+        db.delete_column('auth_userprofile', 'grado_ocupacional')
+
+        # Deleting field 'UserProfile.institucion'
+        db.delete_column('auth_userprofile', 'institucion')
+
+
+        # Renaming column for 'UserProfile.city' to match new field type.
+        db.rename_column('auth_userprofile', 'city_id', 'city')
+        # Changing field 'UserProfile.city'
+        db.alter_column('auth_userprofile', 'city', self.gf('django.db.models.fields.TextField')(null=True))
 
     models = {
         'auth.group': {
@@ -107,13 +161,46 @@ class Migration(SchemaMigration):
             'email': ('django.db.models.fields.CharField', [], {'max_length': '255', 'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
+        'student.courseenrollmentattribute': {
+            'Meta': {'object_name': 'CourseEnrollmentAttribute'},
+            'enrollment': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': "orm['student.CourseEnrollment']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'namespace': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'value': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
         'student.dashboardconfiguration': {
-            'Meta': {'object_name': 'DashboardConfiguration'},
+            'Meta': {'ordering': "('-change_date',)", 'object_name': 'DashboardConfiguration'},
             'change_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'changed_by': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'on_delete': 'models.PROTECT'}),
             'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'recent_enrollment_time_delta': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'})
+        },
+        'student.entranceexamconfiguration': {
+            'Meta': {'unique_together': "(('user', 'course_id'),)", 'object_name': 'EntranceExamConfiguration'},
+            'course_id': ('xmodule_django.models.CourseKeyField', [], {'max_length': '255', 'db_index': 'True'}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'db_index': 'True', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'skip_entrance_exam': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'db_index': 'True', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
+        'student.languageproficiency': {
+            'Meta': {'unique_together': "(('code', 'user_profile'),)", 'object_name': 'LanguageProficiency'},
+            'code': ('django.db.models.fields.CharField', [], {'max_length': '16'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'user_profile': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'language_proficiencies'", 'to': "orm['student.UserProfile']"})
+        },
+        'student.linkedinaddtoprofileconfiguration': {
+            'Meta': {'ordering': "('-change_date',)", 'object_name': 'LinkedInAddToProfileConfiguration'},
+            'change_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'changed_by': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'on_delete': 'models.PROTECT'}),
+            'company_identifier': ('django.db.models.fields.TextField', [], {}),
+            'dashboard_tracking_code': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'trk_partner_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '10', 'blank': 'True'})
         },
         'student.loginfailures': {
             'Meta': {'object_name': 'LoginFailures'},
@@ -121,6 +208,16 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lockout_until': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
+        'student.manualenrollmentaudit': {
+            'Meta': {'object_name': 'ManualEnrollmentAudit'},
+            'enrolled_by': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True'}),
+            'enrolled_email': ('django.db.models.fields.CharField', [], {'max_length': '255', 'db_index': 'True'}),
+            'enrollment': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['student.CourseEnrollment']", 'null': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'reason': ('django.db.models.fields.TextField', [], {'null': 'True'}),
+            'state_transition': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'time_stamp': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'})
         },
         'student.passwordhistory': {
             'Meta': {'object_name': 'PasswordHistory'},
@@ -152,6 +249,7 @@ class Migration(SchemaMigration):
         'student.userprofile': {
             'Meta': {'unique_together': "(('cedula',),)", 'object_name': 'UserProfile', 'db_table': "'auth_userprofile'"},
             'allow_certificate': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'bio': ('django.db.models.fields.CharField', [], {'max_length': '3000', 'null': 'True', 'blank': 'True'}),
             'cedula': ('django.db.models.fields.CharField', [], {'max_length': '132', 'null': 'True', 'blank': 'True'}),
             'city': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'to': "orm['cities.City']", 'null': 'True', 'blank': 'True'}),
             'country': ('django_countries.fields.CountryField', [], {'max_length': '2', 'null': 'True', 'blank': 'True'}),
@@ -167,6 +265,7 @@ class Migration(SchemaMigration):
             'mailing_address': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'meta': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'db_index': 'True', 'max_length': '255', 'blank': 'True'}),
+            'profile_image_uploaded_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'profile'", 'unique': 'True', 'to': "orm['auth.User']"}),
             'year_of_birth': ('django.db.models.fields.IntegerField', [], {'db_index': 'True', 'null': 'True', 'blank': 'True'})
         },
