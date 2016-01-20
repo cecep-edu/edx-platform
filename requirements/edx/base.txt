@@ -56,14 +56,8 @@ nltk==2.0.5
 nose==1.3.3
 oauthlib==0.7.2
 paramiko==1.9.0
-<<<<<<< HEAD
-path.py==3.0.1
-Pillow==2.7.0
-pip>=1.4
-=======
 path.py==7.2
 Pillow==2.7.0
->>>>>>> named-release/cypress
 polib==1.0.3
 pycrypto>=2.6
 pygments==2.0.1

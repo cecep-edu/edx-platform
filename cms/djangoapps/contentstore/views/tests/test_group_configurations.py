@@ -757,11 +757,7 @@ class GroupConfigurationsUsageInfoTestCase(CourseTestCase, HelperMethods):
         self._add_user_partitions(count=1)
         vertical, __ = self._create_content_experiment(cid=0, name_suffix='0', special_characters=u"JOSÉ ANDRÉS")
 
-<<<<<<< HEAD
-        actual = GroupConfiguration.get_split_test_partitions_with_usage(self.course, self.store)
-=======
         actual = GroupConfiguration.get_split_test_partitions_with_usage(self.store, self.course, )
->>>>>>> named-release/cypress
 
         expected = [{
             'id': 0,
