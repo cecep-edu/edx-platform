@@ -433,9 +433,6 @@ def register_user(request, extra_context=None):
         overrides['selected_provider'] = current_provider.name
         context.update(overrides)
 
-    public_entities = PublicEntity.objects.all()
-    context.update({'public_entities': public_entities})
-
     return render_to_response('register.html', context)
 
 
