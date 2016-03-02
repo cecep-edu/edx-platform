@@ -163,4 +163,4 @@ jsonfield==1.0.3
 # Inlines CSS styles into HTML for email notifications.
 pynliner==0.5.2
 git+https://github.com/ovnicraft/suds.git
-rave==5.11.0
+raven==5.11.0
