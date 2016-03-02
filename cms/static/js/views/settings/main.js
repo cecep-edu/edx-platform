@@ -1,8 +1,9 @@
 define(["js/views/validation", "codemirror", "underscore", "jquery", "jquery.ui", "js/utils/date_utils", "js/models/uploads",
     "js/views/uploads", "js/utils/change_on_enter", "js/views/license", "js/models/license",
-    "js/views/feedback_notification", "jquery.timepicker", "date", "tinymce", "jquery.tinymce"],
-    function(ValidatingView, CodeMirror, _, $, ui, DateUtils, FileUploadModel,
-        FileUploadDialog, TriggerChangeEventOnEnter, LicenseView, LicenseModel, NotificationView, tinymce) {
+    "common/js/components/views/feedback_notification", "jquery.timepicker", "date", "gettext"],
+       function(ValidatingView, CodeMirror, _, $, ui, DateUtils, FileUploadModel,
+                FileUploadDialog, TriggerChangeEventOnEnter, LicenseView, LicenseModel, NotificationView,
+                timepicker, date, gettext) {
 
 var DetailsView = ValidatingView.extend({
     // Model class is CMS.Models.Settings.CourseDetails
@@ -58,11 +59,11 @@ var DetailsView = ValidatingView.extend({
             plugins: ["table", "code"],
             menu: {
                 file: {title: 'File', items: 'save'},
-                edit: {title: 'Edit', items: 'undo redo | cut copy paste | selectall'}, 
-                insert: {title: 'Insert', items: '|'}, 
-                view: {title: 'View', items: 'visualaid'}, 
-                format: {title: 'Format', items: 'bold italic underline strikethrough superscript subscript | formats | removeformat'}, 
-                table: {title: 'Table'}, 
+                edit: {title: 'Edit', items: 'undo redo | cut copy paste | selectall'},
+                insert: {title: 'Insert', items: '|'},
+                view: {title: 'View', items: 'visualaid'},
+                format: {title: 'Format', items: 'bold italic underline strikethrough superscript subscript | formats | removeformat'},
+                table: {title: 'Table'},
                 tools: {title: 'Tools', items: 'inserttable'}
             },
             toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | table code",
@@ -79,8 +80,8 @@ var DetailsView = ValidatingView.extend({
 
         if (options.showMinGradeWarning || false) {
             new NotificationView.Warning({
-                title: gettext("Credit Eligibility Requirements"),
-                message: gettext("Minimum passing grade for credit is not set."),
+                title: gettext("Course Credit Requirements"),
+                message: gettext("The minimum grade for course credit is not set."),
                 closeIcon: true
             }).show();
         }
@@ -123,6 +124,21 @@ var DetailsView = ValidatingView.extend({
             this.$('.div-grade-requirements').hide();
         }
         this.$('#' + this.fieldToSelectorMap['entrance_exam_minimum_score_pct']).val(this.model.get('entrance_exam_minimum_score_pct'));
+
+        var selfPacedButton = this.$('#course-pace-self-paced'),
+            instructorPacedButton = this.$('#course-pace-instructor-paced'),
+            paceToggleTip = this.$('#course-pace-toggle-tip');
+        (this.model.get('self_paced') ? selfPacedButton : instructorPacedButton).attr('checked', true);
+        if (this.model.canTogglePace()) {
+            selfPacedButton.removeAttr('disabled');
+            instructorPacedButton.removeAttr('disabled');
+            paceToggleTip.text('');
+        }
+        else {
+            selfPacedButton.attr('disabled', true);
+            instructorPacedButton.attr('disabled', true);
+            paceToggleTip.text(gettext('Course pacing cannot be changed once a course has started.'));
+        }
 
         this.licenseView.render()
 
@@ -261,6 +277,11 @@ var DetailsView = ValidatingView.extend({
                 }
             }, this), 1000);
             break;
+        case 'course-pace-self-paced':
+            // Fallthrough to handle both radio buttons
+        case 'course-pace-instructor-paced':
+            this.model.set('self_paced', JSON.parse(event.currentTarget.value));
+            break;
         default: // Everything else is handled by datepickers and CodeMirror.
             break;
         }
@@ -379,4 +400,3 @@ var DetailsView = ValidatingView.extend({
 return DetailsView;
 
 }); // end define()
-

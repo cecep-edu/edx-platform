@@ -13,6 +13,8 @@ from lms.envs.dev import (WIKI_ENABLED)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+HTTPS = 'off'
+
 LOGGING = get_logger_config(ENV_ROOT / "log",
                             logging_env="dev",
                             tracking_filename="tracking.log",
@@ -51,12 +53,9 @@ CONTENTSTORE = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'edx',
-        'USER': 'vagrant',
-        'PASSWORD': 'vagrant',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ENV_ROOT / "db" / "edx.db",
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -166,12 +165,10 @@ FEATURES['ENABLE_SERVICE_STATUS'] = True
 
 ############################# SEGMENT-IO ##################################
 
-# If there's an environment variable set, grab it and turn on Segment.io
+# If there's an environment variable set, grab it to turn on Segment
 # Note that this is the Studio key. There is a separate key for the LMS.
 import os
-SEGMENT_IO_KEY = os.environ.get('SEGMENT_IO_KEY')
-if SEGMENT_IO_KEY:
-    FEATURES['SEGMENT_IO'] = True
+CMS_SEGMENT_KEY = os.environ.get('SEGMENT_KEY')
 
 CERT_QUEUE = 'certificates'
 
