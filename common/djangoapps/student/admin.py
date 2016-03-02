@@ -138,16 +138,13 @@ class CourseEnrollmentAdmin(admin.ModelAdmin):
     list_display = ('id', 'course_id', 'mode', 'user', 'is_active',)
     list_filter = ('mode', 'is_active',)
     raw_id_fields = ('user',)
-    search_fields = ('course_id', 'mode', 'user__username',)
+    search_fields = ('course_id', 'mode', 'user__username', 'user__email')
 
     def queryset(self, request):
         return super(CourseEnrollmentAdmin, self).queryset(request).select_related('user')
 
     class Meta(object):
         model = CourseEnrollment
-
-class EnrollmentAdmin(admin.ModelAdmin):
-    search_fields = ['user__email', 'course_id']
 
 class UserProfileAdmin(admin.ModelAdmin):
     """ Admin interface for UserProfile model. """
@@ -167,8 +164,6 @@ admin.site.register(CourseAccessRole, CourseAccessRoleAdmin)
 admin.site.register(DashboardConfiguration, ConfigurationModelAdmin)
 
 admin.site.register(CourseAllowUnenroll)
-
-admin.site.register(CourseEnrollment, EnrollmentAdmin)
 
 admin.site.register(LinkedInAddToProfileConfiguration, LinkedInAddToProfileConfigurationAdmin)
 
