@@ -785,7 +785,7 @@ INSTALLED_APPS = (
     'monitoring',
 
     # Cities UPEx
-    'cities.app.MyCities',
+    'cities.apps.MyCities',
 
     # Course action state
     'course_action_state',
