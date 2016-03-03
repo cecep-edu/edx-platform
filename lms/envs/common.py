@@ -1891,7 +1891,7 @@ INSTALLED_APPS = (
     'monitoring',
 
     #cities
-    'cities.apps.MyCities',
+    'cities',
     # Course action state
     'course_action_state',
 

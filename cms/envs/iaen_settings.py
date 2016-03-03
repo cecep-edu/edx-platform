@@ -7,8 +7,6 @@ LANGUAGE_CODE = 'es-419'
 USE_I18N = True
 USE_L10N = True
 
-INSTALLED_APPS += ('cities',)
-
 DELTA_YEAR = 12
 MAX_YEAR_ALLOWED = 70
 
