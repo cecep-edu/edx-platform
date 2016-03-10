@@ -205,52 +205,6 @@ import calendar
           </li>
 
           % endif
-
-          <li class="field-group">
-            <div class="field required select" id="type-id">
-              <label for="type_id">${_("TYPE ID")}</label>
-              <select id="type-id" name="type_id">
-                <option value="cedula">CEDULA</option>
-                <option value="pasaporte">PASAPORTE</option>
-              </select>
-            </div>
-          </li>
-          <li class="field-group">
-            <div class="field required text" id="field-cedula">
-              <label for="cedula-label">Cedula / Pasaporte</label>
-              <input id="cedula" type="text" name="cedula" value="" placeholder="Ejemplo: 0102030405" required aria-required="true" aria-describedby="cedula-tip"/>
-              <span class="tip tip-input" id="cedula-tip">No ingrese caracteres especiales.</span>
-            </div>
-            <div class="field text" id="field-senescyt">
-              <label for="senescyt">Registro Senescyt</label>
-              <input id="number_senescyt" type="text" name="senescyt" value="" readonly aria-describedby="senescyt-tip"/>
-              <span class="tip tip-input" id="senescyt-tip">Si tiene título de tercer nivel o superior.</span>
-            </div>
-          </li>
-          <li class="field required text" id="field-city">
-            <label for="city">${_('City')}</label>
-            <input id="city" type="text" name="city" value="" placeholder="${_('Ejemplo: Quito, Pichincha, Ecuador')}" required aria-required="true" aria-describedby="city-tip"/>
-            <span class="tip tip-input" id="city-tip">Debe <strong>seleccionar</strong>su ciudad de la lista que se desplega<strong>cuando digite un texto.</strong></span>
-            <input type="hidden" name="city_id" value="" id="city_id"/>
-          </li>
-          <li class="field-group">
-            <div class="field required text" id="field-publicentity">
-              <label for="publicentity">Institución Pública (SOLO SERVIDORES PUBLICOS)</label>
-	      <input placeholder="Ejemplo: IAEN o NINGUNO" id="publicentity" name="publicentity" type="text" required aria-describedby="publicentity-tip"/>
-              <span class="tip tip-input" id="publicentity-tip"><strong>Si es servidor público, escriba su institución y seleccione de la lista.</strong></span>
-              <input type="hidden" name="entity_id" value="" id="entity_id"/>
-            </div>
-
-            <div class="field required select" id="gradosp-id">
-              <label for="gradosp">Grupo Ocupacional (SOLO SERVIDORES PUBLICOS)</label>
-              <select id="gradosp" name="gradosp">
-                <option value="">--</option>
-                %for code, grupo in UserProfile.GRADO_CHOICES:
-                <option value="${code}">${_(grupo)}</option>
-                %endfor
-              </select>
-            </div>
-          </li>
         </ol>
 
         % else:
@@ -392,6 +346,7 @@ import calendar
 
             % if settings.REGISTRATION_EXTRA_FIELDS['honor_code'] != 'hidden':
             ## If the stanford theme isn't enabled, check if we have an Honor Code link in our marketing map
+            % if not self.stanford_theme_enabled() and marketing_link('HONOR') and marketing_link('HONOR') != '#':
             <div class="field ${settings.REGISTRATION_EXTRA_FIELDS['honor_code']} checkbox" id="field-honorcode">
               <input id="honorcode-yes" type="checkbox" name="honor_code" value="true" />
               <%
@@ -405,6 +360,7 @@ import calendar
                 link_start='<a href="{url}" class="new-vp" tabindex="-1">'.format(url=honor_code_path),
                 link_end='</a>')}</label>
             </div>
+            % endif
             % endif
           </li>
         </ol>
